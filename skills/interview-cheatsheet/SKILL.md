@@ -192,12 +192,12 @@ Do **NOT** `git add` / `git commit` / `git push`. Report:
     docs(tutorials): add <Topic> cheat sheet (rendered via /render-html)
 
   ⚠️ Did NOT auto-commit — user reviews and pushes manually.
-  Also update docs/tutorials/README.md to add the new row.
+  Do not create or update a tutorial index unless the user asks for one.
 ```
 
 ## Update the index
 
-After the tutorial passes, optionally append a row to `docs/tutorials/README.md`:
+After the tutorial passes, optionally append a row to an existing project-local tutorial index:
 
 ```
 | **<Topic> 面试 Cheat Sheet** | [`<slug>_tutorial.md`](<slug>_tutorial.md) | [`<slug>_tutorial.html`](https://wanshuiyin.github.io/Auto-claude-code-research-in-sleep/tutorials/<slug>_tutorial.html) | <one-line topic list> |

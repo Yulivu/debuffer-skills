@@ -112,7 +112,7 @@ Use this path when the repository looks like ARIS: it has `skills/<name>/SKILL.m
    - `skills/skills-codex/<name>/SKILL.md`
    - overlays only if reviewer routing differs
    - `docs/SKILLS_CATALOG.md`
-   - count-bearing docs/tests such as `AGENT_GUIDE.md`, README files, Codex mirror README files, and inventory tests
+   - count-bearing docs/tests such as `AGENT_GUIDE.md`, the single root `README.md`, and inventory tests
 6. Run the repository's inventory and targeted tests after integration. In Codex-managed projects, resolve the ARIS repo root from `.aris/installed-skills-codex.txt` or `$ARIS_REPO` first, then run the checks from that repo:
 
 ```powershell

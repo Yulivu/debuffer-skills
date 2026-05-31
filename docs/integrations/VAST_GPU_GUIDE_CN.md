@@ -1,7 +1,7 @@
 # Vast.ai 按需 GPU 集成
 
 > 🇬🇧 English: [VAST_GPU_GUIDE.md](VAST_GPU_GUIDE.md)
-> ARIS [GPU 服务器配置](../../README_CN.md#%EF%B8%8F-安装)的三种模式之一。没有自己的 GPU 服务器时用这个。
+> ARIS [GPU 与 AutoDL 策略](../../README.md#autodl--gpu)的备选模式之一。没有自己的 GPU 服务器时用这个。
 
 ARIS 支持从 [Vast.ai](https://vast.ai)（最便宜的 ML 硬件 spot 租赁市场）按需租 GPU。当你跑 `/run-experiment` 时，ARIS **分析你的训练任务**（模型大小、数据集、预估时间），搜索能放下这个负载的最便宜 GPU，然后按**总成本**（不是 $/hr）排序展示给你。你选一个，ARIS 全自动：租 → 配环境 → 跑 → 收结果 → 销毁。
 

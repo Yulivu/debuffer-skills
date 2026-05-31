@@ -33,7 +33,6 @@ cp -a skills/skills-codex-gemini-review/* ~/.codex/skills/
 
 mkdir -p ~/.codex/mcp-servers/gemini-review
 cp mcp-servers/gemini-review/server.py ~/.codex/mcp-servers/gemini-review/server.py
-cp mcp-servers/gemini-review/README.md ~/.codex/mcp-servers/gemini-review/README.md
 codex mcp add gemini-review --env GEMINI_REVIEW_BACKEND=api -- python3 ~/.codex/mcp-servers/gemini-review/server.py
 ```
 

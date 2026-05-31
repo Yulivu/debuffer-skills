@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "{{project_slug}}"
 version = "0.1.0"
 description = "{{project_title}} research code and reproducible experiments."
-readme = "README.md"
+readme = {text = "{{project_title}} research code and reproducible experiments.", content-type = "text/markdown"}
 requires-python = ">=3.10"
 dependencies = [
   "numpy>=1.24",

@@ -6,7 +6,6 @@ on:
       - 'skills/**'
       - 'docs/SKILLS_CATALOG.md'
       - 'README.md'
-      - 'README_CN.md'
       - 'AGENT_GUIDE.md'
       - 'docs/ARIS_INTRO.md'
       - 'docs/ARIS_INTRO.html'
