@@ -2,10 +2,10 @@
 name: research-review
 description: Prepare a prompt-only deep critical review package for research ideas, papers, or results. Generates concise reviewer prompts for a separate conversation, supports venue profiles such as ICLR, AAAI, JMLR, and TPAMI, and consumes pasted feedback; direct reviewer backends are opt-in. Use when user says "review my research", "help me review", or "get external review".
 argument-hint: [topic-or-scope]
-allowed-tools: Bash(*), Read, Grep, Glob, Write, Edit, mcp__codex__codex, mcp__codex__codex-reply, mcp__manual_review__review, mcp__manual_review__review_reply
+allowed-tools: Bash(*), Read, Grep, Glob, Write, Edit
 ---
 
-# Research Review via External Reviewer Backend (xhigh reasoning)
+# Research Review via Prompt-Only External Reviewer
 
 > 🔒 **Do not wrap this skill in `/loop`, `/schedule`, or `CronCreate`.** It is
 > verdict-bearing — it produces a cross-model review verdict, multi-round with
@@ -39,8 +39,10 @@ prompt-only review:
 
 ## Constants
 
-- REVIEWER_MODEL = `gpt-5.5` — Default model for the Codex backend. Must be an OpenAI model (e.g., `gpt-5.5`, `o3`, `gpt-4o`). Manual backend uses whatever model the user chooses.
-- **REVIEWER_BACKEND = `codex`** — Default: Codex MCP (xhigh). Override with `— reviewer: oracle-pro` for Oracle MCP, or `— reviewer: manual` for Manual Review MCP. If manual-review MCP is unavailable, stop and print the install command; do not fall back to Codex. See `shared-references/reviewer-routing.md`.
+- REVIEWER_MODEL = `external conversation chosen by user`
+- **REVIEWER_BACKEND = `prompt-only`**. Legacy backends (`codex`,
+  `manual`, `oracle-pro`) are not part of the lightweight default and require
+  an explicit user request plus available tools.
 
 ## Reviewer Calling Convention
 

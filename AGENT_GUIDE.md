@@ -1,205 +1,108 @@
-# ARIS Agent Guide
+# debuffer-skills Agent Guide
 
-> **For AI agents reading this repo cold.** If you are a human, see [README.md](README.md) or [docs/ARIS_INTRO.html](https://wanshuiyin.github.io/Auto-claude-code-research-in-sleep/ARIS_INTRO.html).
+> 给第一次读取本仓库的 AI agent。人的入口看 [README.md](README.md)，完整技能目录看 [docs/SKILLS_CATALOG.md](docs/SKILLS_CATALOG.md)。
 
-ARIS is a research harness: composable Markdown skills that orchestrate the ML research lifecycle through cross-model adversarial collaboration. Executor (Claude / Codex / Cursor / Antigravity / Copilot CLI) writes code & papers; reviewer (GPT-5.5 via Codex MCP, or Claude / Gemini via `claude-review` / `gemini-review` MCP) critiques in fresh threads.
+这个仓库是一个轻量化科研 skills 包，不是全自动科研平台。默认行为是：本地做结构、代码、审查准备和 tiny smoke；重型计算交给 AutoDL/HPC；外部评审优先写 prompt 到 `review-prompts/`，让另一个独立对话评审。
 
-> **Source of Truth.** This file is a *routing index*, not a specification.
-> Behavior of a skill lives in `skills/<name>/SKILL.md`. System-wide
-> contracts live in `skills/shared-references/*.md`. If this guide
-> conflicts with a SKILL.md, the **SKILL.md wins**.
+如果本文件和具体 `skills/<name>/SKILL.md` 冲突，以 `SKILL.md` 为准；跨技能默认规则看 `skills/shared-references/lightweight-research-pack.md`。
 
-## Skill Locations & Platforms
+## 包状态
 
-| Platform | Skill root | Notes |
-|----------|-----------|-------|
-| Claude Code / Cursor / Trae / Antigravity / Copilot CLI | `skills/<name>/SKILL.md` | Mainline skills; native `SKILL.md` invocation |
-| Codex CLI | `skills/skills-codex/<name>/SKILL.md` | Codex mirror; uses `spawn_agent` instead of `mcp__codex__codex` |
-| Codex + Claude-review | `skills/skills-codex-claude-review/` | Overlay on top of `skills-codex/` |
-| Codex + Gemini-review | `skills/skills-codex-gemini-review/` | Same pattern, Gemini reviewer |
+**Full catalog**: [docs/SKILLS_CATALOG.md](docs/SKILLS_CATALOG.md) — **79 skills**.
 
-**Full catalog**: [`docs/SKILLS_CATALOG.md`](docs/SKILLS_CATALOG.md) — **79 skills**, grouped by role.
+| 区域 | 路径 | 说明 |
+|---|---|---|
+| 主线 skills | `skills/<name>/SKILL.md` | 行为源头 |
+| Codex mirror | `skills/skills-codex/<name>/SKILL.md` | Codex 路由适配，语义应与主线一致 |
+| 共享契约 | `skills/shared-references/*.md` | 轻量包、评审、证据、helper、项目状态协议 |
+| 工具 | `tools/` | 安装器、同步器、审计 helper |
+| 文档 | `docs/` | 只保留必要专题文档和技能目录 |
 
-Invocation syntax is identical across hosts:
-```
-/skill-name "arguments" — key: value, key2: value2
-```
+## 默认规则
 
-## Common Parameters
+- **本地轻量**：本地只跑导入检查、单元测试、lint、配置解析、tiny dry-run/smoke。不要默认跑重型训练、长 sweep 或正式评测。
+- **AutoDL 优先**：需要 GPU/HPC 时，准备 AutoDL preflight、smoke suite、数据清单、结果回传和正式运行审批，不直接开长 SSH 任务。
+- **远程手动 gate**：涉及 `ssh`、`scp`、`rsync`、`screen`、`tmux`、`nohup` 的步骤，默认只输出命令块并等待用户运行或批准。
+- **评审 prompt-only**：审查类 skill 默认写 `review-prompts/<scope>_review_prompt.md`，要求用户在另一个独立对话里评审并粘贴结果。不要默认调用 MCP/API/subagent reviewer。
+- **文档克制**：维护 `PROJECT_STATUS.md`、`PROJECT_BRIEF.md`、`NEXT_ACTIONS.md`、`findings.md`、`EXPERIMENT_LOG.md` 等小文件。`PROJECT_GUIDE.md` 只在阶段门或用户明确要求时生成。
+- **证据边界**：smoke 只说明工程可跑，不构成论文证据。正式结果必须从 `experiments/runs/` 经本地审计后进入 `experiments/results/`。
 
-ARIS has **two independent control axes** plus scoped flags.
+## 项目阶段
 
-### Axis 1 — `effort` (depth / budget)
+先判断起步状态，再决定生成多少内容：
 
-```
-— effort: lite | balanced | max | beast      # default: balanced
-```
+| 起步状态 | 最小动作 |
+|---|---|
+| `venue-only` | 写目标 venue 风险、问题假设、下一步文献/验证问题 |
+| `reference-paper` | 做 claim map、复现/扩展计划、最小实验路线 |
+| `reference-codebase` | 审 license、入口、环境、测试和可复用边界 |
+| `idea-doc` | 抽取假设、非目标、最小可证伪计划 |
+| `existing-repo` | 先 inventory 和迁移图，再小步编辑 |
+| `partial-results` | 先盘点日志/图表/配置/证据链，再补审计 |
 
-Controls how many papers / ideas / rounds / pilots. Codex reasoning is **always `xhigh`** regardless of effort.
+每个活跃项目都应维护 `PROJECT_STATUS.md`：
 
-### Axis 2 — `assurance` (audit strictness, independent of effort)
-
-```
-— assurance: draft | polished | conference-ready | submission
-```
-
-Controls whether mandatory audits gate the final report. `lite` / `balanced` default to `draft`; `max` / `beast` default to `submission`. Override is legal: `--- effort: lite --- assurance: conference-ready` is meaningful. Spec: [`shared-references/assurance-contract.md`](skills/shared-references/assurance-contract.md).
-
-### Other common parameters
-
-```
-— human checkpoint: true | false             # pause for approval (default: false)
-— AUTO_PROCEED: true | false                 # auto-continue at gates (default: true)
-— difficulty: medium | hard | nightmare      # reviewer adversarial level
-— venue: ICLR | NeurIPS | ICML | ...         # target venue
-— sources: web, zotero, deepxiv, exa, ...    # literature sources
-— gpu: local | remote | vast | modal         # GPU backend
-— reviewer: codex | oracle-pro | manual      # reviewer routing
+```text
+Current phase: experiment protocol
+Startup mode: reference-codebase
+Target venue: JMLR
+Last accepted artifact: PROJECT_BRIEF.md
+Next gate: AutoDL smoke readiness
+Map: direction -> idea -> method -> repo scaffold -> [experiment protocol] -> local smoke -> AutoDL smoke -> formal runs -> evidence audit -> paper plan -> manuscript -> submission
+Blockers: ...
 ```
 
-### Scoped flags (skill-specific)
+## 常用入口
 
-| Flag | Skill | Effect |
-|------|-------|--------|
-| `--- style-ref <source>` | writer-side skills | Mimic exemplar's structural style WITHOUT copying claims / terms |
-| `--- edit-whitelist <path>` | `/auto-paper-improvement-loop` | YAML schema gating which paths / operations the loop may touch |
-| `--- soft-only` | `/citation-audit` | Bib frozen — rewrites body instead of editing `.bib` |
-| `--review` / `--no-review` | `/render-html` | Toggle cross-model review gate (default: academic=on, dashboard=off) |
-| `--author "..."` | `/render-html` | Optional byline rendered between subtitle and meta |
-| `--deep-fix` / `--restatement-check` | `/proof-checker` | Patch-grade fix plans / cross-location theorem drift |
+| 场景 | 首选 skill | 默认动作 |
+|---|---|---|
+| 建仓/迁移 | `/research-repo-architect` | 轻量结构、项目状态、AutoDL hooks |
+| 只知道方向/venue | `/idea-discovery` | 生成最小 brief、文献问题和 review prompt |
+| 已有想法 | `/research-refine` | 收敛方法假设和下一步实验 |
+| 形成实验计划 | `/experiment-plan` | 产出可复现协议，不直接跑正式实验 |
+| 实现实验 | `/experiment-bridge` | 本地 tiny checks + AutoDL handoff + code review prompt |
+| 准备远程跑 | `/autodl-hpc` | preflight、smoke、数据清单、审批 gate |
+| 外部评审 | `/research-review` | 写 prompt，等待独立对话反馈 |
+| 论文证据审计 | `/experiment-audit`, `/paper-claim-audit`, `/citation-audit` | 写审计 prompt 或执行显式批准的 legacy backend |
+| 写论文 | `/paper-writing` | 用已审计证据组织 LaTeX，不补造结果 |
 
-Parameters pass through workflow chains automatically.
+## 安装 Profile
 
-## Workflow Index
+安装器支持 profile，默认 `full`：
 
-```
-Main chain:      /research-pipeline = W1 → W1.5 → W2 → W3
-Post-paper:      W4 (rebuttal), W5 (resubmit to new venue), W6 (talk)
-```
-
-| ID | Skill | Input | Output | When to invoke |
-|----|-------|-------|--------|----------------|
-| W1 | `/idea-discovery "direction"` | research direction | `IDEA_REPORT.md`, `EXPERIMENT_PLAN.md`, `FINAL_PROPOSAL.md` | Starting new research |
-| W1.5 | `/experiment-bridge` | `EXPERIMENT_PLAN.md` | running code, `EXPERIMENT_LOG.md` | Have a plan, need to implement |
-| W2 | `/auto-review-loop "scope"` | paper + results | improved paper + `REVIEW_STATE.json` | Iterative improvement loop |
-| W3 | `/paper-writing "NARRATIVE_REPORT.md"` | narrative report | `paper/main.pdf` + LaTeX source | Ready to write |
-| W4 | `/rebuttal "paper/ + reviews"` | paper + reviews | `PASTE_READY.txt` + `REBUTTAL_DRAFT_rich.md` | Reviews received |
-| W5 | `/resubmit-pipeline "paper/" --- venue: X` | polished paper + new venue | `<NEW_VENUE_DIR>/` + `RESUBMIT_REPORT.json` | Port to another venue under hard constraints |
-| W6 | `/paper-talk "paper/" --- venue: X` | paper | Beamer + PPTX + speaker notes + Q&A prep | Conference talk after acceptance |
-
-Hard constraints on W5: no new experiments, no bib edits, no framework changes, never overwrites prior submissions. Enforced via `--edit-whitelist` + `RESUBMIT_REPORT.json` 7-state failure-mode ledger.
-
-## Assurance & Audit Chain
-
-ARIS gates submission via a 5-layer cross-model audit chain. Each layer is invoked by a different skill, all use **fresh codex threads** (never `codex-reply`):
-
-| Layer | Skill | Asks | Verdict file |
-|:----:|-------|------|--------------|
-| 1 | `/experiment-audit` | "Is the eval code honest? (no fake GT, no self-normalized scores, no phantom results)" | `EXPERIMENT_AUDIT.{md,json}` |
-| 2 | `/result-to-claim` | "Does the claim scientifically follow from the result?" | (writes claim status to Research Wiki) |
-| 3 | `/paper-claim-audit` | "Does the paper *report* the numbers truthfully?" (zero-context reviewer) | `PAPER_CLAIM_AUDIT.{md,json}` |
-| 4 | `/citation-audit` | "Every `\cite{}` valid? Existence + metadata + context-appropriateness?" | `CITATION_AUDIT.{md,json}` |
-| 5 | `/kill-argument` | "Strongest 200-word rejection memo + independent adjudicator scoring each attack point" | `KILL_ARGUMENT.{md,json}` |
-
-All five emit verdicts on the 6-state schema per [`shared-references/assurance-contract.md`](skills/shared-references/assurance-contract.md): `PASS | WARN | FAIL | BLOCKED | ERROR | NOT_APPLICABLE`.
-
-At `assurance: submission`, Phase 6 of `/paper-writing` runs `tools/verify_paper_audits.sh` and refuses to emit the Final Report if ANY layer is non-green.
-
-**Executor must NOT judge its own integrity.** Reviewer reads the artifact cold (file paths only, never summaries or interpretations). Trace each reviewer call to `.aris/traces/<skill>/<date>_run<NN>/` per [`shared-references/review-tracing.md`](skills/shared-references/review-tracing.md).
-
-## HTML Rendering (for human reading)
-
-[`/render-html`](skills/render-html/SKILL.md) renders selected MD / JSON artifacts (IDEA_REPORT, AUTO_REVIEW, KILL_ARGUMENT, PAPER_PLAN, research-wiki state) into single-file HTML for human reading. **MD / JSON remains canonical**; HTML is a generated view derived from the user's academic-newspaper style.
-
-```
-/render-html <input.md> [--template academic|dashboard]
-                        [--out <path>] [--author "..."]
-                        [--review | --no-review]
+```bash
+bash tools/install_aris_codex.sh /path/to/project --profile core-research
 ```
 
-- `academic` template (linear long-form with sticky TOC): **review by default** — fresh `mcp__codex__codex` thread audits render fidelity / safety / structure (NOT claim truthfulness; that's owned by `/paper-claim-audit` etc.)
-- `dashboard` template (grid cockpit): no review by default; pass `--review` to force
-- Outputs: `<file>.html` + `<file>.review.json` sidecar + trace at `.aris/traces/render-html/<date>_run<NN>/`
-- Do NOT hand-edit the generated HTML — edit the source, re-render
-
-## Artifact Contracts
-
-Skills communicate through plain-text files in known locations:
-
-| Artifact | Created by | Consumed by |
-|----------|-----------|-------------|
-| `IDEA_REPORT.md` | `/idea-discovery` | `/experiment-bridge` |
-| `refine-logs/FINAL_PROPOSAL.md` | `/research-refine` | `/experiment-plan` |
-| `EXPERIMENT_PLAN.md` | `/experiment-plan` | `/experiment-bridge` |
-| `EXPERIMENT_LOG.md` | `/experiment-bridge` | `/auto-review-loop`, `/result-to-claim` |
-| `NARRATIVE_REPORT.md` | `/auto-review-loop` (or human) | `/paper-writing` |
-| `paper/main.tex` | `/paper-write` | `/paper-compile` |
-| `paper/main.pdf` | `/paper-compile` | `/auto-paper-improvement-loop` |
-| `REVIEW_STATE.json` | `/auto-review-loop` | `/auto-review-loop` (resume after context auto-compact) |
-| `EXPERIMENT_AUDIT.{md,json}` | `/experiment-audit` | `/result-to-claim` |
-| `PAPER_CLAIM_AUDIT.{md,json}` | `/paper-claim-audit` | `/paper-writing` Phase 5.5 gate |
-| `CITATION_AUDIT.{md,json}` | `/citation-audit` | `/paper-writing` Phase 5.8 submission gate |
-| `KILL_ARGUMENT.{md,json}` | `/kill-argument` | `/paper-writing` Phase 5.6 + `/resubmit-pipeline` adversarial gate |
-| `RESUBMIT_REPORT.json` | `/resubmit-pipeline` | submission-gate verifier (7-state ledger) |
-| `GAP_REPORT.md` | `/paper-plan` (when `--- style-ref:` set) | `/paper-write` (emits `<!-- DATA_NEEDED: ... -->` HTML comments for missing slots) |
-| `<artifact>.review.json` | `/render-html` review gate | manual triage |
-| `.aris/edit_whitelist.yaml` | human / `/resubmit-pipeline` | `/auto-paper-improvement-loop --edit-whitelist` |
-| `research-wiki/` | `/research-wiki` | `/idea-creator`, `/research-lit`, `/result-to-claim` |
-| `.aris/meta/events.jsonl` | hooks (passive logging) | `/meta-optimize` |
-| `.aris/traces/<skill>/<date>_run<NN>/` | reviewer-class skills | audit / forensic replay |
-
-## Helper Resolution (writing new skills)
-
-When a SKILL.md invokes a canonical helper (e.g., `verify_papers.py`, `research_wiki.py`, `save_trace.sh`, `arxiv_fetch.py`, `verify_paper_audits.sh`), **do NOT hardcode** `python3 tools/foo.py`. Resolve via the strict-safe chain documented in [`shared-references/integration-contract.md`](skills/shared-references/integration-contract.md) §2:
-
-```
-Layer 0:  ${CLAUDE_SKILL_DIR}/scripts/<helper>     # owner SKILL self-contained (CC 1.0+)
-Layer 1:  .aris/tools/<helper>                     # project-local symlink
-Layer 2:  tools/<helper>                           # repo-local
-Layer 3:  $ARIS_REPO/tools/<helper>                # global fallback
+```powershell
+powershell -ExecutionPolicy Bypass -File tools\install_aris.ps1 C:\path\to\project -Platform codex -Profile core-research
 ```
 
-Pick a failure policy from `integration-contract.md` §2 per-helper table: A (gate) / B (side-effect) / C (forensic) / D1 (cascade) / D2 (multi-source aggregate) / E (diagnostic). Each has POSIX-sh + `set -e` + `set -u` safe example blocks.
+| Profile | 用途 |
+|---|---|
+| `core-research` | 建仓、idea、实验计划、AutoDL、基础审查 |
+| `paper` | 论文写作、编译、图表、审计、rebuttal/resubmit |
+| `review` | prompt-only 外部评审和证据审计 |
+| `full` | 全量安装 79 skills |
 
-Advisory CI lint at `.github/workflows/lint-skills-helpers.yml` flags hardcoded `python3 tools/foo.py` patterns in PR-modified SKILL.md (warning only, never fails CI). Single-owner helpers (used by exactly one SKILL) live at `skills/<owner>/scripts/<helper>` per Arch C; precedents: `figure-spec`, `paper-illustration-image2`, `experiment-queue`, `render-html`.
+## 修改仓库时必须验证
 
-## Cross-Model Protocol
+```bash
+python tools/check_skills_inventory.py
+python -m pytest tests/test_codex_skill_mirror.py -q
+git diff --check
+```
 
-- **Executor** (Claude / Codex / Cursor / Antigravity / Copilot): writes code, runs experiments, drafts papers
-- **Reviewer** (GPT-5.5 via Codex MCP, default; or Claude / Gemini via `*-review` MCP overlays): critiques, scores, demands revisions
-- **Rule**: executor and reviewer **must** be different model families. Same-family review is a non-feature.
-- **Reviewer independence**: pass file paths only, never summaries or interpretations
-- **Thread freshness**: every reviewer call uses `mcp__codex__codex` (or equivalent), **never** `codex-reply` — narrative accumulation inflates scores
-- **Experiment integrity**: executor must NOT judge its own eval code — reviewer audits directly per [`shared-references/experiment-integrity.md`](skills/shared-references/experiment-integrity.md)
+如果改安装器：
 
-Default reviewer model is `gpt-5.5` (runtime since 2026-04-24; docs aligned 2026-05-14). Legacy `gpt-5.4` available as `--- reviewer-model: gpt-5.4`. Oracle Pro tier (`gpt-5.5-pro`) via `--- reviewer: oracle-pro` is a separate routing path.
+```bash
+python -m pytest tests/test_install_aris_ps1.py -q
+```
 
-## Shared References
+## 禁止默认行为
 
-Read these before invoking review-related or audit-class skills:
-
-| File | When you need it |
-|------|------------------|
-| [`reviewer-independence.md`](skills/shared-references/reviewer-independence.md) | Any cross-model review |
-| [`experiment-integrity.md`](skills/shared-references/experiment-integrity.md) | Writing eval / audit code |
-| [`fan-out-pattern.md`](skills/shared-references/fan-out-pattern.md) | Fanning out subagents for breadth (any runtime tier) |
-| [`acceptance-gate.md`](skills/shared-references/acceptance-gate.md) | Autonomous loops / goal mode — who may ACCEPT a result |
-| [`external-cadence.md`](skills/shared-references/external-cadence.md) | Before wrapping a skill in `/loop`, `/schedule`, or `CronCreate` |
-| [`assurance-contract.md`](skills/shared-references/assurance-contract.md) | 6-state verdict schema, audit gating |
-| [`integration-contract.md`](skills/shared-references/integration-contract.md) | Helper resolution + failure policies (writing new SKILL.md) |
-| [`review-tracing.md`](skills/shared-references/review-tracing.md) | Where to save reviewer traces |
-| [`reviewer-routing.md`](skills/shared-references/reviewer-routing.md) | `--- reviewer: oracle-pro` etc. |
-| [`citation-discipline.md`](skills/shared-references/citation-discipline.md) | Citation rules |
-| [`effort-contract.md`](skills/shared-references/effort-contract.md) | Effort level specifications |
-| [`writing-principles.md`](skills/shared-references/writing-principles.md) | Writing standards |
-| [`venue-checklists.md`](skills/shared-references/venue-checklists.md) | Venue formatting |
-
-## Research Wiki (Optional)
-
-If `research-wiki/` exists in the project:
-- `/research-lit` auto-ingests discovered papers
-- `/idea-creator` reads wiki before ideation, writes ideas (both successful and failed) back after
-- `/result-to-claim` updates claim status (supported / invalidated / pending)
-- 3+ failed ideas → triggers re-ideation suggestion (failed ideas become anti-repetition memory)
-
-Initialize with `/research-wiki init`. Spec: [`skills/research-wiki/SKILL.md`](skills/research-wiki/SKILL.md). Helper canonical path: `tools/research_wiki.py` (resolved via Layer 1-3 chain above).
+- 不要新增 README-like 文件；仓库只保留根 `README.md`。
+- 不要把教程全集、论文 PDF、演示图片或 generated HTML 放回主包。
+- 不要默认接入新的 API reviewer；先输出 prompt。
+- 不要默认 SSH 到远程机器启动长任务。
+- 不要在每轮对话生成新的长 Markdown 报告；先更新已有小文件或阶段 guide。

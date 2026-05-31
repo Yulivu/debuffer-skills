@@ -1,193 +1,89 @@
-# ARIS Skills Catalog
+# Skills Catalog
 
-Every skill that ships with ARIS, grouped by role. **79 skills** as of the
-latest update; new skills land via PR and get added to the table below.
+????? `debuffer-skills` ????????????? Codex mirror ?? **79 skills**?
 
-- Each `Skill` link goes to the canonical `SKILL.md` (the LLM-readable spec).
-- `Role` is a one-line summary — see the `SKILL.md` for the full contract,
-  phases, and triggers.
-- `Requires` lists external dependencies beyond ARIS core (Codex MCP, Gemini
-  API, Modal account, LaTeX toolchain, etc.). `None` means it works out of
-  the box on a standard install.
+??????????????????lint?tiny smoke ???????????? AutoDL/HPC????????? `review-prompts/`??????????????
 
-> **Codex CLI mirror:** every skill below has a parallel implementation
-> under [`skills/skills-codex/`](../skills/skills-codex/) for Codex CLI users.
-> The mirror swaps the Codex-MCP reviewer path for Codex-native
-> `spawn_agent` + `send_input`. SKILL semantics are otherwise identical;
-> the table below tracks the main-tree canonical files.
+| Skill | ?? | ??? | ???? |
+|---|---|---|---|
+| [`/ablation-planner`](../skills/ablation-planner/SKILL.md) | ????? | Use when main results pass result-to-claim (claim_supported=yes or partial) and ablation studies are needed for paper submission. Codex designs ablations from a reviewer's perspective, CC reviews feasibility and implements. | ??????? venue ?????????????????? |
+| [`/alphaxiv`](../skills/alphaxiv/SKILL.md) | ?????? | Quick single-paper lookup via AlphaXiv LLM-optimized summaries with tiered source fallback. Use when user says "explain this paper", "summarize paper", pastes an arXiv/AlphaXiv URL, or provides a bare arXiv ID for quick understanding - not for broad literature search. | ??/???????????????????????????? |
+| [`/analyze-results`](../skills/analyze-results/SKILL.md) | ????? | Analyze ML experiment results, compute statistics, generate comparison tables and insights. Use when user says "analyze results", "compare", or needs to interpret experimental data. | ?????????????? AutoDL/HPC ??????????? |
+| [`/arxiv`](../skills/arxiv/SKILL.md) | ?????? | Search, download, and summarize academic papers from arXiv. Use when user says "search arxiv", "download paper", "fetch arxiv", "arxiv search", "get paper pdf", or wants to find and save papers from arXiv to the local paper library. | ??/???????????????????????????? |
+| [`/auto-paper-improvement-loop`](../skills/auto-paper-improvement-loop/SKILL.md) | ?? | Autonomously improve a generated paper via GPT-5.4 xhigh review → implement fixes → recompile, for 2 rounds. Use when user says \"改论文\", \"improve paper\", \"论文润色循环\", \"auto improve\", or wants to iteratively polish a generated paper. | ? SKILL.md ??????????????????? |
+| [`/auto-review-loop`](../skills/auto-review-loop/SKILL.md) | ????? | Guided prompt-only multi-round research review loop. Generates external-review prompts for a separate conversation, waits for pasted feedback, implements user-approved fixes, and keeps compact review logs; legacy reviewer backends are opt-in. Use when user says "auto review loop", "review until it passes", or wants iterative research improvement without direct reviewer API calls. | ???? review-prompts????????????????legacy API ?????? |
+| [`/auto-review-loop-llm`](../skills/auto-review-loop-llm/SKILL.md) | ????? | Autonomous research review loop using any OpenAI-compatible LLM API. Configure via llm-chat MCP server or environment variables. Trigger with "auto review loop llm" or "llm review". | ???? review-prompts????????????????legacy API ?????? |
+| [`/auto-review-loop-minimax`](../skills/auto-review-loop-minimax/SKILL.md) | ????? | Autonomous multi-round research review loop using MiniMax API. Use when you want to use MiniMax instead of Codex MCP for external review. Trigger with "auto review loop minimax" or "minimax review". | ???? review-prompts????????????????legacy API ?????? |
+| [`/autodl-hpc`](../skills/autodl-hpc/SKILL.md) | ????? | Prepare, validate, and gate AutoDL/HPC research experiments with GitHub deploy-key bootstrap, offline data policy, preflight and smoke gates, FileZilla/SFTP result transfer, and formal-run approval boundaries. Defaults to command preparation over autonomous SSH execution. Use when Codex needs AutoDL, /root/autodl-tmp, remote GPU/HPC smoke tests, preflight_autodl.py, run_autodl_smoke.sh, deploy keys, formal suite gating, or safe download/audit workflows. | ?????????????? AutoDL/HPC ??????????? |
+| [`/citation-audit`](../skills/citation-audit/SKILL.md) | ????? | Zero-context verification that every bibliographic entry in the paper is real, correctly attributed, and used in a context the cited paper actually supports. Uses a fresh cross-model reviewer with web/DBLP/arXiv lookup to catch hallucinated authors, wrong years, fabricated venues, version mismatches, and wrong-context citations (cite present but the cited paper does not establish the claim). Use when user says \"审查引用\", \"check citations\", \"citation audit\", \"verify references\", \"引用核对\", or before submission to ensure bibliography integrity. | ???? review-prompts????????????????legacy API ?????? |
+| [`/claims-drafting`](../skills/claims-drafting/SKILL.md) | ?? | Draft patent claims for an invention. Use when user says \"撰写权利要求\", \"draft claims\", \"写权利要求书\", \"claim drafting\", or wants to create patent claims. The core skill of the patent pipeline. | ??????????????????????????? |
+| [`/comm-lit-review`](../skills/comm-lit-review/SKILL.md) | ?????? | Communications-domain literature review with Claude-style knowledge-base-first retrieval. Use when the task is about communications, wireless, networking, satellite/NTN, Wi-Fi, cellular, transport protocols, congestion control, routing, scheduling, MAC/PHY, rate adaptation, channel estimation, beamforming, or communication-system research and the user wants papers, related work, a survey, or a landscape summary. Search Zotero, Obsidian, and local paper folders first when available, then search IEEE Xplore, ScienceDirect, ACM Digital Library, and broader web in that order. | ??/???????????????????????????? |
+| [`/deepxiv`](../skills/deepxiv/SKILL.md) | ?????? | Search and progressively read open-access academic papers through DeepXiv. Use when the user wants layered paper access, section-level reading, trending papers, or DeepXiv-backed literature retrieval. | ??/???????????????????????????? |
+| [`/dse-loop`](../skills/dse-loop/SKILL.md) | ???? | Autonomous design space exploration loop for computer architecture and EDA. Runs a program, analyzes results, tunes parameters, and iterates until objective is met or timeout. Use when user says \"DSE\", \"design space exploration\", \"sweep parameters\", \"optimize\", \"find best config\", or wants iterative parameter tuning. | ?????? skill??????????????? |
+| [`/embodiment-description`](../skills/embodiment-description/SKILL.md) | ?? | Write detailed embodiment descriptions for patent specifications. Use when user says \"撰写实施例\", \"write embodiment\", \"实施例描述\", \"detailed description\", or wants to describe how to practice an invention. | ??????????????????????????? |
+| [`/exa-search`](../skills/exa-search/SKILL.md) | ?????? | AI-powered web search via Exa with content extraction. Use when user says "exa search", "web search with content", "find similar pages", or needs broad web results beyond academic databases (arXiv, Semantic Scholar). | ??/???????????????????????????? |
+| [`/experiment-audit`](../skills/experiment-audit/SKILL.md) | ????? | Audit experiment integrity before claiming results. Uses cross-model review (external reviewer backend) to check for fake ground truth, score normalization fraud, phantom results, and insufficient scope. Use when user says \"审计实验\", \"check experiment integrity\", \"audit results\", \"实验诚实度\", or after experiments complete before writing claims. | ???? review-prompts????????????????legacy API ?????? |
+| [`/experiment-bridge`](../skills/experiment-bridge/SKILL.md) | ????? | Lightweight experiment bridge between idea planning and review. Reads EXPERIMENT_PLAN.md, implements experiment code, runs local validation only, prepares AutoDL/HPC gated execution, and writes prompt-only code-review handoffs. Use when user says \"实现实验\", \"implement experiments\", \"bridge\", \"从计划到跑实验\", \"deploy the plan\", or has an experiment plan ready to execute. | ?????????????? AutoDL/HPC ??????????? |
+| [`/experiment-plan`](../skills/experiment-plan/SKILL.md) | ????? | 'Turn a refined research proposal or method idea into a detailed, claim-driven experiment roadmap. Use after \`research-refine\`, or when the user asks for a detailed experiment plan, ablation matrix, evaluation protocol, run order, compute budget, or paper-ready validation that supports the core problem, novelty, simplicity, and any LLM / VLM / Diffusion / RL-based contribution.' | ??????? venue ?????????????????? |
+| [`/experiment-queue`](../skills/experiment-queue/SKILL.md) | ????? | Opt-in SSH job queue for multi-seed/multi-config ML experiments with OOM-aware retry, stale-screen cleanup, and wave-transition race prevention. In the lightweight AutoDL-first pack, use only when the user explicitly asks for SSH queue orchestration or approves a prepared command block. | ?????????????? AutoDL/HPC ??????????? |
+| [`/feishu-notify`](../skills/feishu-notify/SKILL.md) | ???? | Send notifications to Feishu/Lark. Internal utility used by other skills, or manually via /feishu-notify. Supports push-only (webhook) and interactive (bidirectional) modes. Use when user says \"发飞书\", \"notify feishu\", or other skills need to send status updates. | ?????????????????????????? |
+| [`/figure-description`](../skills/figure-description/SKILL.md) | ????? | Process user-provided patent figures and generate formal drawing descriptions. Use when user says \"附图处理\", \"figure description\", \"附图说明\", \"drawings description\", or wants to describe patent figures with reference numerals. | ???????????????LaTeX ????????????? |
+| [`/figure-spec`](../skills/figure-spec/SKILL.md) | ????? | Generate deterministic publication-quality architecture, workflow, and pipeline diagrams from structured JSON (FigureSpec) into editable SVG. Use when user says \"架构图\", \"workflow 图\", \"pipeline 图\", \"确定性矢量图\", \"figure spec\", \"draw architecture\", or needs precise, editable, publication-ready vector diagrams. Preferred over AI illustration for formal architecture/workflow figures. | ???????????????LaTeX ????????????? |
+| [`/formula-derivation`](../skills/formula-derivation/SKILL.md) | ????? | Structures and derives research formulas when the user wants to 推导公式, build a theory line, organize assumptions, turn scattered equations into a coherent derivation, or rewrite theory notes into a paper-ready formula document. Use when the derivation target is not yet fully fixed, the main object still needs to be chosen, or the user needs a coherent derivation package rather than a finished theorem proof. | ??????? venue ?????????????????? |
+| [`/gemini-search`](../skills/gemini-search/SKILL.md) | ?????? | Search research papers via Gemini for broad literature discovery. Use when user says "gemini search", "gemini papers", "search with gemini", or wants AI-powered literature discovery beyond arXiv/Semantic Scholar indexes. | ??/???????????????????????????? |
+| [`/grant-proposal`](../skills/grant-proposal/SKILL.md) | ???? | Draft a structured grant proposal from research ideas and literature. Supports KAKENHI (Japan), NSF (US), NSFC (China, including 面上/青年/优青/杰青/海外优青/重点), ERC (EU), DFG (Germany), SNSF (Switzerland), ARC (Australia), NWO (Netherlands), and generic formats. Use when user says \"write grant\", \"grant proposal\", \"申請書\", \"write KAKENHI\", \"科研費\", \"基金申请\", \"写基金\", \"NSF proposal\", or wants to turn research ideas into a funding application. | ?????????????????????????? |
+| [`/idea-creator`](../skills/idea-creator/SKILL.md) | ????? | Generate and rank research ideas given a broad direction. Use when user says "找idea", "brainstorm ideas", "generate research ideas", "what can we work on", or wants to explore a research area for publishable directions. | ??????? venue ?????????????????? |
+| [`/idea-discovery`](../skills/idea-discovery/SKILL.md) | ???? | Workflow 1: Full idea discovery pipeline. Orchestrates research-lit → idea-creator → novelty-check → research-review → research-refine-pipeline to go from a broad research direction to validated, pilot-tested ideas. Use when user says \"找idea全流程\", \"idea discovery pipeline\", \"从零开始找方向\", or wants the complete idea exploration workflow. | ?????? skill??????????????? |
+| [`/idea-discovery-robot`](../skills/idea-discovery-robot/SKILL.md) | ???? | Workflow 1 adaptation for robotics and embodied AI. Orchestrates robotics-aware literature survey, idea generation, novelty check, and critical review to go from a broad robotics direction to benchmark-grounded, simulation-first ideas. Use when user says \"robotics idea discovery\", \"机器人找idea\", \"embodied AI idea\", \"机器人方向探索\", \"sim2real 选题\", or wants ideas for manipulation, locomotion, navigation, drones, humanoids, or general robot learning. | ?????? skill??????????????? |
+| [`/interview-cheatsheet`](../skills/interview-cheatsheet/SKILL.md) | ???? | Generate a project-local Chinese ML/LLM interview or study cheat sheet without adding tutorial corpora to the skills repo. Uses compact planning, prompt-only review, and optional HTML rendering. Use when the user asks for an interview cheat sheet, study guide, tutorial, quick reference, or "面试速查". | ?????????????????????????? |
+| [`/invention-structuring`](../skills/invention-structuring/SKILL.md) | ?? | Structure a raw invention idea into a formal invention disclosure. Use when user says \"构建发明\", \"structure invention\", \"发明构建\", \"invention disclosure\", or wants to formalize a rough idea into a patent-ready structure. | ??????????????????????????? |
+| [`/jurisdiction-format`](../skills/jurisdiction-format/SKILL.md) | ?? | Compile patent application into jurisdiction-specific filing format. Use when user says \"格式转换\", \"jurisdiction format\", \"国家格式\", \"compile patent\", or wants formatted patent documents for CN/US/EP filing. | ??????????????????????????? |
+| [`/kill-argument`](../skills/kill-argument/SKILL.md) | ????? | Two-thread adversarial review: a fresh reviewer constructs the strongest 200-word rejection memo, then a second fresh reviewer defends the paper point-by-point and surfaces still-unresolved critical issues. Use when user says \"kill argument\", \"adversarial review\", \"hostile review\", \"rebuttal preparation\", \"reviewer-2 simulation\", or before submitting a theory paper that has already passed standard review rounds. | ???? review-prompts????????????????legacy API ?????? |
+| [`/mermaid-diagram`](../skills/mermaid-diagram/SKILL.md) | ????? | Generate Mermaid diagrams from user requirements. Saves .mmd and .md files to figures/ directory with syntax verification. Supports flowcharts, sequence diagrams, class diagrams, ER diagrams, Gantt charts, and 18 more diagram types. | ???????????????LaTeX ????????????? |
+| [`/meta-optimize`](../skills/meta-optimize/SKILL.md) | ???? | Analyze ARIS usage logs and propose optimizations to SKILL.md files, reviewer prompts, and workflow defaults. Outer-loop harness optimization inspired by Meta-Harness (Lee et al., 2026). Use when user says \"优化技能\", \"meta optimize\", \"improve skills\", \"分析使用记录\", or wants to optimize ARIS's own harness components based on accumulated experience. | ?????? skill??????????????? |
+| [`/monitor-experiment`](../skills/monitor-experiment/SKILL.md) | ????? | Prepare gated monitoring commands for running experiments, check progress from pasted/logged outputs, and collect results after user approval. Use when user says "check results", "is it done", "monitor", or wants experiment output. | ?????????????? AutoDL/HPC ??????????? |
+| [`/novelty-check`](../skills/novelty-check/SKILL.md) | ?????? | Verify research idea novelty against recent literature. Use when user says "查新", "novelty check", "有没有人做过", "check novelty", or wants to verify a research idea is novel before implementing. | ??/???????????????????????????? |
+| [`/openalex`](../skills/openalex/SKILL.md) | ?????? | Search academic papers via OpenAlex API for open citation data, institutional affiliations, and funding information. Use when user says "openalex search", "search openalex", "open citation graph", or wants comprehensive academic metadata beyond arXiv/Semantic Scholar. | ??/???????????????????????????? |
+| [`/overleaf-sync`](../skills/overleaf-sync/SKILL.md) | ????? | Two-way sync between a local paper directory and an Overleaf project via the Overleaf Git bridge (Premium feature). Lets you keep ARIS audit/edit workflows on the local copy while collaborators edit in the Overleaf web UI. Token never touches the agent — user does the one-time auth via macOS Keychain. Use when user says \"同步 overleaf\", \"overleaf sync\", \"推送到 overleaf\", \"connect overleaf\", \"Overleaf 桥接\", \"pull overleaf\", \"push overleaf\", or wants to bridge their ARIS paper directory with an Overleaf project. | ???????????????LaTeX ????????????? |
+| [`/paper-claim-audit`](../skills/paper-claim-audit/SKILL.md) | ????? | Zero-context verification that every number, comparison, and scope claim in the paper matches raw result files. Uses a fresh cross-model reviewer with NO prior context to prevent confirmation bias. Use when user says \"审查论文数据\", \"check paper claims\", \"verify numbers\", \"论文数字核对\", or before submission to ensure paper-to-evidence fidelity. | ???? review-prompts????????????????legacy API ?????? |
+| [`/paper-compile`](../skills/paper-compile/SKILL.md) | ????? | Compile LaTeX paper to PDF, fix errors, and verify output. Use when user says \"编译论文\", \"compile paper\", \"build PDF\", \"生成PDF\", or wants to compile LaTeX into a submission-ready PDF. | ???????????????LaTeX ????????????? |
+| [`/paper-figure`](../skills/paper-figure/SKILL.md) | ????? | Generate publication-quality figures and tables from experiment results. Use when user says \"画图\", \"作图\", \"generate figures\", \"paper figures\", or needs plots for a paper. | ???????????????LaTeX ????????????? |
+| [`/paper-illustration`](../skills/paper-illustration/SKILL.md) | ????? | Generate publication-quality AI illustrations for academic papers using Gemini image generation. Creates architecture diagrams, method illustrations with Claude-supervised iterative refinement loop. Use when user says \"生成图表\", \"画架构图\", \"AI绘图\", \"paper illustration\", \"generate diagram\", or needs visual figures for papers. | ???????????????LaTeX ????????????? |
+| [`/paper-illustration-image2`](../skills/paper-illustration-image2/SKILL.md) | ????? | Generate publication-quality academic illustrations through a local Codex app-server bridge that uses Codex native image generation. This is a separate experimental alternative to \`paper-illustration\`, intended for Claude Code users who want a GPT-image-style renderer without modifying the original skill. | ???????????????LaTeX ????????????? |
+| [`/paper-plan`](../skills/paper-plan/SKILL.md) | ????? | Generate a structured paper outline from review conclusions and experiment results. Use when user says \"写大纲\", \"paper outline\", \"plan the paper\", \"论文规划\", or wants to create a paper plan before writing. | ???????????????LaTeX ????????????? |
+| [`/paper-poster`](../skills/paper-poster/SKILL.md) | ????? | Generate a conference poster (article + tcbposter LaTeX → A0/A1 PDF + editable PPTX + SVG) from a compiled paper. Use when user says \"做海报\", \"制作海报\", \"conference poster\", \"make poster\", \"生成poster\", \"poster session\", or wants to create a poster for a conference presentation. | ???????????????LaTeX ????????????? |
+| [`/paper-slides`](../skills/paper-slides/SKILL.md) | ????? | Generate conference presentation slides (beamer LaTeX → PDF + editable PPTX) from a compiled paper, with speaker notes and full talk script. Use when user says \"做PPT\", \"做幻灯片\", \"make slides\", \"conference talk\", \"presentation slides\", \"生成slides\", \"写演讲稿\", or wants beamer slides for a conference talk. | ???????????????LaTeX ????????????? |
+| [`/paper-talk`](../skills/paper-talk/SKILL.md) | ????? | End-to-end conference talk pipeline: paper → slide outline → Beamer + PPTX → per-page polish → assurance checks (claim / citation / anonymity) → final export and report. Default-good for academic conference talks (NeurIPS / ICML / ICLR / VALSE / 投稿 talks). Trigger phrases: \"做 talk\", \"做 PPT 全流程\", \"talk pipeline\", \"end-to-end slides\", \"做演讲\", \"conference talk full workflow\". Use when the user wants the complete talk artifact, not just a slide deck. | ???????????????LaTeX ????????????? |
+| [`/paper-write`](../skills/paper-write/SKILL.md) | ????? | Draft LaTeX paper section by section from an outline. Use when user says \"写论文\", \"write paper\", \"draft LaTeX\", \"开始写\", or wants to generate LaTeX content from a paper plan. | ???????????????LaTeX ????????????? |
+| [`/paper-writing`](../skills/paper-writing/SKILL.md) | ???? | Workflow 3: Full paper writing pipeline. Orchestrates paper-plan → paper-figure → figure-spec/paper-illustration/mermaid-diagram → paper-write → paper-compile → auto-paper-improvement-loop to go from a narrative report to a polished PDF. At \`— effort: max / beast\` (or explicit \`— assurance: submission\`), Phase 6 gates the Final Report on \`verify_paper_audits.sh\` (resolved per integration-contract §2); the PDF is labelled \`submission-ready\` only when the external verifier is green. Use when user says \"写论文全流程\", \"write paper pipeline\", \"从报告到PDF\", \"paper writing\", or wants the complete paper generation workflow. | ?????? skill??????????????? |
+| [`/patent-novelty-check`](../skills/patent-novelty-check/SKILL.md) | ?? | Assess patent novelty and non-obviousness against prior art. Use when user says \"专利查新\", \"patent novelty\", \"可专利性评估\", \"patentability check\", or wants to evaluate if an invention is patentable. | ??????????????????????????? |
+| [`/patent-pipeline`](../skills/patent-pipeline/SKILL.md) | ???? | Full patent drafting pipeline from invention description to jurisdiction-formatted filing documents. Supports CN (CNIPA), US (USPTO), EP (EPO). Supports invention patents and utility models. Use when user says \"写专利\", \"patent pipeline\", \"专利申请\", \"draft patent\", \"写权利要求书\", or wants to draft a complete patent application. | ?????? skill??????????????? |
+| [`/patent-review`](../skills/patent-review/SKILL.md) | ????? | Get an external patent examiner review of a patent application. Use when user says \"专利审查\", \"patent review\", \"审查意见\", \"examiner review\", or wants critical feedback on patent claims and specification. | ???? review-prompts????????????????legacy API ?????? |
+| [`/pixel-art`](../skills/pixel-art/SKILL.md) | ????? | Generate pixel art SVG illustrations for READMEs, docs, or slides. Use when user says "画像素图", "pixel art", "make an SVG illustration", "README hero image", or wants a cute visual. | ???????????????LaTeX ????????????? |
+| [`/prior-art-search`](../skills/prior-art-search/SKILL.md) | ?? | Search patent databases and academic literature for prior art relevant to an invention. Use when user says \"现有技术检索\", \"prior art search\", \"专利检索\", \"check patents\", or wants to find relevant prior art. | ??????????????????????????? |
+| [`/proof-checker`](../skills/proof-checker/SKILL.md) | ????? | Rigorous mathematical proof verification and fixing workflow. Reads a LaTeX proof, identifies gaps via cross-model review (external reviewer backend, xhigh reasoning), fixes each gap with full derivations, re-reviews, and generates an audit report. Use when user says "检查证明", "verify proof", "proof check", "审证明", "check this proof", or wants rigorous mathematical verification of a theory paper. | ???? review-prompts????????????????legacy API ?????? |
+| [`/proof-writer`](../skills/proof-writer/SKILL.md) | ????? | Writes rigorous mathematical proofs for ML/AI theory. Use when asked to prove a theorem, lemma, proposition, or corollary, fill in missing proof steps, formalize a proof sketch, 补全证明, 写证明, 证明某个命题, or determine whether a claimed proof can actually be completed under the stated assumptions. | ???????????????LaTeX ????????????? |
+| [`/qzcli`](../skills/qzcli/SKILL.md) | ????? | Manage GPU compute jobs on the Qizhi (启智) platform using qzcli — a kubectl-style CLI tool. Use when user says "qzcli", "启智平台", "submit job", "stop job", "查计算组", "avail", "list jobs", "batch submit", or needs to manage distributed training jobs on a Qizhi instance. | ?????????????? AutoDL/HPC ??????????? |
+| [`/rebuttal`](../skills/rebuttal/SKILL.md) | ???? | Workflow 4: Submission rebuttal pipeline. Parses external reviews, enforces coverage and grounding, drafts a safe text-only rebuttal under venue limits, and manages follow-up rounds. Use when user says \"rebuttal\", \"reply to reviewers\", \"ICML rebuttal\", \"OpenReview response\", or wants to answer external reviews safely. | ?????? skill??????????????? |
+| [`/render-html`](../skills/render-html/SKILL.md) | ????? | Render an ARIS Markdown / JSON artifact (IDEA_REPORT, AUTO_REVIEW, KILL_ARGUMENT, PAPER_PLAN, research-wiki state, etc.) into a single-file HTML view designed for human reading. Academic template outputs are gated by a fresh cross-model Codex review for render fidelity + safety (the ARIS invariant). Use when the user says \"渲染 HTML\", \"出一份 HTML 报告\", \"render html\", \"make this readable\", \"export to html\", or wants a polished web-rendered view of a Markdown artifact. Markdown/JSON stays the canonical source; HTML is a generated, reviewed view. | ???????????????LaTeX ????????????? |
+| [`/research-lit`](../skills/research-lit/SKILL.md) | ?????? | Search and analyze research papers, find related work, summarize key ideas. Use when user says "find papers", "related work", "literature review", "what does this paper say", or needs to understand academic papers. | ??/???????????????????????????? |
+| [`/research-pipeline`](../skills/research-pipeline/SKILL.md) | ???? | Lightweight AutoDL-first research pipeline: idea discovery → experiment bridge → prompt-only review loop → optional paper writing. Adapts to venue-only, reference-paper/codebase, idea-doc, existing-repo, or partial-results starts; avoids heavy local compute, defaults to concise artifacts, and prepares AutoDL/HPC gated runs. Use when user says \"全流程\", \"full pipeline\", \"从找idea到投稿\", \"end-to-end research\", or wants a complete but user-gated research lifecycle. | ?????? skill??????????????? |
+| [`/research-refine`](../skills/research-refine/SKILL.md) | ????? | 'Turn a vague research direction into a problem-anchored, elegant, frontier-aware, implementation-oriented method plan via iterative GPT-5.4 review. Use when the user says "refine my approach", "帮我细化方案", "decompose this problem", "打磨idea", "refine research plan", "细化研究方案", or wants a concrete research method that stays simple, focused, and top-venue ready instead of a vague or overbuilt idea.' | ??????? venue ?????????????????? |
+| [`/research-refine-pipeline`](../skills/research-refine-pipeline/SKILL.md) | ???? | 'Run an end-to-end workflow that chains \`research-refine\` and \`experiment-plan\`. Use when the user wants a one-shot pipeline from vague research direction to focused final proposal plus detailed experiment roadmap, or asks to "串起来", build a pipeline, do it end-to-end, or generate both the method and experiment plan together.' | ?????? skill??????????????? |
+| [`/research-repo-architect`](../skills/research-repo-architect/SKILL.md) | ?? | Organize research code and ARIS skill repositories into lightweight reproducible architecture. Use when Codex needs to scaffold or migrate a research repo for different startup stages, separate reusable code from scripts, standardize data/config/results/run directories, add Python src-layout packaging, create AutoDL/HPC-ready entrypoints with smoke/formal gates, keep local work light, or integrate ARIS skills/tools/shared-references with mainline and Codex mirrors. | ? SKILL.md ??????????????????? |
+| [`/research-review`](../skills/research-review/SKILL.md) | ????? | Prepare a prompt-only deep critical review package for research ideas, papers, or results. Generates concise reviewer prompts for a separate conversation, supports venue profiles such as ICLR, AAAI, JMLR, and TPAMI, and consumes pasted feedback; direct reviewer backends are opt-in. Use when user says "review my research", "help me review", or "get external review". | ???? review-prompts????????????????legacy API ?????? |
+| [`/research-wiki`](../skills/research-wiki/SKILL.md) | ?????? | Persistent research knowledge base that accumulates papers, ideas, experiments, claims, and their relationships across the entire research lifecycle. Inspired by Karpathy's LLM Wiki pattern. Use when user says \"知识库\", \"research wiki\", \"add paper\", \"wiki query\", \"查知识库\", or wants to build/query a persistent field map. | ??/???????????????????????????? |
+| [`/resubmit-pipeline`](../skills/resubmit-pipeline/SKILL.md) | ???? | Workflow 5: orchestrate a text-only resubmit of a polished paper to a different venue under hard constraints (no new experiments, no bib edits, no framework changes, never overwrite prior submissions). Phase 0 physical isolation, Phase 0.5 health + anonymity check, Phase 1 audit (proof / claim / citation), Phase 2 microedits via auto-loop with edit-whitelist + citation-audit --soft-only, Phase 3 kill-argument adversarial gate, Phase 4 final compile + Overleaf push via /overleaf-sync. Use when user says \"resubmit pipeline\", \"重投流程\", \"port paper to <new venue>\", \"resubmit to <venue>\", \"tighten paper for resubmission\", or has a rejected/withdrawn paper to move to a different top venue under tight time budget. | ?????? skill??????????????? |
+| [`/result-to-claim`](../skills/result-to-claim/SKILL.md) | ????? | Use when experiments complete to judge what claims the results support, what they don't, and what evidence is still missing. Codex MCP evaluates results against intended claims and routes to next action (pivot, supplement, or confirm). Use after experiments finish — before writing the paper or running ablations. | ???? review-prompts????????????????legacy API ?????? |
+| [`/run-experiment`](../skills/run-experiment/SKILL.md) | ????? | Prepare and gate ML experiment execution with AutoDL/HPC preferred for heavy compute. Runs only local validation/tiny smoke checks by default, prints SSH/remote command blocks for approval, and keeps Vast.ai/Modal as opt-in alternatives. Use when user says "run experiment", "deploy to server", "跑实验", or needs to launch training jobs. | ?????????????? AutoDL/HPC ??????????? |
+| [`/semantic-scholar`](../skills/semantic-scholar/SKILL.md) | ?????? | Search published venue papers (IEEE, ACM, Springer, etc.) via Semantic Scholar API. Complements /arxiv (preprints) with citation counts, venue metadata, and TLDR. Use when user says "search semantic scholar", "find IEEE papers", "find journal papers", "venue papers", "citation search", or wants published literature beyond arXiv preprints. | ??/???????????????????????????? |
+| [`/serverless-modal`](../skills/serverless-modal/SKILL.md) | ????? | Run GPU workloads on Modal — training, fine-tuning, inference, batch processing. Zero-config serverless: no SSH, no Docker, auto scale-to-zero. Use when user says \"modal run\", \"modal training\", \"modal inference\", \"deploy to modal\", \"need a GPU\", \"run on modal\", \"serverless GPU\", or needs remote GPU compute. | ?????????????? AutoDL/HPC ??????????? |
+| [`/slides-polish`](../skills/slides-polish/SKILL.md) | ????? | Per-page Codex review + targeted python-pptx / Beamer fixes for academic talk slides. Use AFTER /paper-slides (or any externally generated PPTX/Beamer) when the deck looks 'mostly OK' but the user wants a final pass that aligns visual weight with a reference, bumps PPTX fonts to projector-readable size, kills italic style leaks, fixes text-frame overflow, and catches per-slide layout drift. Trigger phrases: \"polish slides\", \"slides 排版不对\", \"PPTX 字体太小\", \"和 Beamer 比一下\", \"per-page review\", \"和 codex 一页一页过\". | ???????????????LaTeX ????????????? |
+| [`/specification-writing`](../skills/specification-writing/SKILL.md) | ?? | Write the full patent specification from claims and invention disclosure. Use when user says \"撰写说明书\", \"write specification\", \"写说明书\", \"patent description\", or wants to draft the complete patent specification. | ??????????????????????????? |
+| [`/system-profile`](../skills/system-profile/SKILL.md) | ????? | Profile a target (script, process, GPU, memory, interconnect) using external tools and code instrumentation. Produces structured performance reports with actionable recommendations. Use when user says "profile", "benchmark", "bottleneck", or wants performance analysis. | ?????????????? AutoDL/HPC ??????????? |
+| [`/training-check`](../skills/training-check/SKILL.md) | ????? | Periodically check WandB metrics during training to catch problems early (NaN, loss divergence, idle GPUs). Avoids wasting GPU hours on broken runs. Use when training is running and you want automated health checks. | ?????????????? AutoDL/HPC ??????????? |
+| [`/vast-gpu`](../skills/vast-gpu/SKILL.md) | ????? | Rent, manage, and destroy GPU instances on vast.ai. Use when user says \"rent gpu\", \"vast.ai\", \"rent a server\", \"cloud gpu\", or needs on-demand GPU without owning hardware. | ?????????????? AutoDL/HPC ??????????? |
+| [`/wiki-enrich`](../skills/wiki-enrich/SKILL.md) | ?????? | Fill in the per-paper TODO sections (Problem/Method/Key Results/Limitations/Reusable Ingredients/...) of research-wiki/papers/<slug>.md pages that /research-lit, /arxiv, /alphaxiv, /deepxiv, /semantic-scholar, /exa-search ingest as bare scaffolds. Implements the Karpathy LLM-wiki principle that the LLM (not the human) writes and maintains wiki bodies. Use when user says 'enrich wiki', 'fill paper TODOs', 'wiki body 補完', '把 paper 摘要寫進 wiki', 'research-wiki 自動填', or after a batch ingest that left papers/ as TODO scaffolds. | ??/???????????????????????????? |
+| [`/writing-systems-papers`](../skills/writing-systems-papers/SKILL.md) | ????? | Paragraph-level structural blueprint for 10-12 page systems papers targeting OSDI, SOSP, ASPLOS, NSDI, and EuroSys. Provides page allocation, paragraph templates, and writing patterns. Use when user says \"写系统论文\", \"systems paper structure\", \"OSDI paper\", \"SOSP paper\", or wants fine-grained structural guidance for a systems conference submission. | ???????????????LaTeX ????????????? |
 
----
-
-## 🏗️ Workflow Orchestrators
-
-End-to-end pipelines that chain many sub-skills. Most users start here.
-
-| Skill | Role | Requires |
-|---|---|---|
-| [`/research-pipeline`](../skills/research-pipeline/SKILL.md) | **Full chain** — Workflow 1 → 1.5 → 2 → 3, from research direction to submission-ready paper | Codex MCP, LaTeX, GPU |
-| [`/idea-discovery`](../skills/idea-discovery/SKILL.md) | **Workflow 1** — research-lit → idea-creator → novelty-check → research-review → research-refine-pipeline | Codex MCP |
-| [`/idea-discovery-robot`](../skills/idea-discovery-robot/SKILL.md) | Workflow 1 adapter for robotics / embodied AI — robotics-aware literature survey + benchmark-anchored ideation | Codex MCP |
-| [`/experiment-bridge`](../skills/experiment-bridge/SKILL.md) | **Workflow 1.5** — read experiment plan → implement code → sanity check → deploy to GPU → collect initial results | GPU (local / remote / Vast / Modal) |
-| [`/auto-review-loop`](../skills/auto-review-loop/SKILL.md) | **Workflow 2** — autonomous review → fix → re-review until positive or max rounds; uses Codex MCP reviewer | Codex MCP |
-| [`/auto-review-loop-llm`](../skills/auto-review-loop-llm/SKILL.md) | Same as Workflow 2 but uses any OpenAI-compatible LLM via [`llm-chat`](../mcp-servers/llm-chat/) MCP server | llm-chat MCP |
-| [`/auto-review-loop-minimax`](../skills/auto-review-loop-minimax/SKILL.md) | Workflow 2 variant pinned to MiniMax API | MiniMax API key |
-| [`/paper-writing`](../skills/paper-writing/SKILL.md) | **Workflow 3** — paper-plan → paper-figure → illustration → paper-write → paper-compile → auto-paper-improvement-loop | Codex MCP, LaTeX |
-| [`/rebuttal`](../skills/rebuttal/SKILL.md) | **Workflow 4** — parse reviews → atomize → strategy → draft → safety check → stress test → 2-version output → follow-ups | Codex MCP |
-| [`/resubmit-pipeline`](../skills/resubmit-pipeline/SKILL.md) | **Workflow 5** — text-only port across venues (no new experiments, no bib edits) — isolation → anonymity → audits `--soft-only` → microedit → kill-argument gate → compile + push | Codex MCP, LaTeX |
-| [`/paper-talk`](../skills/paper-talk/SKILL.md) | **Workflow 6** — paper → slide outline → Beamer + PPTX → per-page polish → assurance audits → final report | Codex MCP, LaTeX, python-pptx |
-| [`/research-refine-pipeline`](../skills/research-refine-pipeline/SKILL.md) | Sub-pipeline used by `/idea-discovery` — refine method + plan experiments in one chain | Codex MCP |
-| [`/patent-pipeline`](../skills/patent-pipeline/SKILL.md) | Full patent drafting — invention → claims → spec → jurisdiction format (CN / US / EP) | Codex MCP |
-| [`/dse-loop`](../skills/dse-loop/SKILL.md) | Autonomous design-space exploration loop for computer architecture / EDA — run → analyze → tune → iterate until objective met | Domain-specific tools |
-| [`/meta-optimize`](../skills/meta-optimize/SKILL.md) | **Workflow M** — analyze ARIS usage logs and propose SKILL.md / prompt / default-parameter improvements (outer-loop self-evolution) | Codex MCP, hook logging |
-
-## 📚 Literature & Search
-
-Paper retrieval, summarization, novelty verification.
-
-| Skill | Role | Requires |
-|---|---|---|
-| [`/research-lit`](../skills/research-lit/SKILL.md) | Multi-source literature search — Zotero / Obsidian / local PDFs / web / arXiv / S2 / DeepXiv / Exa / Gemini / OpenAlex with cross-source dedup | None (sources gated by MCP / SDK availability) |
-| [`/arxiv`](../skills/arxiv/SKILL.md) | Search, download, summarize arXiv papers; multi-result table + per-paper detail | None |
-| [`/semantic-scholar`](../skills/semantic-scholar/SKILL.md) | Published-venue paper search (IEEE / ACM / Springer) — citation counts, venue metadata, TLDR | None (rate-limited without S2 API key) |
-| [`/deepxiv`](../skills/deepxiv/SKILL.md) | Progressive paper reading — search → brief → head → section → trending → web search | `pip install deepxiv-sdk` |
-| [`/exa-search`](../skills/exa-search/SKILL.md) | AI-powered broad web search with content extraction — blogs, docs, news, papers | `pip install exa-py` + `EXA_API_KEY` |
-| [`/openalex`](../skills/openalex/SKILL.md) | OpenAlex API search — 250M+ open citation graph, institutional affiliations, funding data | `pip install requests` |
-| [`/gemini-search`](../skills/gemini-search/SKILL.md) | Gemini-driven literature discovery — decomposes topics into sub-problems, aliases, variants | `gemini-cli` v0.40+ |
-| [`/alphaxiv`](../skills/alphaxiv/SKILL.md) | Quick single-paper lookup via [AlphaXiv](https://alphaxiv.org) — three-tier fallback (overview → markdown → LaTeX source) | None |
-| [`/comm-lit-review`](../skills/comm-lit-review/SKILL.md) | Communications-domain literature review with Claude-style knowledge-base-first retrieval — wireless / networking / satellite / Wi-Fi / cellular | None |
-| [`/novelty-check`](../skills/novelty-check/SKILL.md) | Verify a research idea is novel against recent literature — multi-source search + cross-model verification + closest-prior-work table | Codex MCP |
-
-## 💡 Ideation & Method Design
-
-Generating, refining, planning research ideas before implementation.
-
-| Skill | Role | Requires |
-|---|---|---|
-| [`/idea-creator`](../skills/idea-creator/SKILL.md) | Brainstorm 8-12 ideas, filter by feasibility, pilot on GPU, rank by signal | Codex MCP, GPU for pilots |
-| [`/research-refine`](../skills/research-refine/SKILL.md) | Iterative method refinement — problem anchor → up to 5 review rounds → score ≥ 9 | Codex MCP |
-| [`/experiment-plan`](../skills/experiment-plan/SKILL.md) | Turn a refined proposal into a claim-driven experiment roadmap — ablations, budgets, run order | None |
-| [`/ablation-planner`](../skills/ablation-planner/SKILL.md) | Design ablation studies from a reviewer's perspective (after main results pass `/result-to-claim`) | Codex MCP |
-| [`/formula-derivation`](../skills/formula-derivation/SKILL.md) | Structure theory derivations — organize assumptions, build derivation chains, turn scattered equations into coherent narrative | None |
-
-## 🧪 Experiments & Infrastructure
-
-GPU job submission, scheduling, monitoring, profiling.
-
-| Skill | Role | Requires |
-|---|---|---|
-| [`/run-experiment`](../skills/run-experiment/SKILL.md) | Deploy experiments to local / remote / Vast.ai / Modal GPU | GPU (configurable) |
-| [`/autodl-hpc`](../skills/autodl-hpc/SKILL.md) | Prepare and gate AutoDL/HPC research runs — deploy-key bootstrap, offline data policy, preflight/smoke validation, FileZilla/SFTP transfer, formal-run approval boundary | AutoDL or SSH GPU/HPC access |
-| [`/monitor-experiment`](../skills/monitor-experiment/SKILL.md) | Monitor running experiments, check progress, collect results | None |
-| [`/analyze-results`](../skills/analyze-results/SKILL.md) | Compute statistics, generate comparison tables, surface insights from experiment results | None |
-| [`/experiment-queue`](../skills/experiment-queue/SKILL.md) | SSH job queue for multi-seed / multi-config sweeps — OOM retry, stale-screen cleanup, wave gating, crash-safe state | SSH access |
-| [`/vast-gpu`](../skills/vast-gpu/SKILL.md) | Rent, manage, destroy on-demand GPU on [Vast.ai](https://vast.ai) | Vast.ai account + `vast-cli` |
-| [`/serverless-modal`](../skills/serverless-modal/SKILL.md) | Run GPU workloads on [Modal](https://modal.com) — zero-config serverless, auto scale-to-zero | `pip install modal` + Modal account |
-| [`/qzcli`](../skills/qzcli/SKILL.md) | Manage GPU compute jobs on the Qizhi (启智) platform via `qzcli` (kubectl-style CLI) | `qzcli` installed |
-| [`/training-check`](../skills/training-check/SKILL.md) | Periodically poll W&B metrics during training — catch NaN, loss divergence, idle GPUs early | W&B account |
-| [`/system-profile`](../skills/system-profile/SKILL.md) | Profile a target (script / process / GPU / memory / interconnect) with external tools + code instrumentation; produce actionable report | Profiling tools |
-
-## 🛡️ Review, Audit & Assurance
-
-Cross-model critique, integrity checking, evidence verification.
-
-| Skill | Role | Requires |
-|---|---|---|
-| [`/research-review`](../skills/research-review/SKILL.md) | Single-round deep critical review from external LLM (Codex GPT xhigh by default; `oracle-pro` route for Pro tier) | Codex MCP (or Oracle MCP) |
-| [`/experiment-audit`](../skills/experiment-audit/SKILL.md) | Cross-model integrity check of experiment code + results — catches fake ground truth, score-normalization fraud, phantom results, scope inflation | Codex MCP |
-| [`/result-to-claim`](../skills/result-to-claim/SKILL.md) | Map experimental results to intended claims — judges what's supported, what's not, what's missing; routes to next action | Codex MCP |
-| [`/paper-claim-audit`](../skills/paper-claim-audit/SKILL.md) | Zero-context numeric verification — every number / comparison / scope claim in the paper checked against raw result files by a fresh reviewer (no confirmation bias) | Codex MCP |
-| [`/citation-audit`](../skills/citation-audit/SKILL.md) | Bibliography audit — existence + metadata correctness + context appropriateness for every `\cite{}`; `--soft-only` mode for frozen-bib resubmits | Codex MCP, web access |
-| [`/proof-checker`](../skills/proof-checker/SKILL.md) | Rigorous mathematical proof verification — 20-category issue taxonomy, two-axis severity, side-condition checklists, counterexample red team, proof-obligation ledger | Codex MCP |
-| [`/kill-argument`](../skills/kill-argument/SKILL.md) | Two-thread adversarial review — Thread 1 writes the strongest 200-word rejection memo; Thread 2 (independent) defends point-by-point and surfaces still-unresolved issues | Codex MCP |
-
-## 📝 Paper Writing & Figures
-
-LaTeX generation, figure / diagram production, prose polishing.
-
-| Skill | Role | Requires |
-|---|---|---|
-| [`/paper-plan`](../skills/paper-plan/SKILL.md) | Generate a structured paper outline from review conclusions + experiment results — claims-evidence matrix, section structure, figure plan, citation scaffolding | None |
-| [`/paper-write`](../skills/paper-write/SKILL.md) | Section-by-section LaTeX generation (ICLR / NeurIPS / ICML / IEEE / ACL / AAAI / CVPR / ACM MM). Anti-hallucination BibTeX via DBLP / CrossRef | None |
-| [`/paper-figure`](../skills/paper-figure/SKILL.md) | Publication-quality matplotlib / seaborn plots + LaTeX comparison tables from experiment results | matplotlib / seaborn |
-| [`/figure-spec`](../skills/figure-spec/SKILL.md) | Deterministic JSON → SVG renderer for architecture / workflow / pipeline / audit-cascade diagrams. Shape-aware edge clipping, self-loops, CJK width estimation | None |
-| [`/paper-illustration`](../skills/paper-illustration/SKILL.md) | AI architecture + method illustrations via Gemini image generation, with Claude-supervised iterative refinement | `GEMINI_API_KEY` |
-| [`/paper-illustration-image2`](../skills/paper-illustration-image2/SKILL.md) | Codex-native image generation alternative — uses ChatGPT Plus / Pro quota via local Codex app-server bridge (no Gemini key) | Codex app-server + `codex-image2` MCP bridge |
-| [`/mermaid-diagram`](../skills/mermaid-diagram/SKILL.md) | Generate Mermaid diagrams from requirements — flowcharts, sequence, class, ER, Gantt, with syntax verification | None |
-| [`/pixel-art`](../skills/pixel-art/SKILL.md) | Generate pixel-art SVG illustrations for READMEs, docs, slides | None |
-| [`/paper-compile`](../skills/paper-compile/SKILL.md) | Compile LaTeX paper to PDF — auto-fix errors, submission readiness checks | LaTeX (`latexmk`, `pdfinfo`) |
-| [`/auto-paper-improvement-loop`](../skills/auto-paper-improvement-loop/SKILL.md) | 2-round content review + format check — typical 4 / 10 → 8.5 / 10 score lift. `--edit-whitelist` mode for resubmits | Codex MCP |
-| [`/proof-writer`](../skills/proof-writer/SKILL.md) | Draft rigorous mathematical proofs for ML / AI theory — theorems, lemmas, propositions, corollaries; fill in missing steps; formalize sketches | None |
-| [`/writing-systems-papers`](../skills/writing-systems-papers/SKILL.md) | Paragraph-level structural blueprint for 10-12 page systems papers — page allocation, paragraph templates, writing patterns for OSDI / SOSP / ASPLOS / NSDI / EuroSys | None |
-| [`/grant-proposal`](../skills/grant-proposal/SKILL.md) | Structured grant proposal drafting — KAKENHI (JP), NSF (US), NSFC (CN including 面上 / 青年 / 优青 / 杰青 / 海优 / 重点), ERC (EU), DFG (DE), more | None |
-
-## 🎤 Talks, Posters & Resubmission
-
-After-paper outputs and venue porting.
-
-| Skill | Role | Requires |
-|---|---|---|
-| [`/paper-slides`](../skills/paper-slides/SKILL.md) | Conference presentation — Beamer LaTeX → PDF + editable PPTX + speaker notes + full talk script | LaTeX, python-pptx |
-| [`/slides-polish`](../skills/slides-polish/SKILL.md) | Per-page Codex review + targeted python-pptx / Beamer fixes (font scaling, frame resize, banner-as-tcolorbox, italic leak guard, em-dash spacing, CJK font hint, anonymity placeholder discipline) | Codex MCP, python-pptx |
-| [`/paper-poster`](../skills/paper-poster/SKILL.md) | Conference poster — article + tcbposter LaTeX → A0 / A1 PDF + editable PPTX + SVG | LaTeX (tcolorbox + tcbposter) |
-
-(Orchestrators `/paper-talk` for the talk pipeline and `/resubmit-pipeline`
-for venue porting live under [Workflow Orchestrators](#%EF%B8%8F-workflow-orchestrators).)
-
-## 📜 Patents
-
-End-to-end patent drafting and prior-art workflow.
-
-| Skill | Role | Requires |
-|---|---|---|
-| [`/invention-structuring`](../skills/invention-structuring/SKILL.md) | Structure a raw invention idea into a formal invention disclosure | None |
-| [`/claims-drafting`](../skills/claims-drafting/SKILL.md) | Draft patent claims — independent + dependent, with anti-pattern checks | None |
-| [`/embodiment-description`](../skills/embodiment-description/SKILL.md) | Write detailed embodiment descriptions for the patent specification | None |
-| [`/specification-writing`](../skills/specification-writing/SKILL.md) | Full patent specification from claims + invention disclosure | None |
-| [`/figure-description`](../skills/figure-description/SKILL.md) | Generate formal drawing descriptions for patent figures | None |
-| [`/prior-art-search`](../skills/prior-art-search/SKILL.md) | Search patent databases + academic literature for prior art relevant to an invention | None (web access) |
-| [`/patent-novelty-check`](../skills/patent-novelty-check/SKILL.md) | Assess patent novelty and non-obviousness against prior art (patentability evaluation) | Codex MCP |
-| [`/patent-review`](../skills/patent-review/SKILL.md) | External patent-examiner-style critical review of a patent application | Codex MCP |
-| [`/jurisdiction-format`](../skills/jurisdiction-format/SKILL.md) | Compile patent application into jurisdiction-specific filing format (CN / US / EP) | None |
-
-(Orchestrator `/patent-pipeline` chaining all of the above lives under
-[Workflow Orchestrators](#%EF%B8%8F-workflow-orchestrators).)
-
-## 🧰 Meta, Utilities & Integrations
-
-Cross-cutting infrastructure used by other skills or run on demand.
-
-| Skill | Role | Requires |
-|---|---|---|
-| [`/research-wiki`](../skills/research-wiki/SKILL.md) | Persistent research knowledge base — papers / ideas / experiments / claims with typed relationships. Workflow hooks auto-ingest across the research lifecycle | None (pure Python stdlib) |
-| [`/wiki-enrich`](../skills/wiki-enrich/SKILL.md) | Fill the per-paper TODO sections that `ingest_paper` leaves as scaffolds (Karpathy LLM-wiki principle). Fetch chain alphaxiv → deepxiv → arXiv → page abstract; idempotent by default, `--force` to rewrite | Python stdlib + WebFetch |
-| [`/research-repo-architect`](../skills/research-repo-architect/SKILL.md) | Scaffold or migrate reproducible research repos and ARIS skills repos; preserves source/config/run/result separation plus ARIS skill mirrors, helper resolver, and runtime-state contracts | None |
-| [`/render-html`](../skills/render-html/SKILL.md) | Render ARIS Markdown / JSON artifacts into reviewed single-file HTML views for human reading | Python stdlib; Codex MCP for review gate |
-| [`/overleaf-sync`](../skills/overleaf-sync/SKILL.md) | Two-way sync between local paper directory and Overleaf project via Overleaf Git bridge (Premium) — `setup` / `pull` (diff protocol) / `push` (confirmation gate) / `status` | Overleaf Premium + macOS Keychain |
-| [`/feishu-notify`](../skills/feishu-notify/SKILL.md) | Send notifications to Feishu / Lark — push-only (webhook) or interactive (bidirectional) modes. Off by default | Feishu webhook URL |
-| [`/interview-cheatsheet`](../skills/interview-cheatsheet/SKILL.md) | Generate long-form Chinese ML / LLM interview-prep cheat sheets with formulas, code, Q&A, review, and HTML output | Codex MCP, Python |
-
----
-
-## How to use this catalog
-
-- **Looking for a workflow entry point?** Start with [Workflow Orchestrators](#%EF%B8%8F-workflow-orchestrators).
-- **Want to add a skill to an existing workflow?** Read the orchestrator's
-  `SKILL.md` to see which sub-skills it composes.
-- **Building your own pipeline?** Pick the skills from each category and
-  chain them via prompt — no framework lock-in, every skill is a single
-  `SKILL.md` readable by any LLM agent.
-
-## Adding a new skill
-
-1. Create `skills/<name>/SKILL.md` with `name:` + `description:` frontmatter
-   (the description shows up in the LLM's slash-command autocomplete).
-2. Per the
-   [`integration-contract.md`](../skills/shared-references/integration-contract.md)
-   §2 contract, if your skill invokes any helper script under `tools/`, use
-   the canonical resolver chain — do NOT hardcode `python3 tools/foo.py`.
-3. Add a row to the appropriate category table above (or propose a new
-   category in your PR if your skill doesn't fit).
-4. The advisory CI lint will catch any hardcoded-path regressions on PR.
-
-See the [main README](../README.md) for installation, setup, and end-to-end
-workflow examples.
+????????????? skill ?????????`skills/skills-codex/`??????????????????PDF???????? HTML ?????

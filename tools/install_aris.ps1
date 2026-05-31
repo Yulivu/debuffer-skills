@@ -23,6 +23,9 @@ param(
     [ValidateSet('auto', 'claude', 'codex')]
     [string]$Platform = 'auto',
 
+    [ValidateSet('core-research', 'paper', 'review', 'full')]
+    [string]$Profile = 'full',
+
     [string]$ArisRepo = '',
 
     [switch]$DryRun,
@@ -287,6 +290,56 @@ function Test-SafeName {
     return $Name -match $SafeNameRegex
 }
 
+function Test-ProfileIncludesName {
+    param([string]$Name)
+    if ($SupportNames -contains $Name) {
+        return $true
+    }
+    switch ($Profile) {
+        'full' { return $true }
+        'core-research' {
+            return $Name -in @(
+                'research-repo-architect', 'research-pipeline', 'idea-discovery',
+                'idea-discovery-robot', 'idea-creator', 'research-refine',
+                'research-refine-pipeline', 'experiment-plan', 'experiment-bridge',
+                'run-experiment', 'monitor-experiment', 'experiment-queue',
+                'analyze-results', 'autodl-hpc', 'ablation-planner',
+                'training-check', 'system-profile', 'research-review',
+                'auto-review-loop', 'experiment-audit', 'result-to-claim',
+                'paper-claim-audit', 'citation-audit', 'research-lit', 'arxiv',
+                'semantic-scholar', 'openalex', 'deepxiv', 'exa-search',
+                'alphaxiv', 'novelty-check', 'comm-lit-review', 'wiki-enrich',
+                'research-wiki', 'figure-spec', 'render-html'
+            )
+        }
+        'paper' {
+            return $Name -in @(
+                'paper-writing', 'paper-plan', 'paper-write', 'paper-compile',
+                'paper-figure', 'paper-illustration', 'paper-illustration-image2',
+                'figure-description', 'figure-spec', 'mermaid-diagram', 'render-html',
+                'paper-talk', 'paper-slides', 'slides-polish', 'paper-poster',
+                'proof-writer', 'proof-checker', 'formula-derivation',
+                'citation-audit', 'paper-claim-audit', 'result-to-claim',
+                'kill-argument', 'auto-paper-improvement-loop',
+                'writing-systems-papers', 'rebuttal', 'resubmit-pipeline',
+                'overleaf-sync', 'research-review', 'auto-review-loop',
+                'research-refine'
+            )
+        }
+        'review' {
+            return $Name -in @(
+                'research-review', 'auto-review-loop', 'experiment-audit',
+                'result-to-claim', 'paper-claim-audit', 'citation-audit',
+                'proof-checker', 'kill-argument', 'novelty-check',
+                'research-refine', 'auto-paper-improvement-loop', 'rebuttal',
+                'research-lit', 'arxiv', 'semantic-scholar', 'openalex',
+                'deepxiv', 'exa-search', 'alphaxiv', 'render-html'
+            )
+        }
+    }
+    return $false
+}
+
 function Build-Inventory {
     param($Config)
     if (-not (Test-Path -LiteralPath $Config.SourceRoot -PathType Container)) {
@@ -312,6 +365,9 @@ function Build-Inventory {
         } elseif (Test-Path -LiteralPath (Join-Path $dir.FullName 'SKILL.md') -PathType Leaf) {
             $kind = 'skill'
         } else {
+            continue
+        }
+        if (-not (Test-ProfileIncludesName $name)) {
             continue
         }
         $sourceRel = "$($Config.SourceRelPrefix)/$name"
@@ -726,6 +782,7 @@ function New-ManifestContent {
     $lines.Add("repo_root`t$RepoRoot")
     $lines.Add("project_root`t$ProjectRoot")
     $lines.Add("platform`t$PlatformName")
+    $lines.Add("profile`t$Profile")
     $lines.Add("generated`t$((Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ'))")
     $lines.Add("kind`tname`tsource_rel`ttarget_rel`tmode")
     foreach ($entry in $Plan | Where-Object { $_.Action -in @('REUSE', 'ADOPT', 'CREATE', 'UPDATE_TARGET') } | Sort-Object Name) {
@@ -759,6 +816,7 @@ function Update-ManagedDoc {
 $($Config.BlockBegin)
 ## $($Config.Title)
 ARIS skills installed in this project: $Count entries.
+Profile: ``$Profile``
 Manifest: ``.aris/$($Config.ManifestName)``
 ARIS repo root: ``$RepoRoot``
 Project skill path: ``$($Config.TargetRelDisplay)/<skill-name>``
@@ -883,6 +941,7 @@ function Invoke-Main {
     Write-Host "  Platform: $selectedPlatform"
     Write-Host "  Repo:     $repoRoot"
     Write-Host "  Target:   $targetRoot"
+    Write-Host "  Profile:  $Profile"
     Write-Host "  Mode:     $mode"
 
     Check-NoSymlinkedParents @($arisDir, (Split-Path -Parent $targetRoot), $targetRoot)

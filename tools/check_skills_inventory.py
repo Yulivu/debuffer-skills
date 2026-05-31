@@ -14,8 +14,6 @@ CODEX_ROOT = SKILLS_ROOT / "skills-codex"
 CATALOG = REPO_ROOT / "docs" / "SKILLS_CATALOG.md"
 README = REPO_ROOT / "README.md"
 AGENT_GUIDE = REPO_ROOT / "AGENT_GUIDE.md"
-ARIS_INTRO = REPO_ROOT / "docs" / "ARIS_INTRO.md"
-ARIS_INTRO_HTML = REPO_ROOT / "docs" / "ARIS_INTRO.html"
 BOM = b"\xef\xbb\xbf"
 
 FORBIDDEN_CODEX_REVIEWER_STRINGS = (
@@ -47,6 +45,42 @@ IGNORED_README_SCAN_PARTS = {
     ".venv",
     "venv",
 }
+
+IGNORED_POLICY_SCAN_PARTS = IGNORED_README_SCAN_PARTS | {
+    "skills-codex-claude-review",
+    "skills-codex-gemini-review",
+}
+
+FORBIDDEN_LIGHTWEIGHT_PATHS = (
+    Path("docs/tutorials"),
+    Path("community_papers"),
+    Path("assets"),
+)
+
+FORBIDDEN_DOC_NAMES = {
+    "ARIS_INTRO.md",
+    "ARIS_INTRO.html",
+    "ANTIGRAVITY_ADAPTATION.md",
+    "ANTIGRAVITY_ADAPTATION_CN.md",
+    "CURSOR_ADAPTATION.md",
+    "TRAE_ARIS_RUNBOOK_EN.md",
+    "TRAE_ARIS_RUNBOOK_CN.md",
+    "COPILOT_CLI_ADAPTATION.md",
+    "OPENCLAW_ADAPTATION.md",
+    "MODELSCOPE_GUIDE.md",
+    "ALI_CODING_PLAN_GUIDE.md",
+    "LLM_API_MIX_MATCH_GUIDE.md",
+    "MINIMAX_MCP_GUIDE.md",
+    "MiniMax-GLM-Configuration.md",
+    "MANUAL_REVIEW_GUIDE.md",
+    "MANUAL_REVIEW_GUIDE_CN.md",
+    "CODEX_CLAUDE_REVIEW_GUIDE.md",
+    "CODEX_CLAUDE_REVIEW_GUIDE_CN.md",
+    "CODEX_GEMINI_REVIEW_GUIDE.md",
+    "CODEX_GEMINI_REVIEW_GUIDE_CN.md",
+}
+
+MAX_MAIN_PACK_FILE_BYTES = 2_000_000
 
 
 def skill_names(root: Path) -> set[str]:
@@ -97,6 +131,18 @@ def readme_like_paths() -> list[Path]:
     return sorted(paths)
 
 
+def policy_scanned_files() -> list[Path]:
+    paths: list[Path] = []
+    for path in REPO_ROOT.rglob("*"):
+        if not path.is_file():
+            continue
+        rel = path.relative_to(REPO_ROOT)
+        if any(part in IGNORED_POLICY_SCAN_PARTS for part in rel.parts):
+            continue
+        paths.append(path)
+    return paths
+
+
 def require(condition: bool, message: str, failures: list[str]) -> None:
     if not condition:
         failures.append(message)
@@ -132,8 +178,6 @@ def check_inventory() -> list[str]:
     catalog_text = read(CATALOG)
     readme = read(README)
     agent_guide = read(AGENT_GUIDE)
-    aris_intro = read(ARIS_INTRO)
-    aris_intro_html = read(ARIS_INTRO_HTML)
 
     expected_count = len(main)
     count_checks = [
@@ -141,12 +185,6 @@ def check_inventory() -> list[str]:
         (README, readme, r"包含 \*\*(?P<count>\d+) 个 skill\*\*"),
         (README, readme, r"主线与 Codex mirror 均为 \*\*(?P<count>\d+) 个 skill\*\*"),
         (AGENT_GUIDE, agent_guide, r"Full catalog.*?\*\*(?P<count>\d+) skills\*\*"),
-        (ARIS_INTRO, aris_intro, r"collection of \*\*(?P<count>\d+) composable Claude Code skills\*\*"),
-        (ARIS_INTRO, aris_intro, r"## The (?P<count>\d+) Skills"),
-        (ARIS_INTRO, aris_intro, r"一组 (?P<count>\d+) 个可组合的 Claude Code skills"),
-        (ARIS_INTRO_HTML, aris_intro_html, r"collection of <strong>(?P<count>\d+) composable Claude Code skills</strong>"),
-        (ARIS_INTRO_HTML, aris_intro_html, r'id="the-(?P<count>\d+)-skills"'),
-        (ARIS_INTRO_HTML, aris_intro_html, r"一组 (?P<count>\d+) 个可组合的 Claude Code skills"),
     ]
     for path, text, pattern in count_checks:
         require_count(path, text, pattern, expected_count, failures)
@@ -168,6 +206,47 @@ def check_inventory() -> list[str]:
     for required in REQUIRED_README_ANCHORS:
         if required not in anchors:
             failures.append(f"README.md missing required anchor: <a id=\"{required}\"></a>")
+
+    docs_files = sorted((REPO_ROOT / "docs").rglob("*")) if (REPO_ROOT / "docs").exists() else []
+    docs_file_rels = {
+        str(path.relative_to(REPO_ROOT)).replace("\\", "/")
+        for path in docs_files
+        if path.is_file()
+    }
+    if docs_file_rels != {"docs/SKILLS_CATALOG.md"}:
+        failures.append(
+            "docs/ must stay lightweight with only docs/SKILLS_CATALOG.md; found: "
+            + ", ".join(sorted(docs_file_rels))
+        )
+
+    for rel in FORBIDDEN_LIGHTWEIGHT_PATHS:
+        if (REPO_ROOT / rel).exists():
+            failures.append(f"forbidden lightweight-pack path exists: {rel}")
+
+    for path in policy_scanned_files():
+        rel = path.relative_to(REPO_ROOT)
+        if path.name in FORBIDDEN_DOC_NAMES:
+            failures.append(f"obsolete platform/API doc is back in main pack: {rel}")
+        if path.stat().st_size > MAX_MAIN_PACK_FILE_BYTES:
+            failures.append(
+                f"large file in main pack ({path.stat().st_size} bytes > "
+                f"{MAX_MAIN_PACK_FILE_BYTES}): {rel}"
+            )
+
+    required_policy_terms = {
+        README: ("--profile core-research", "review-prompts/", "AutoDL"),
+        AGENT_GUIDE: ("--profile core-research", "prompt-only", "AutoDL"),
+        SKILLS_ROOT / "shared-references" / "lightweight-research-pack.md": (
+            "Install Profiles",
+            "Remote Command Gate",
+            "Repository Hygiene",
+        ),
+    }
+    for path, terms in required_policy_terms.items():
+        text = read(path)
+        for term in terms:
+            if term not in text:
+                failures.append(f"{path.relative_to(REPO_ROOT)} missing lightweight policy term: {term}")
 
     # Agent-grant hygiene (WB2): `Agent` in allowed-tools is the Tier-2
     # fan-out capability gate. Per shared-references/fan-out-pattern.md it is

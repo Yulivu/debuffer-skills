@@ -26,6 +26,7 @@
 #   --aris-repo PATH                 override repo discovery
 #   --with-claude-review-overlay     install skills-codex-claude-review on top
 #   --with-gemini-review-overlay     install skills-codex-gemini-review on top
+#   --profile NAME                   install a scoped set: core-research, paper, review, full (default: full)
 #   --dry-run                        show plan, no writes
 #   --quiet                          no prompts
 #   --no-doc                         skip AGENTS.md managed block update
@@ -55,6 +56,7 @@ NO_DOC=false
 CLEAR_STALE_LOCK=false
 WITH_CLAUDE_OVERLAY=false
 WITH_GEMINI_OVERLAY=false
+PROFILE="full"
 REPLACE_LINK_NAMES=()
 
 usage() { sed -n '2,34p' "$0" | sed 's/^# \?//'; }
@@ -66,6 +68,7 @@ while [[ $# -gt 0 ]]; do
         --aris-repo) ARIS_REPO_OVERRIDE="${2:?--aris-repo requires path}"; shift 2 ;;
         --with-claude-review-overlay) WITH_CLAUDE_OVERLAY=true; shift ;;
         --with-gemini-review-overlay) WITH_GEMINI_OVERLAY=true; shift ;;
+        --profile) PROFILE="${2:?--profile requires NAME}"; shift 2 ;;
         --dry-run) DRY_RUN=true; shift ;;
         --quiet) QUIET=true; shift ;;
         --no-doc) NO_DOC=true; shift ;;
@@ -92,6 +95,43 @@ prompt() { $QUIET && return 0; printf "%s " "$1" >&2; read -r REPLY; [[ "$REPLY"
 abs_path() { ( cd "$1" 2>/dev/null && pwd ) || return 1; }
 is_safe_name() { [[ "$1" =~ $SAFE_NAME_REGEX ]]; }
 is_symlink() { [[ -L "$1" ]]; }
+validate_profile() {
+    case "$PROFILE" in
+        core-research|paper|review|full) ;;
+        *) die "unknown profile: $PROFILE (expected core-research, paper, review, or full)" ;;
+    esac
+}
+profile_includes_name() {
+    local name="$1"
+    [[ "$name" == "shared-references" ]] && return 0
+    case "$PROFILE" in
+        full)
+            return 0
+            ;;
+        core-research)
+            case "$name" in
+                research-repo-architect|research-pipeline|idea-discovery|idea-discovery-robot|idea-creator|research-refine|research-refine-pipeline|experiment-plan|experiment-bridge|run-experiment|monitor-experiment|experiment-queue|analyze-results|autodl-hpc|ablation-planner|training-check|system-profile|research-review|auto-review-loop|experiment-audit|result-to-claim|paper-claim-audit|citation-audit|research-lit|arxiv|semantic-scholar|openalex|deepxiv|exa-search|alphaxiv|novelty-check|comm-lit-review|wiki-enrich|research-wiki|figure-spec|render-html)
+                    return 0
+                    ;;
+            esac
+            ;;
+        paper)
+            case "$name" in
+                paper-writing|paper-plan|paper-write|paper-compile|paper-figure|paper-illustration|paper-illustration-image2|figure-description|figure-spec|mermaid-diagram|render-html|paper-talk|paper-slides|slides-polish|paper-poster|proof-writer|proof-checker|formula-derivation|citation-audit|paper-claim-audit|result-to-claim|kill-argument|auto-paper-improvement-loop|writing-systems-papers|rebuttal|resubmit-pipeline|overleaf-sync|research-review|auto-review-loop|research-refine)
+                    return 0
+                    ;;
+            esac
+            ;;
+        review)
+            case "$name" in
+                research-review|auto-review-loop|experiment-audit|result-to-claim|paper-claim-audit|citation-audit|proof-checker|kill-argument|novelty-check|research-refine|auto-paper-improvement-loop|rebuttal|research-lit|arxiv|semantic-scholar|openalex|deepxiv|exa-search|alphaxiv|render-html)
+                    return 0
+                    ;;
+            esac
+            ;;
+    esac
+    return 1
+}
 name_in_replace_allowlist() {
     local needle="$1"
     local item
@@ -180,6 +220,7 @@ build_upstream_inventory() {
             else
                 continue
             fi
+            profile_includes_name "$name" || continue
             source_rel="skills/$package/$name"
             printf "%s|%s|%s\n" "$kind" "$name" "$source_rel" >> "$tmp"
         done
@@ -215,6 +256,7 @@ manifest_lookup_source() { awk -F'\t' -v n="$2" '$2==n {print $3; exit}' "$1"; }
 manifest_repo_root() { awk -F'\t' '$1=="repo_root" {print $2; exit}' "$1"; }
 
 PROJECT_PATH="${PROJECT_PATH:-$(pwd)}"
+validate_profile
 [[ -d "$PROJECT_PATH" ]] || die "project path does not exist: $PROJECT_PATH"
 PROJECT_PATH="$(abs_path "$PROJECT_PATH")"
 ARIS_REPO="$(resolve_aris_repo)"
@@ -352,6 +394,7 @@ write_manifest_tmp() {
         printf "project_root\t%s\n" "$PROJECT_PATH"
         printf "generated\t%s\n" "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
         printf "packages\t%s\n" "$(selected_packages | paste -sd, -)"
+        printf "profile\t%s\n" "$PROFILE"
         printf "kind\tname\tsource_rel\ttarget_rel\tmode\n"
         awk -F'|' '$1=="REUSE"||$1=="ADOPT"||$1=="CREATE"||$1=="UPDATE_TARGET"{print}' "$plan" \
         | while IFS='|' read -r _ kind name source_rel _extra; do
@@ -456,6 +499,7 @@ update_agents_doc() {
     new_block="$BLOCK_BEGIN
 ## ARIS Codex Skill Scope
 ARIS Codex packages installed in this project: $packages_csv
+Profile: $PROFILE
 Managed entries: $count
 Manifest: \`$ARIS_DIR_NAME/$MANIFEST_NAME\`
 ARIS repo root: \`$ARIS_REPO\`
@@ -607,6 +651,7 @@ log "ARIS Codex Project Install"
 log "  Project:   $PROJECT_PATH"
 log "  Repo:      $ARIS_REPO"
 log "  Packages:  $(selected_packages | paste -sd, -)"
+log "  Profile:   $PROFILE"
 log "  Action:    $ACTION$($DRY_RUN && echo ' (dry-run)')"
 log ""
 

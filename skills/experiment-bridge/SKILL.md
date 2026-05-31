@@ -2,7 +2,7 @@
 name: experiment-bridge
 description: "Lightweight experiment bridge between idea planning and review. Reads EXPERIMENT_PLAN.md, implements experiment code, runs local validation only, prepares AutoDL/HPC gated execution, and writes prompt-only code-review handoffs. Use when user says \"实现实验\", \"implement experiments\", \"bridge\", \"从计划到跑实验\", \"deploy the plan\", or has an experiment plan ready to execute."
 argument-hint: [experiment-plan-path-or-topic]
-allowed-tools: Bash(*), Read, Write, Edit, Grep, Glob, Skill, mcp__codex__codex, mcp__codex__codex-reply
+allowed-tools: Bash(*), Read, Write, Edit, Grep, Glob, Skill
 ---
 
 # Workflow 1.5: Experiment Bridge
@@ -48,7 +48,8 @@ refine-logs/FINAL_PROPOSAL.md
 
 ## Constants
 
-- **CODE_REVIEW = true** — GPT-5.4 xhigh reviews experiment code before deployment. Catches logic bugs before wasting GPU hours. Set `false` to skip.
+- **CODE_REVIEW = prompt-only** — write an external code-review prompt before
+  deployment. Legacy direct reviewer calls require explicit user request.
 - **AUTO_DEPLOY = true** — Automatically deploy experiments after implementation + review. Set `false` to manually inspect code before deploying.
 - **SANITY_FIRST = true** — Run the sanity-stage experiment first (smallest, fastest) before launching the rest. Catches setup bugs early.
 - **MAX_PARALLEL_RUNS = 4** — Maximum number of experiments to deploy in parallel (limited by available GPUs).
@@ -135,11 +136,14 @@ For each milestone (in order), write the experiment scripts:
    - Are results saved in a parseable format (JSON/CSV)?
    - Does the code match FINAL_PROPOSAL.md's method description?
 
-### Phase 2.5: Cross-Model Code Review (when CODE_REVIEW = true)
+### Phase 2.5: Prompt-Only Code Review (when CODE_REVIEW = prompt-only)
 
 **Skip this step if `CODE_REVIEW` is `false`.**
 
-Before deploying, send the experiment code to GPT-5.4 xhigh for review:
+Before deploying, write `review-prompts/experiment_code_review_prompt.md` and
+ask the user to run it in a separate review conversation. The legacy direct
+backend shape below is retained only as the prompt payload template; do not call
+it unless the user explicitly requests the legacy backend:
 
 ```
 mcp__codex__codex:

@@ -7,8 +7,6 @@ on:
       - 'docs/SKILLS_CATALOG.md'
       - 'README.md'
       - 'AGENT_GUIDE.md'
-      - 'docs/ARIS_INTRO.md'
-      - 'docs/ARIS_INTRO.html'
       - 'tools/check_skills_inventory.py'
       - 'tests/test_codex_skill_mirror.py'
       - '.github/workflows/check-skills-inventory.yml'

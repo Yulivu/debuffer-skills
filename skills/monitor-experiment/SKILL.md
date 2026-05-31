@@ -1,8 +1,8 @@
 ---
 name: monitor-experiment
-description: Monitor running experiments, check progress, collect results. Use when user says "check results", "is it done", "monitor", or wants experiment output.
+description: Prepare gated monitoring commands for running experiments, check progress from pasted/logged outputs, and collect results after user approval. Use when user says "check results", "is it done", "monitor", or wants experiment output.
 argument-hint: [server-alias or screen-name]
-allowed-tools: Bash(ssh *), Bash(echo *), Read, Write, Edit
+allowed-tools: Bash(echo *), Read, Write, Edit
 ---
 
 # Monitor Experiment Results
@@ -17,6 +17,15 @@ allowed-tools: Bash(ssh *), Bash(echo *), Read, Write, Edit
 > run that verdict **once** after the wait clears — not re-entered per tick.
 
 Monitor: $ARGUMENTS
+
+## Customized Pack Defaults
+
+Read `../shared-references/lightweight-research-pack.md` before monitoring.
+Remote monitoring is gated: print `ssh`, `screen`, `tmux`, `scp`, `rsync`, or
+Modal/Vast commands and ask the user to run or approve them. Do not open or
+poll long remote sessions autonomously by default. Interpret only concrete
+evidence such as exit codes, logs, JSON metrics, W&B history, and downloaded run
+bundles.
 
 ## Workflow
 

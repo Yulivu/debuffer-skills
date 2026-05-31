@@ -158,6 +158,28 @@ def test_install_aris_ps1_codex_apply_reconcile_and_uninstall(tmp_path: Path) ->
     assert "ARIS Codex Skill Scope" not in (project / "AGENTS.md").read_text(encoding="utf-8")
 
 
+def test_install_aris_ps1_codex_profile_scopes_inventory(tmp_path: Path) -> None:
+    repo = make_minimal_repo(tmp_path)
+    make_skill(repo / "skills" / "skills-codex" / "research-review", "# review\n")
+    make_skill(repo / "skills" / "skills-codex" / "paper-write", "# paper\n")
+    project = tmp_path / "project"
+    project.mkdir()
+
+    run_ps([str(project), "-Platform", "codex", "-ArisRepo", str(repo), "-Profile", "review"])
+
+    assert junction_target(project / ".agents" / "skills" / "research-review") == (
+        repo / "skills" / "skills-codex" / "research-review"
+    )
+    assert junction_target(project / ".agents" / "skills" / "shared-references") == (
+        repo / "skills" / "skills-codex" / "shared-references"
+    )
+    assert not path_item_exists(project / ".agents" / "skills" / "alpha")
+    assert not path_item_exists(project / ".agents" / "skills" / "paper-write")
+    manifest_text = (project / ".aris" / "installed-skills-codex.txt").read_text(encoding="utf-8")
+    assert "profile\treview" in manifest_text
+    assert "Profile: `review`" in (project / "AGENTS.md").read_text(encoding="utf-8")
+
+
 def test_install_aris_ps1_claude_uses_mainline_flat_junctions(tmp_path: Path) -> None:
     repo = make_minimal_repo(tmp_path)
     project = tmp_path / "project"

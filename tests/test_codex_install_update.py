@@ -1,12 +1,21 @@
 from __future__ import annotations
 
+import os
+import shutil
 import subprocess
 from pathlib import Path
+
+import pytest
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 INSTALL_SCRIPT = REPO_ROOT / "tools" / "install_aris_codex.sh"
 UPDATE_SCRIPT = REPO_ROOT / "tools" / "smart_update_codex.sh"
+
+pytestmark = pytest.mark.skipif(
+    os.name == "nt" and (shutil.which("bash") is None or shutil.which("cp") is None),
+    reason="install_aris_codex.sh tests require Unix shell tools (bash, cp)",
+)
 
 
 def run(
@@ -61,7 +70,7 @@ def test_install_aris_codex_dry_run_has_no_project_writes(tmp_path: Path) -> Non
 
 
 def test_install_aris_codex_avoids_bash4_associative_arrays() -> None:
-    text = INSTALL_SCRIPT.read_text()
+    text = INSTALL_SCRIPT.read_text(encoding="utf-8")
     assert "declare -A" not in text
 
 
@@ -142,6 +151,38 @@ def test_install_aris_codex_reconcile_and_uninstall(tmp_path: Path) -> None:
     assert not (project / ".agents" / "skills" / "beta").exists()
     assert (project / ".aris" / "installed-skills-codex.txt.prev").exists()
     assert "ARIS Codex Skill Scope" not in (project / "AGENTS.md").read_text()
+
+
+def test_install_aris_codex_profile_scopes_inventory(tmp_path: Path) -> None:
+    repo = tmp_path / "aris"
+    make_skill(repo / "skills" / "skills-codex" / "research-review", "# review\n")
+    make_skill(repo / "skills" / "skills-codex" / "auto-review-loop", "# loop\n")
+    make_skill(repo / "skills" / "skills-codex" / "paper-write", "# paper\n")
+    make_skill(repo / "skills" / "skills-codex" / "run-experiment", "# run\n")
+    (repo / "skills" / "skills-codex" / "shared-references").mkdir(parents=True, exist_ok=True)
+    (repo / "skills" / "skills-codex" / "shared-references" / "lightweight-research-pack.md").write_text("x\n")
+
+    project = tmp_path / "project"
+    project.mkdir()
+
+    run(
+        [
+            "bash",
+            str(INSTALL_SCRIPT),
+            str(project),
+            "--aris-repo",
+            str(repo),
+            "--profile",
+            "review",
+            "--quiet",
+        ]
+    )
+
+    installed = {path.name for path in (project / ".agents" / "skills").iterdir()}
+    assert installed == {"shared-references", "research-review", "auto-review-loop"}
+    manifest = (project / ".aris" / "installed-skills-codex.txt").read_text()
+    assert "profile\treview" in manifest
+    assert "Profile: review" in (project / "AGENTS.md").read_text()
 
 
 def test_install_aris_codex_uninstall_uses_manifest_repo_root(tmp_path: Path) -> None:

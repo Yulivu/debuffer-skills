@@ -2,10 +2,10 @@
 name: auto-review-loop
 description: Guided prompt-only multi-round research review loop. Generates external-review prompts for a separate conversation, waits for pasted feedback, implements user-approved fixes, and keeps compact review logs; legacy reviewer backends are opt-in. Use when user says "auto review loop", "review until it passes", or wants iterative research improvement without direct reviewer API calls.
 argument-hint: [topic-or-scope]
-allowed-tools: Bash(*), Read, Grep, Glob, Write, Edit, Skill, mcp__codex__codex, mcp__codex__codex-reply, mcp__manual_review__review, mcp__manual_review__review_reply
+allowed-tools: Bash(*), Read, Grep, Glob, Write, Edit, Skill
 ---
 
-# Auto Review Loop: Autonomous Research Improvement
+# Auto Review Loop: Guided Prompt-Only Research Improvement
 
 > 🔒 **Do not wrap this skill in `/loop`, `/schedule`, or `CronCreate`.** It
 > already loops internally (review → fix → re-review) and the reviewer carries
@@ -44,8 +44,10 @@ explicitly requests legacy automation:
 - MAX_ROUNDS = 4
 - POSITIVE_THRESHOLD: score >= 6/10 **AND** verdict ∈ {"ready", "almost"} — **both** must hold. This matches the operative Phase-E STOP CONDITION exactly; the verdict vocabulary is {"ready", "almost", "not ready"} (a high score with a "not ready" verdict does NOT stop the loop). Earlier wording here used `or` and a stale verdict set ("accept"/"sufficient"/"ready for submission") — that was an internal inconsistency; the `AND` form is authoritative.
 - REVIEW_DOC: `review-stage/AUTO_REVIEW.md` (cumulative log) *(fall back to `./AUTO_REVIEW.md` for legacy projects)*
-- REVIEWER_MODEL = `gpt-5.5` — Default model for the Codex backend. Must be an OpenAI model (e.g., `gpt-5.5`, `o3`, `gpt-4o`). Manual backend uses whatever model the user chooses.
-- **REVIEWER_BACKEND = `codex`** — Default: Codex MCP (xhigh). Override with `— reviewer: oracle-pro` for Oracle MCP, or `— reviewer: manual` for Manual Review MCP. If manual-review MCP is unavailable, stop and print the install command; do not fall back to Codex. See `shared-references/reviewer-routing.md`.
+- REVIEWER_MODEL = `external conversation chosen by user`
+- **REVIEWER_BACKEND = `prompt-only`**. Legacy backends (`codex`,
+  `manual`, `oracle-pro`) require an explicit user request plus available
+  tools; otherwise write reviewer prompts and wait for pasted feedback.
 - **OUTPUT_DIR = `review-stage/`** — All review-stage outputs go here. Create the directory if it doesn't exist.
 - **HUMAN_CHECKPOINT = false** — When `true`, pause after each round's review (Phase B) and present the score + weaknesses to the user. Wait for user input before proceeding to Phase C. The user can: approve the suggested fixes, provide custom modification instructions, skip specific fixes, or stop the loop early. When `false` (default), the loop runs fully autonomously.
 - **COMPACT = false** — When `true`, (1) read `EXPERIMENT_LOG.md` and `findings.md` instead of parsing full logs on session recovery, (2) append key findings to `findings.md` after each round.
