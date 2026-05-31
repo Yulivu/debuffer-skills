@@ -22,7 +22,8 @@ tools/                                 Shared helpers and installer/update scrip
 templates/                             User-facing research artifact templates.
 docs/                                  Human docs, catalogs, setup guides, examples.
 tests/                                 Inventory, installer, helper, and integration tests.
-mcp-servers/                           Optional reviewer/integration bridges.
+mcp-servers/                           Active bridges only: manual-review and codex-image2.
+archived/                              Versioned archive for inactive bridges and tests.
 assets/                                Repo-level README/docs media.
 ```
 

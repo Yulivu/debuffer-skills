@@ -15,6 +15,8 @@
 | 共享契约 | `skills/shared-references/*.md` | 轻量包、评审、证据、helper、项目状态协议 |
 | 工具 | `tools/` | 安装器、同步器、库存检查和共享 helper |
 | 文档 | `docs/SKILLS_CATALOG.md` | 中文紧凑技能目录 |
+| 活动 MCP | `mcp-servers/` | 只保留 `manual-review` 和 `codex-image2` |
+| 归档区 | `archived/` | 历史 MCP、测试和实验性代码，保留在 Git 中 |
 
 ## 工作边界
 

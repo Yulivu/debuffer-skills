@@ -58,6 +58,8 @@ FORBIDDEN_LIGHTWEIGHT_PATHS = (
     Path("assets"),
 )
 
+ACTIVE_MCP_SERVERS = {"codex-image2", "manual-review"}
+
 MAX_MAIN_PACK_FILE_BYTES = 2_000_000
 
 
@@ -200,6 +202,29 @@ def check_inventory() -> list[str]:
     for rel in FORBIDDEN_LIGHTWEIGHT_PATHS:
         if (REPO_ROOT / rel).exists():
             failures.append(f"forbidden lightweight-pack path exists: {rel}")
+
+    mcp_root = REPO_ROOT / "mcp-servers"
+    active_mcp = {
+        path.name
+        for path in mcp_root.iterdir()
+        if path.is_dir()
+    } if mcp_root.exists() else set()
+    if active_mcp != ACTIVE_MCP_SERVERS:
+        failures.append(
+            "mcp-servers/ must contain only active bridges "
+            f"{sorted(ACTIVE_MCP_SERVERS)}; found: {sorted(active_mcp)}"
+        )
+
+    check_ignore = REPO_ROOT / ".git" / "info" / "exclude"
+    gitignore_text = read(REPO_ROOT / ".gitignore")
+    local_exclude = check_ignore.read_text(encoding="utf-8") if check_ignore.exists() else ""
+    ignore_lines = [
+        line.strip().replace("\\", "/").rstrip("/")
+        for line in (gitignore_text + "\n" + local_exclude).splitlines()
+        if line.strip() and not line.lstrip().startswith("#")
+    ]
+    if "archived" in ignore_lines or "archived/**" in ignore_lines or "archived/*" in ignore_lines:
+        failures.append("archived/ must stay tracked; do not add it to Git ignore rules")
 
     for path in policy_scanned_files():
         rel = path.relative_to(REPO_ROOT)

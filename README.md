@@ -151,7 +151,8 @@ skills/shared-references/       跨 skill 契约和协议
 tools/                          安装器、同步器和共享 helper
 templates/                      项目产物模板
 docs/SKILLS_CATALOG.md          中文紧凑技能目录
-mcp-servers/                    可选 bridge
+mcp-servers/                    活动 MCP：manual-review、codex-image2
+archived/                       归档代码，保留在 Git 中
 tests/                          inventory、mirror 和安装器测试
 ```
 
