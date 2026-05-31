@@ -153,13 +153,13 @@ if research-wiki/ exists:
     for each claim resolved by this verdict:
         if verdict == "yes":
             Update claim page: status → supported
-            run the installed ARIS research_wiki.py helper to add a supports edge from "exp:<id>" to "claim:<cid>"
+            run the installed debuffer research_wiki.py helper to add a supports edge from "exp:<id>" to "claim:<cid>"
         elif verdict == "partial":
             Update claim page: status → partial
-            run the installed ARIS research_wiki.py helper to add a partial supports edge from "exp:<id>" to "claim:<cid>"
+            run the installed debuffer research_wiki.py helper to add a partial supports edge from "exp:<id>" to "claim:<cid>"
         else:
             Update claim page: status → invalidated
-            run the installed ARIS research_wiki.py helper to add an invalidates edge from "exp:<id>" to "claim:<cid>"
+            run the installed debuffer research_wiki.py helper to add an invalidates edge from "exp:<id>" to "claim:<cid>"
 
     # 3. Update idea outcome
     Update research-wiki/ideas/<idea_id>.md:
@@ -168,8 +168,8 @@ if research-wiki/ exists:
       - If positive: fill "Actual Outcome" and "Reusable Components"
 
     # 4. Rebuild + log
-    rebuild the query pack with the installed ARIS research_wiki.py helper
-    log "result-to-claim: exp:<id> verdict=<verdict> for idea:<idea_id>" with the installed ARIS research_wiki.py helper
+    rebuild the query pack with the installed debuffer research_wiki.py helper
+    log "result-to-claim: exp:<id> verdict=<verdict> for idea:<idea_id>" with the installed debuffer research_wiki.py helper
 
     # 5. Re-ideation suggestion
     Count failed/partial ideas since last /idea-creator run.
@@ -187,4 +187,4 @@ if research-wiki/ exists:
 
 ## Review Tracing
 
-After the secondary Codex judgment, save a trace following `../shared-references/review-tracing.md`. Write files directly to `.aris/traces/result-to-claim/<date>_run<NN>/` and include the prompt, raw reviewer response, parsed verdict, routing action, and whether the result is `[pending external review]`. Respect the `--- trace:` parameter when present (default: `full`).
+After the secondary Codex judgment, save a trace following `../shared-references/review-tracing.md`. Write files directly to `.debuffer_skills/traces/result-to-claim/<date>_run<NN>/` and include the prompt, raw reviewer response, parsed verdict, routing action, and whether the result is `[pending external review]`. Respect the `--- trace:` parameter when present (default: `full`).

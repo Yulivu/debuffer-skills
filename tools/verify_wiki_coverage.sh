@@ -5,7 +5,7 @@
 # already ingested into `research-wiki/papers/`. Reports the delta so the
 # user can run `/research-wiki sync --arxiv-ids <missing>` to backfill.
 #
-# This is a best-effort diagnostic. Because ARIS has no canonical "papers
+# This is a best-effort diagnostic. Because debuffer has no canonical "papers
 # I actually read" log (unlike paper-writing's audit artifacts), scans
 # grep over likely sources and will miss papers read via channels it
 # doesn't scan. See `shared-references/integration-contract.md` §6
@@ -15,7 +15,7 @@
 #   bash tools/verify_wiki_coverage.sh <wiki_root> [--scan <path> ...] [--json-out <path>]
 #
 # Defaults:
-#   --scan: scans CWD-level `.aris/traces/`, `paper/`, `PAPER_PLAN.md`,
+#   --scan: scans CWD-level `.debuffer_skills/traces/`, `paper/`, `PAPER_PLAN.md`,
 #           `NARRATIVE_REPORT.md`, `references.bib` if they exist.
 #   --json-out: <wiki_root>/.wiki-coverage-report.json
 #
@@ -50,7 +50,7 @@ WIKI_ROOT="$(cd "$WIKI_ROOT" && pwd)"
 
 # Default scan set: obvious places where arxiv IDs show up
 if [[ ${#SCAN_PATHS[@]} -eq 0 ]]; then
-    for p in .aris/traces paper PAPER_PLAN.md NARRATIVE_REPORT.md references.bib; do
+    for p in .debuffer_skills/traces .aris/traces paper PAPER_PLAN.md NARRATIVE_REPORT.md references.bib; do
         [[ -e "$p" ]] && SCAN_PATHS+=("$p")
     done
 fi
@@ -151,9 +151,10 @@ if [[ "$MISS_COUNT" -gt 0 ]]; then
     HINT_IDS=$(head -20 "$MISSING" | paste -sd, -)
     # Resolve helper path the same way the skills do (per
     # skills/shared-references/wiki-helper-resolution.md)
-    HINT_SCRIPT=".aris/tools/research_wiki.py"
+    HINT_SCRIPT=".debuffer_skills/tools/research_wiki.py"
+    [[ -f "$HINT_SCRIPT" ]] || HINT_SCRIPT=".aris/tools/research_wiki.py"
     [[ -f "$HINT_SCRIPT" ]] || HINT_SCRIPT="tools/research_wiki.py"
-    [[ -f "$HINT_SCRIPT" ]] || { [[ -n "${ARIS_REPO:-}" ]] && HINT_SCRIPT="$ARIS_REPO/tools/research_wiki.py"; }
+    [[ -f "$HINT_SCRIPT" ]] || { [[ -n "${DEBUFFER_SKILLS_REPO:-${SKILL_REPO:-${ARIS_REPO:-}}}" ]] && HINT_SCRIPT="${DEBUFFER_SKILLS_REPO:-${SKILL_REPO:-${ARIS_REPO:-}}}/tools/research_wiki.py"; }
     [[ -f "$HINT_SCRIPT" ]] || HINT_SCRIPT="<resolve-via-shared-ref>/research_wiki.py"
     echo "Backfill suggestion:" >&2
     echo "    python3 \"$HINT_SCRIPT\" sync $WIKI_ROOT --arxiv-ids $HINT_IDS" >&2

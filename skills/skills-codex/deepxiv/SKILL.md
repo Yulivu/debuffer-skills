@@ -71,8 +71,8 @@ Resolve `$DEEPXIV_FETCHER` via the canonical strict-safe Codex chain
 (see [`shared-references/integration-contract.md`](../shared-references/integration-contract.md) §2):
 
 ```bash
-if [ -z "${ARIS_REPO:-}" ] && [ -f .aris/installed-skills-codex.txt ]; then
-    ARIS_REPO=$(awk -F'\t' '$1=="repo_root"{print $2; exit}' .aris/installed-skills-codex.txt 2>/dev/null) || true
+if [ -z "${ARIS_REPO:-}" ] && [ -f .debuffer_skills/installed-skills-codex.txt ]; then
+    ARIS_REPO=$(awk -F'\t' '$1=="repo_root"{print $2; exit}' .debuffer_skills/installed-skills-codex.txt 2>/dev/null) || true
 fi
 DEEPXIV_FETCHER=""
 [ -n "${ARIS_REPO:-}" ] && [ -f "$ARIS_REPO/tools/deepxiv_fetch.py" ] && DEEPXIV_FETCHER="$ARIS_REPO/tools/deepxiv_fetch.py"
@@ -138,5 +138,5 @@ Follow [`shared-references/integration-contract.md`](../shared-references/integr
 
 - Prefer the adapter script over raw `deepxiv` commands when available.
 - If DeepXiv is missing, give the install command and suggest `/arxiv` or `/research-lit "topic" - sources: web`.
-- Use DeepXiv as an additive source, not a replacement for existing ARIS literature tooling.
+- Use DeepXiv as an additive source, not a replacement for existing debuffer literature tooling.
 - If the result overlaps with a published venue paper from Semantic Scholar, keep the richer venue metadata in the final summary.

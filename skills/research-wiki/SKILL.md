@@ -11,7 +11,7 @@ Subcommand: **$ARGUMENTS**
 
 ## Overview
 
-The research wiki is a persistent, per-project knowledge base that accumulates structured knowledge across the entire ARIS research lifecycle. Unlike one-off literature surveys that are used and forgotten, the wiki **compounds** — every paper read, idea tested, experiment run, and review received makes the wiki smarter.
+The research wiki is a persistent, per-project knowledge base that accumulates structured knowledge across the entire debuffer research lifecycle. Unlike one-off literature surveys that are used and forgotten, the wiki **compounds** — every paper read, idea tested, experiment run, and review received makes the wiki smarter.
 
 Inspired by [Karpathy's LLM Wiki pattern](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f): compile knowledge once, keep it current, don't re-derive on every query.
 
@@ -75,16 +75,16 @@ default), which is exactly the failure mode that left a real user's
 
 ```bash
 cd "$(git rev-parse --show-toplevel 2>/dev/null || pwd)" || exit 1
-ARIS_REPO="${ARIS_REPO:-$(awk -F'\t' '$1=="repo_root"{print $2; exit}' .aris/installed-skills.txt 2>/dev/null)}"
-WIKI_SCRIPT=".aris/tools/research_wiki.py"
+ARIS_REPO="${ARIS_REPO:-$(awk -F'\t' '$1=="repo_root"{print $2; exit}' .debuffer_skills/installed-skills.txt 2>/dev/null)}"
+WIKI_SCRIPT=".debuffer_skills/tools/research_wiki.py"
 [ -f "$WIKI_SCRIPT" ] || WIKI_SCRIPT="tools/research_wiki.py"
 [ -f "$WIKI_SCRIPT" ] || { [ -n "${ARIS_REPO:-}" ] && WIKI_SCRIPT="$ARIS_REPO/tools/research_wiki.py"; }
 [ -f "$WIKI_SCRIPT" ] || {
-  echo "ERROR: research_wiki.py not found at .aris/tools/, tools/, or \$ARIS_REPO/tools/." >&2
+  echo "ERROR: research_wiki.py not found at .debuffer_skills/tools/, tools/, or \$ARIS_REPO/tools/." >&2
   echo "       Fix one of:" >&2
-  echo "         1. rerun 'bash tools/install_aris.sh' from the ARIS repo (creates .aris/tools symlink)" >&2
-  echo "         2. export ARIS_REPO=<path-to-ARIS-repo>" >&2
-  echo "         3. cp <ARIS-repo>/tools/research_wiki.py tools/" >&2
+  echo "         1. rerun 'bash tools/install_aris.sh' from the debuffer repo (creates .debuffer_skills/tools symlink)" >&2
+  echo "         2. export ARIS_REPO=<path-to-debuffer-repo>" >&2
+  echo "         3. cp <debuffer-repo>/tools/research_wiki.py tools/" >&2
   exit 1
 }
 ```
@@ -121,7 +121,7 @@ truth for the wiki schema.)
 
 Add a paper to the wiki. This subcommand is thin wrapping around
 `python3 "$WIKI_SCRIPT" ingest_paper …`, which is the single
-implementation of paper ingest in ARIS (per
+implementation of paper ingest in debuffer (per
 [`shared-references/integration-contract.md`](../shared-references/integration-contract.md)
 — one helper, no copies). The helper does all of:
 

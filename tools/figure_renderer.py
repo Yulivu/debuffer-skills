@@ -9,13 +9,13 @@ This shim exists so existing users keep working without re-running
 install_aris.sh. The three legacy resolver layers all still hit a
 valid Python module:
 
-  layer 1  <project>/.aris/tools/figure_renderer.py
+  layer 1  <project>/.debuffer_skills/tools/figure_renderer.py
            → symlink to $ARIS_REPO/tools/figure_renderer.py
            → this file (shim)
            → $ARIS_REPO/skills/figure-spec/scripts/figure_renderer.py
 
   layer 2  <project>/tools/figure_renderer.py
-           → this file (when running from inside the ARIS repo)
+           → this file (when running from inside the debuffer repo)
 
   layer 3  $ARIS_REPO/tools/figure_renderer.py
            → this file (when ARIS_REPO env var is set)
@@ -52,7 +52,7 @@ def main() -> int:
             "       The Phase 3.1 migration moved this helper into the\n"
             "       /figure-spec SKILL ('skills/figure-spec/scripts/'). Your\n"
             "       local checkout may be incomplete — try `git pull` from the\n"
-            "       ARIS repo, or rerun `bash tools/install_aris.sh` to refresh\n"
+            "       debuffer repo, or rerun `bash tools/install_aris.sh` to refresh\n"
             "       the project-local symlink chain."
         )
     # os.execv replaces this Python process; argv[0] is the real path so

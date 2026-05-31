@@ -1,17 +1,17 @@
 #!/usr/bin/env bash
-# save_trace.sh — Save a reviewer MCP call trace to .aris/traces/
-# Part of the ARIS Review Tracing Protocol (shared-references/review-tracing.md)
+# save_trace.sh — Save a reviewer MCP call trace to .debuffer_skills/traces/
+# Part of the debuffer Review Tracing Protocol (shared-references/review-tracing.md)
 #
 # Policy C (forensic helper). SKILL callers MUST resolve the helper path
 # through the canonical chain documented in
 # `skills/shared-references/integration-contract.md` §2; the SKILL bash
 # block then runs `bash "$TRACE_HELPER" --skill ... --purpose ... --model ...`.
 # Do NOT hard-code `bash tools/save_trace.sh` from a SKILL; the path is
-# only stable from inside the ARIS repo (manual smoke testing) and breaks
-# silently in downstream user projects that have only `.aris/tools/` or
+# only stable from inside the debuffer repo (manual smoke testing) and breaks
+# silently in downstream user projects that have only `.debuffer_skills/tools/` or
 # `$ARIS_REPO/tools/`.
 #
-# Usage (from inside the ARIS repo, smoke test):
+# Usage (from inside the debuffer repo, smoke test):
 #   bash tools/save_trace.sh \
 #     --skill "auto-review-loop" \
 #     --purpose "round-1-review" \
@@ -33,7 +33,7 @@ set -euo pipefail
 
 # --- Parse arguments ---
 SKILL="" PURPOSE="" MODEL="" THREAD_ID="" PROMPT="" RESPONSE=""
-PROMPT_FILE="" RESPONSE_FILE="" TRACE_MODE="${ARIS_TRACE_MODE:-full}"
+PROMPT_FILE="" RESPONSE_FILE="" TRACE_MODE="${DEBUFFER_TRACE_MODE:-${ARIS_TRACE_MODE:-full}}"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -70,7 +70,11 @@ fi
 
 # --- Determine run directory ---
 TODAY=$(date +%Y-%m-%d)
-TRACES_DIR=".aris/traces/${SKILL}"
+STATE_DIR="${DEBUFFER_STATE_DIR:-.debuffer_skills}"
+if [[ "$STATE_DIR" == ".debuffer_skills" && ! -d "$STATE_DIR" && -d ".aris" ]]; then
+  STATE_DIR=".aris"
+fi
+TRACES_DIR="$STATE_DIR/traces/${SKILL}"
 mkdir -p "$TRACES_DIR"
 
 # Find next run number for today
@@ -157,8 +161,8 @@ json.dump(data, open('${RUN_DIR}/${CALL_PREFIX}-${PURPOSE}.meta.json', 'w'), ind
 "
 
 # --- Append to events.jsonl (if it exists) ---
-EVENTS_FILE=".aris/meta/events.jsonl"
-if [[ -d ".aris/meta" ]]; then
+EVENTS_FILE="$STATE_DIR/meta/events.jsonl"
+if [[ -d "$STATE_DIR/meta" ]]; then
   python3 -c "
 import json
 evt = {

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""queue_manager.py — ARIS experiment-queue scheduler.
+"""queue_manager.py — debuffer experiment-queue scheduler.
 
 Runs on the SSH remote host (or locally for Modal/Vast.ai future support).
 Reads a manifest, launches jobs across free GPUs via `screen`, retries on OOM,

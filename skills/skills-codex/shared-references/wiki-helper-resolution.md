@@ -8,7 +8,7 @@ for Codex's install layout (the helper may live under
 ## The chain
 
 ```bash
-ARIS_REPO="${ARIS_REPO:-$(awk -F'\t' '$1=="repo_root"{print $2; exit}' .aris/installed-skills-codex.txt 2>/dev/null)}"
+ARIS_REPO="${ARIS_REPO:-$(awk -F'\t' '$1=="repo_root"{print $2; exit}' .debuffer_skills/installed-skills-codex.txt 2>/dev/null)}"
 WIKI_SCRIPT=""
 [ -n "$ARIS_REPO" ] && [ -f "$ARIS_REPO/tools/research_wiki.py" ] && WIKI_SCRIPT="$ARIS_REPO/tools/research_wiki.py"
 [ -z "$WIKI_SCRIPT" ] && [ -f tools/research_wiki.py ] && WIKI_SCRIPT="tools/research_wiki.py"
@@ -48,7 +48,7 @@ After Variant B, every helper invocation must be guarded:
 | | CC | Codex |
 |---|---|---|
 | Manifest filename | `installed-skills.txt` | `installed-skills-codex.txt` |
-| Symlink layer (`.aris/tools/...`) | yes (PR #174 / #192) | no — Codex install model is direct copy under `~/.codex/skills/`, no symlink |
+| Symlink layer (`.debuffer_skills/tools/...`) | yes (PR #174 / #192) | no — Codex install model is direct copy under `~/.codex/skills/`, no symlink |
 | Global-install layer (`~/.codex/skills/<name>/...`) | no | yes |
 | `cd "$(git rev-parse --show-toplevel)"` preamble | yes — guards subdir cwd | optional — Codex usually invokes from project root |
 

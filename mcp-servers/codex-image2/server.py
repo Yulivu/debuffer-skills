@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Codex app-server image bridge for Claude-first ARIS workflows.
+"""Codex app-server image bridge for Claude-first debuffer workflows.
 
 This server exposes a narrow MCP interface that asks the local Codex desktop
 app to generate an image through the app-server path. It is intentionally kept

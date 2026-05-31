@@ -106,7 +106,7 @@ cat > "$HOOK_DIR/pre-commit" <<'HOOK'
 #!/usr/bin/env bash
 # Auto-installed by overleaf_setup.sh. Refuses to commit anything containing
 # what looks like an Overleaf token pattern. Cannot be bypassed by any agent
-# without --no-verify (which the ARIS protocol forbids without explicit user OK).
+# without --no-verify (which the debuffer protocol forbids without explicit user OK).
 set -e
 if git diff --cached | grep -qE 'olp_[A-Za-z0-9]{20,}'; then
     echo "ERROR: Overleaf token pattern (olp_…) detected in staged changes."

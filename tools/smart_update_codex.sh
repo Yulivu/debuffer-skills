@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# smart_update_codex.sh -- update copied ARIS Codex skills safely.
+# smart_update_codex.sh -- update copied debuffer Codex skills safely.
 #
 # Default upstream:
 #   repo/skills/skills-codex
@@ -90,10 +90,14 @@ esac
 
 MANAGED_MANIFEST=""
 if [[ -n "$PROJECT_ROOT" ]]; then
-    MANAGED_MANIFEST="$PROJECT_ROOT/.aris/installed-skills-codex.txt"
+    MANAGED_MANIFEST="$PROJECT_ROOT/.debuffer_skills/installed-skills-codex.txt"
+    LEGACY_MANAGED_MANIFEST="$PROJECT_ROOT/.aris/installed-skills-codex.txt"
 fi
 if [[ -n "$MANAGED_MANIFEST" && -f "$MANAGED_MANIFEST" ]]; then
     die "target project is managed by install_aris_codex.sh. Use: git pull && bash $REPO_ROOT/tools/install_aris_codex.sh \"$PROJECT_ROOT\" --reconcile"
+fi
+if [[ -n "${LEGACY_MANAGED_MANIFEST:-}" && -f "$LEGACY_MANAGED_MANIFEST" ]]; then
+    die "target project has a legacy managed manifest at $LEGACY_MANAGED_MANIFEST. Use: git pull && bash $REPO_ROOT/tools/install_aris_codex.sh \"$PROJECT_ROOT\" --reconcile"
 fi
 if [[ -L "$LOCAL_DIR" ]]; then
     die "local skill directory is a symlink. Use: git pull && bash $REPO_ROOT/tools/install_aris_codex.sh \"${PROJECT_ROOT:-<project>}\" --reconcile"
@@ -101,11 +105,11 @@ fi
 while IFS= read -r link_entry; do
     link_name="$(basename "$link_entry")"
     if [[ "$link_name" == "shared-references" || -d "$UPSTREAM_DIR/$link_name" ]]; then
-        die "local skill directory contains symlink-managed ARIS entry '$link_name'. Use: git pull && bash $REPO_ROOT/tools/install_aris_codex.sh \"${PROJECT_ROOT:-<project>}\" --reconcile"
+        die "local skill directory contains symlink-managed debuffer entry '$link_name'. Use: git pull && bash $REPO_ROOT/tools/install_aris_codex.sh \"${PROJECT_ROOT:-<project>}\" --reconcile"
     fi
     for overlay in "${OVERLAYS[@]}"; do
         if [[ -d "$REPO_ROOT/skills/skills-codex-$overlay/$link_name" ]]; then
-            die "local skill directory contains symlink-managed ARIS overlay entry '$link_name'. Use: git pull && bash $REPO_ROOT/tools/install_aris_codex.sh \"${PROJECT_ROOT:-<project>}\" --reconcile"
+            die "local skill directory contains symlink-managed debuffer overlay entry '$link_name'. Use: git pull && bash $REPO_ROOT/tools/install_aris_codex.sh \"${PROJECT_ROOT:-<project>}\" --reconcile"
         fi
     done
 done < <(find "$LOCAL_DIR" -mindepth 1 -maxdepth 1 -type l)
@@ -121,7 +125,7 @@ cleanup() {
 trap cleanup EXIT INT TERM
 
 if [[ ${#OVERLAYS[@]} -gt 0 ]]; then
-    TMP_ROOT="$(mktemp -d /tmp/aris-codex-update.XXXXXX)"
+    TMP_ROOT="$(mktemp -d /tmp/debuffer-codex-update.XXXXXX)"
     MERGED_UPSTREAM="$TMP_ROOT/upstream"
     mkdir -p "$MERGED_UPSTREAM"
     cp -a "$BASE_UPSTREAM/." "$MERGED_UPSTREAM/"
@@ -211,7 +215,7 @@ if [[ -d "$UPSTREAM_DIR/shared-references" ]]; then
     done < <(find "$UPSTREAM_DIR/shared-references" -type f | sort)
 fi
 
-log "ARIS Codex Smart Update"
+log "debuffer Codex Smart Update"
 log "  Scope:    $SCOPE"
 log "  Upstream: $UPSTREAM_DIR"
 log "  Local:    $LOCAL_DIR"

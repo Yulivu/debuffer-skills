@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Deterministic prompt-injection / promptware / exfiltration scanner for ARIS.
+"""Deterministic prompt-injection / promptware / exfiltration scanner for debuffer.
 
-ARIS injects model- and web-authored content back into agent context: MEMORY.md,
+debuffer injects model- and web-authored content back into agent context: MEMORY.md,
 research-wiki nodes/edges, the query_pack that feeds /idea-creator, fetched paper
 abstracts, and community-PR-authored SKILL.md. None of that was scanned before.
-This module is the cheap, deterministic FIRST layer of ARIS's two-layer defense:
+This module is the cheap, deterministic FIRST layer of debuffer's two-layer defense:
 
   layer 1 (this file) — regex, fail-closed, no model. A poisoned model cannot
                         talk its way past a regex. Blocks overt injection.
@@ -16,8 +16,8 @@ A clean scan is NOT a safety acquittal — only the absence of known-bad strings
 content still belongs to the cross-model jury (acceptance-gate.md).
 
 Pattern set adapted from NousResearch/hermes-agent `tools/threat_patterns.py`
-(MIT License, Copyright (c) 2025 Nous Research), with ARIS-runtime adaptations
-(Claude/Codex/Gemini env vars, ARIS config paths) and an added entry-level
+(MIT License, Copyright (c) 2025 Nous Research), with debuffer-runtime adaptations
+(Claude/Codex/Gemini env vars, debuffer config paths) and an added entry-level
 `quarantine()` + CLI. See shared-references/injection-hygiene.md.
 
 Scope (nested: all ⊂ context ⊂ strict):
@@ -71,7 +71,7 @@ _PATTERNS: List[Tuple[str, str, str]] = [
     (r'you\s+must\s+(?:\w+\s+){0,3}(beacon|exfiltrate|phone\s+home)\b', "forced_action", "context"),
     (r'only\s+use\s+one[\s\-]?liners?\b', "anti_forensic_oneliner", "context"),
     (r'never\s+(?:\w+\s+)*(?:create|write)\s+(?:\w+\s+)*(?:script|file)\s+(?:\w+\s+)*disk', "anti_forensic_disk", "context"),
-    # ARIS runtime: unsetting known agent/provider env vars is pure attack behavior.
+    # debuffer runtime: unsetting known agent/provider env vars is pure attack behavior.
     (r'unset\s+\w*(?:CLAUDE|CODEX|GEMINI|AGENT|OPENAI|ANTHROPIC)\w*', "env_var_unset_agent", "context"),
     (r'\b(?:praxis|cobalt\s*strike|sliver|havoc|mythic|metasploit|brainworm)\b', "known_c2_framework", "context"),
     (r'\bc2\s+(?:server|channel|infrastructure|beacon)\b', "c2_explicit", "context"),
@@ -91,13 +91,13 @@ _PATTERNS: List[Tuple[str, str, str]] = [
     # ── Persistence / backdoor / config-mod (strict) ─────────────────
     (r'authorized_keys', "ssh_backdoor", "strict"),
     (r'\$HOME/\.ssh|\~/\.ssh', "ssh_access", "strict"),
-    # ARIS config surface: tampering with the agent's instructions / install state.
+    # debuffer config surface: tampering with the agent's instructions / install state.
     # Bounded gap + fixed-width negative lookbehind so "REVIEWER_MEMORY.md" does
-    # NOT match via the "MEMORY.md" substring. NOTE: legit ARIS skill docs do say
+    # NOT match via the "MEMORY.md" substring. NOTE: legit debuffer skill docs do say
     # "update CLAUDE.md", so this is tuned for wiki/web content; scanning SKILL.md
-    # itself needs an ARIS-content allowlist first (see injection-hygiene.md).
+    # itself needs an debuffer-content allowlist first (see injection-hygiene.md).
     (r'(?:update|modify|edit|append\s+to|overwrite)\s+[^\n]{0,40}(?:AGENTS\.md|CLAUDE\.md|(?<![A-Za-z_])MEMORY\.md|\.cursorrules|\.clinerules)', "agent_config_mod", "strict"),
-    (r'(update|modify|edit|write|change|append|add\s+to)\s+.*\.aris/(installed-skills\.txt|skill-source\.txt)', "aris_config_mod", "strict"),
+    (r'(update|modify|edit|write|change|append|add\s+to)\s+.*\.(?:debuffer_skills|aris)/(installed-skills(?:-codex|-copilot)?\.txt|skill-source\.txt)', "skill_state_config_mod", "strict"),
 
     # ── Hardcoded secrets (strict) ───────────────────────────────────
     (r'(?:api[_-]?key|token|secret|password)\s*[=:]\s*["\'][A-Za-z0-9+/=_-]{20,}', "hardcoded_secret", "strict"),
@@ -199,7 +199,7 @@ __all__ = ["INVISIBLE_CHARS", "scan_for_threats", "first_threat_message", "quara
 
 def main() -> int:
     import argparse
-    ap = argparse.ArgumentParser(description="ARIS injection / exfiltration scanner.")
+    ap = argparse.ArgumentParser(description="debuffer injection / exfiltration scanner.")
     ap.add_argument("path", help="file to scan, or - for stdin")
     ap.add_argument("--scope", choices=["all", "context", "strict"], default="strict")
     ap.add_argument("--quarantine", action="store_true",

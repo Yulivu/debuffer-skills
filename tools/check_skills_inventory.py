@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check ARIS skill inventory drift across mainline, Codex mirror, and docs."""
+"""Check debuffer skill inventory drift across mainline, Codex mirror, and docs."""
 
 from __future__ import annotations
 
@@ -37,6 +37,7 @@ REQUIRED_README_ANCHORS = (
 
 IGNORED_README_SCAN_PARTS = {
     ".git",
+    ".debuffer_skills",
     ".aris",
     ".agents",
     ".pytest_cache",
@@ -56,29 +57,6 @@ FORBIDDEN_LIGHTWEIGHT_PATHS = (
     Path("community_papers"),
     Path("assets"),
 )
-
-FORBIDDEN_DOC_NAMES = {
-    "ARIS_INTRO.md",
-    "ARIS_INTRO.html",
-    "ANTIGRAVITY_ADAPTATION.md",
-    "ANTIGRAVITY_ADAPTATION_CN.md",
-    "CURSOR_ADAPTATION.md",
-    "TRAE_ARIS_RUNBOOK_EN.md",
-    "TRAE_ARIS_RUNBOOK_CN.md",
-    "COPILOT_CLI_ADAPTATION.md",
-    "OPENCLAW_ADAPTATION.md",
-    "MODELSCOPE_GUIDE.md",
-    "ALI_CODING_PLAN_GUIDE.md",
-    "LLM_API_MIX_MATCH_GUIDE.md",
-    "MINIMAX_MCP_GUIDE.md",
-    "MiniMax-GLM-Configuration.md",
-    "MANUAL_REVIEW_GUIDE.md",
-    "MANUAL_REVIEW_GUIDE_CN.md",
-    "CODEX_CLAUDE_REVIEW_GUIDE.md",
-    "CODEX_CLAUDE_REVIEW_GUIDE_CN.md",
-    "CODEX_GEMINI_REVIEW_GUIDE.md",
-    "CODEX_GEMINI_REVIEW_GUIDE_CN.md",
-}
 
 MAX_MAIN_PACK_FILE_BYTES = 2_000_000
 
@@ -182,7 +160,7 @@ def check_inventory() -> list[str]:
     expected_count = len(main)
     count_checks = [
         (CATALOG, catalog_text, r"\*\*(?P<count>\d+) skills\*\*"),
-        (README, readme, r"包含 \*\*(?P<count>\d+) 个 skill\*\*"),
+        (README, readme, r"当前提供 \*\*(?P<count>\d+) 个 skill\*\*"),
         (README, readme, r"主线与 Codex mirror 均为 \*\*(?P<count>\d+) 个 skill\*\*"),
         (AGENT_GUIDE, agent_guide, r"Full catalog.*?\*\*(?P<count>\d+) skills\*\*"),
     ]
@@ -225,8 +203,6 @@ def check_inventory() -> list[str]:
 
     for path in policy_scanned_files():
         rel = path.relative_to(REPO_ROOT)
-        if path.name in FORBIDDEN_DOC_NAMES:
-            failures.append(f"obsolete platform/API doc is back in main pack: {rel}")
         if path.stat().st_size > MAX_MAIN_PACK_FILE_BYTES:
             failures.append(
                 f"large file in main pack ({path.stat().st_size} bytes > "
@@ -271,11 +247,11 @@ def check_inventory() -> list[str]:
 def main() -> int:
     failures = check_inventory()
     if failures:
-        print("ARIS skill inventory drift detected:", file=sys.stderr)
+        print("Skill inventory drift detected:", file=sys.stderr)
         for failure in failures:
             print(f"- {failure}", file=sys.stderr)
         return 1
-    print("ARIS skill inventory is consistent.")
+    print("Skill inventory is consistent.")
     return 0
 
 

@@ -4,7 +4,7 @@ When a skill needs **breadth** — many candidate ideas, many sources, many
 attack angles, many proof obligations, many draft sections — it may fan
 the generation step out across same-family subagents. This document is
 the canonical convention for doing that **without** weakening the
-cross-model jury that the entire ARIS design rests on.
+cross-model jury that the entire debuffer design rests on.
 
 Rule of thumb: **Fan-out is 火力 (firepower); the jury is 裁判席 (the
 bench). Subagents GENERATE candidates; they NEVER score them.** Fan-out
@@ -49,7 +49,7 @@ judgment and are explicitly allowed on the executor — see
 
 ## The 3-tier degradation ladder
 
-Fan-out is a **skill-prompt pattern, not a harness capability.** ARIS
+Fan-out is a **skill-prompt pattern, not a harness capability.** debuffer
 already fans out today on runtimes that have no parallel-orchestration
 primitive at all (`/kill-argument` runs two sequential fresh codex
 threads with **no Agent tool**; `/citation-audit` verifies per-entry;
@@ -201,7 +201,7 @@ verdict, but the verdict itself stays a single cross-model call.
 One-liner to apply at review time: **fan out the search for candidates;
 never fan out the bench.**
 
-## Worked examples (real ARIS skills)
+## Worked examples (real debuffer skills)
 
 ### `/kill-argument` — Tier 3 sequential fan-out, NO Agent tool
 

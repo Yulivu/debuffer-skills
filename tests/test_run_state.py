@@ -140,7 +140,7 @@ def test_state_is_valid_json_on_disk():
     with _tmp() as d:
         rs.start_run(d, "run-a", PHASES)
         rs.set_status(d, "run-a", "W1", "done", artifact="x/y.md")
-        p = Path(d) / ".aris" / "runs" / "run-a.json"
+        p = Path(d) / ".debuffer_skills" / "runs" / "run-a.json"
         state = json.loads(p.read_text())  # must parse
         assert rs._find_phase(state, "W1")["artifact"] == "x/y.md"
 

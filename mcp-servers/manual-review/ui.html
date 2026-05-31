@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Manual Review — ARIS</title>
+<title>Manual Review — debuffer</title>
 <style>
 :root { --bg: #f8f9fa; --fg: #1a1a2e; --panel: #fff; --border: #dee2e6; --accent: #4361ee; --accent-hover: #3a56d4; --success: #2ecc71; --muted: #6c757d; }
 @media (prefers-color-scheme: dark) { :root { --bg: #1a1a2e; --fg: #e8e8e8; --panel: #16213e; --border: #2a2a4a; --accent: #4cc9f0; --accent-hover: #3db8dd; --success: #2ecc71; --muted: #8892a4; } }
@@ -44,7 +44,7 @@ footer { padding: 10px 24px; border-top: 1px solid var(--border); background: va
 </head>
 <body>
 <header>
-  <h1 id="title">Manual Review — ARIS</h1>
+  <h1 id="title">Manual Review — debuffer</h1>
   <select class="lang-switch" id="langSwitch" onchange="switchLang(this.value)">
     <option value="en">English</option>
     <option value="zh">中文</option>
@@ -105,7 +105,7 @@ footer { padding: 10px 24px; border-top: 1px solid var(--border); background: va
 <script>
 const i18n = {
   en: {
-    title: "Manual Review — ARIS",
+    title: "Manual Review — debuffer",
     warningTitle: "Cross-Model Review Required",
     warningText: "If you are running this from Claude Code, do NOT paste the prompt into any Claude product (claude.ai, Claude API, Claude App). Using the same model family as executor defeats the purpose of cross-model review. Use ChatGPT, DeepSeek, Kimi, Gemini, or any non-Claude model.",
     tutorialTitle: "How to use",
@@ -128,7 +128,7 @@ const i18n = {
     response: "Response",
   },
   zh: {
-    title: "手动评审 — ARIS",
+    title: "手动评审 — debuffer",
     warningTitle: "必须使用不同模型家族",
     warningText: "如果你从 Claude Code 运行此流程，请勿将提示词粘贴到任何 Claude 产品（claude.ai、Claude API、Claude App）。使用与执行器相同的模型家族会使跨模型评审失去意义。请使用 ChatGPT、DeepSeek、Kimi、Gemini 或其他非 Claude 模型。",
     tutorialTitle: "使用方法",

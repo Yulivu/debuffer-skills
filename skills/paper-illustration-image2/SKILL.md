@@ -90,16 +90,16 @@ and a **local Codex app-server MCP bridge** as the raster renderer.
   # Layers 1-3: shared-runtime chain via shim at tools/paper_illustration_image2.py.
   if [ -z "$IMAGE2_HELPER" ]; then
     cd "$(git rev-parse --show-toplevel 2>/dev/null || pwd)" || exit 1
-    if [ -z "${ARIS_REPO:-}" ] && [ -f .aris/installed-skills.txt ]; then
-        ARIS_REPO=$(awk -F'\t' '$1=="repo_root"{print $2; exit}' .aris/installed-skills.txt 2>/dev/null) || true
+    if [ -z "${ARIS_REPO:-}" ] && [ -f .debuffer_skills/installed-skills.txt ]; then
+        ARIS_REPO=$(awk -F'\t' '$1=="repo_root"{print $2; exit}' .debuffer_skills/installed-skills.txt 2>/dev/null) || true
     fi
-    IMAGE2_HELPER=".aris/tools/paper_illustration_image2.py"
+    IMAGE2_HELPER=".debuffer_skills/tools/paper_illustration_image2.py"
     [ -f "$IMAGE2_HELPER" ] || IMAGE2_HELPER="tools/paper_illustration_image2.py"
     [ -f "$IMAGE2_HELPER" ] || { [ -n "${ARIS_REPO:-}" ] && IMAGE2_HELPER="$ARIS_REPO/tools/paper_illustration_image2.py"; }
     [ -f "$IMAGE2_HELPER" ] || IMAGE2_HELPER=""
   fi
   [ -z "$IMAGE2_HELPER" ] && {
-    echo "ERROR: paper_illustration_image2.py not resolved (layer 0: \$CLAUDE_SKILL_DIR/scripts/; layers 1-3: .aris/tools/, tools/, \$ARIS_REPO/tools/)." >&2
+    echo "ERROR: paper_illustration_image2.py not resolved (layer 0: \$CLAUDE_SKILL_DIR/scripts/; layers 1-3: .debuffer_skills/tools/, tools/, \$ARIS_REPO/tools/)." >&2
     echo "       /paper-illustration-image2 cannot proceed. Fix: rerun bash tools/install_aris.sh, or copy the canonical script from \$ARIS_REPO/skills/paper-illustration-image2/scripts/." >&2
     exit 1
   }

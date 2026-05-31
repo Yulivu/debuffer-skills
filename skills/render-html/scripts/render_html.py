@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""render_html.py — convert ARIS Markdown / JSON artifacts to single-file HTML.
+"""render_html.py — convert research Markdown / JSON artifacts to single-file HTML.
 
 Pure-stdlib Python. No external pip deps.
 
@@ -20,7 +20,7 @@ Design invariants (see codex review consultation in commit message):
   - HTML embeds source path + SHA256 + generated timestamp (drift detection).
   - Single-file output. MathJax + highlight.js loaded from CDN unless --offline.
   - Pure stdlib: re, html, hashlib, json, datetime, pathlib, argparse, sys.
-  - Conservative Markdown subset matching what ARIS artifacts actually emit.
+  - Conservative Markdown subset matching what research artifacts usually emit.
 """
 from __future__ import annotations
 
@@ -64,7 +64,7 @@ _RE_PAPER_REF = re.compile(
     r"(?<!\\)\[\[([A-Za-z0-9][A-Za-z0-9_.:-]*)(?:\|([^\]\n]+))?\]\]"
 )
 
-# Inline HTML tags that should pass through inline (commonly used in ARIS docs).
+# Inline HTML tags that should pass through inline (commonly used in research docs).
 _INLINE_HTML_TAGS = ("br", "img", "a", "span", "sub", "sup", "code", "kbd", "b", "i", "u", "strong", "em")
 
 # URL schemes considered safe for href/src. javascript:, data:, vbscript: blocked.
@@ -113,7 +113,7 @@ def sanitize_html(s: str) -> str:
 
     Applied to: (a) inline-HTML spans we pass through, (b) block-HTML
     passthrough content. Markdown text content is HTML-escaped separately
-    and never reaches this function. ARIS workflow artifacts should not
+    and never reaches this function. Research workflow artifacts should not
     contain these tags; this is defense-in-depth in case an LLM hallucinates
     one.
     """
@@ -846,7 +846,7 @@ def _repo_relative(input_path: Path) -> str:
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(
-        description="Render an ARIS Markdown artifact to single-file HTML.",
+        description="Render a research Markdown artifact to single-file HTML.",
     )
     ap.add_argument("input", help="Path to input .md (or .json — wrapped in a <pre>)")
     ap.add_argument("--template", default="academic", choices=["academic", "dashboard"])
@@ -868,7 +868,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument(
         "--blog-mode",
         action="store_true",
-        help="Enable blog/talk mode (adds .aris-blog body class, opt-in active-H2 highlighting)",
+        help="Enable blog/talk mode (adds .debuffer-blog body class, opt-in active-H2 highlighting)",
     )
     ap.add_argument(
         "--collapse-code-min",
@@ -979,7 +979,7 @@ def main(argv: list[str] | None = None) -> int:
         "EXTRA_META": "",
         "PAPER_REGISTRY_JSON": papers_json,
         "COLLAPSE_CODE_MIN": str(args.collapse_code_min),
-        "BODY_CLASS": "aris-blog" if args.blog_mode else "",
+        "BODY_CLASS": "debuffer-blog" if args.blog_mode else "",
     }
 
     rendered = substitute(template_str, vars_)

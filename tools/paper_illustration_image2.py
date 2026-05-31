@@ -8,7 +8,7 @@ The canonical implementation now lives at
 This shim keeps the four legacy resolver layers working without a
 re-install:
 
-  .aris/tools/paper_illustration_image2.py
+  .debuffer_skills/tools/paper_illustration_image2.py
        → $ARIS_REPO/tools/paper_illustration_image2.py (this shim)
        → $ARIS_REPO/skills/paper-illustration-image2/scripts/paper_illustration_image2.py
 
@@ -51,7 +51,7 @@ def main() -> int:
             "       /paper-illustration-image2 SKILL\n"
             "       ('skills/paper-illustration-image2/scripts/'). Your\n"
             "       local checkout may be incomplete — try `git pull` from the\n"
-            "       ARIS repo, or rerun `bash tools/install_aris.sh` to refresh\n"
+            "       debuffer repo, or rerun `bash tools/install_aris.sh` to refresh\n"
             "       the project-local symlink chain."
         )
     os.execv(sys.executable, [sys.executable, str(REAL), *sys.argv[1:]])

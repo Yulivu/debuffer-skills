@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# install_aris_codex.sh -- Project-local ARIS Codex skill installation.
+# install_aris_codex.sh -- Project-local debuffer Codex skill installation.
 #
 # This installer manages a flat Codex project layout:
-#   <project>/.agents/skills/<skill-name> -> <aris-repo>/skills/<package>/<skill-name>
+#   <project>/.agents/skills/<skill-name> -> <skill-repo>/skills/<package>/<skill-name>
 #
 # Managed entries are tracked in:
-#   <project>/.aris/installed-skills-codex.txt
+#   <project>/.debuffer_skills/installed-skills-codex.txt
 #
 # Default package set:
 #   - skills/skills-codex
@@ -23,7 +23,7 @@
 #   --uninstall      remove only entries in manifest; delete manifest
 #
 # Options:
-#   --aris-repo PATH                 override repo discovery
+#   --aris-repo PATH                 override skill repo discovery
 #   --with-claude-review-overlay     install skills-codex-claude-review on top
 #   --with-gemini-review-overlay     install skills-codex-gemini-review on top
 #   --profile NAME                   install a scoped set: core-research, paper, review, full (default: full)
@@ -38,12 +38,15 @@ set -euo pipefail
 MANIFEST_VERSION="1"
 MANIFEST_NAME="installed-skills-codex.txt"
 MANIFEST_PREV_NAME="installed-skills-codex.txt.prev"
-ARIS_DIR_NAME=".aris"
+ARIS_DIR_NAME=".debuffer_skills"
+LEGACY_ARIS_DIR_NAME=".aris"
 LOCK_DIR_NAME=".install-codex.lock.d"
 SKILLS_REL=".agents/skills"
 DOC_FILE_NAME="AGENTS.md"
-BLOCK_BEGIN="<!-- ARIS-CODEX:BEGIN -->"
-BLOCK_END="<!-- ARIS-CODEX:END -->"
+BLOCK_BEGIN="<!-- DEBUFFER-CODEX:BEGIN -->"
+BLOCK_END="<!-- DEBUFFER-CODEX:END -->"
+LEGACY_BLOCK_BEGIN="<!-- debuffer-CODEX:BEGIN -->"
+LEGACY_BLOCK_END="<!-- debuffer-CODEX:END -->"
 SAFE_NAME_REGEX='^[A-Za-z0-9][A-Za-z0-9._-]*$'
 BASE_PACKAGE="skills-codex"
 
@@ -65,7 +68,7 @@ while [[ $# -gt 0 ]]; do
     case "$1" in
         --reconcile) ACTION="reconcile"; shift ;;
         --uninstall) ACTION="uninstall"; shift ;;
-        --aris-repo) ARIS_REPO_OVERRIDE="${2:?--aris-repo requires path}"; shift 2 ;;
+        --repo|--aris-repo) ARIS_REPO_OVERRIDE="${2:?--repo requires path}"; shift 2 ;;
         --with-claude-review-overlay) WITH_CLAUDE_OVERLAY=true; shift ;;
         --with-gemini-review-overlay) WITH_GEMINI_OVERLAY=true; shift ;;
         --profile) PROFILE="${2:?--profile requires NAME}"; shift 2 ;;
@@ -175,10 +178,10 @@ resolve_aris_repo() {
             p="$(abs_path "$ARIS_REPO")"
         else
             for guess in \
-                "$HOME/Desktop/Auto-claude-code-research-in-sleep" \
-                "$HOME/Auto-claude-code-research-in-sleep" \
+                "$HOME/Desktop/debuffer-skills" \
+                "$HOME/debuffer-skills" \
                 "$HOME/aris_repo" \
-                "$HOME/.codex/Auto-claude-code-research-in-sleep"; do
+                "$HOME/.codex/debuffer-skills"; do
                 if [[ -d "$guess/skills/$BASE_PACKAGE" ]]; then
                     p="$(abs_path "$guess")"
                     break
@@ -186,7 +189,7 @@ resolve_aris_repo() {
             done
         fi
     fi
-    [[ -n "${p:-}" ]] || die "cannot find ARIS repo with skills/$BASE_PACKAGE. Use --aris-repo PATH."
+    [[ -n "${p:-}" ]] || die "cannot find skill repo with skills/$BASE_PACKAGE. Use --aris-repo PATH."
     [[ -d "$p/skills/$BASE_PACKAGE" ]] || die "repo missing skills/$BASE_PACKAGE: $p"
     echo "$p"
 }
@@ -201,7 +204,7 @@ selected_packages() {
 build_upstream_inventory() {
     local repo="$1" out="$2"
     local package package_dir d name kind source_rel tmp
-    tmp="$(mktemp -t aris-codex-upstream-raw.XXXX)"
+    tmp="$(mktemp -t debuffer-codex-upstream-raw.XXXX)"
     : > "$out"
     : > "$tmp"
 
@@ -262,11 +265,36 @@ PROJECT_PATH="$(abs_path "$PROJECT_PATH")"
 ARIS_REPO="$(resolve_aris_repo)"
 PROJECT_SKILLS_DIR="$PROJECT_PATH/$SKILLS_REL"
 PROJECT_ARIS_DIR="$PROJECT_PATH/$ARIS_DIR_NAME"
+LEGACY_PROJECT_ARIS_DIR="$PROJECT_PATH/$LEGACY_ARIS_DIR_NAME"
 MANIFEST_PATH="$PROJECT_ARIS_DIR/$MANIFEST_NAME"
 MANIFEST_PREV="$PROJECT_ARIS_DIR/$MANIFEST_PREV_NAME"
 LOCK_DIR="$PROJECT_ARIS_DIR/$LOCK_DIR_NAME"
 DOC_FILE="$PROJECT_PATH/$DOC_FILE_NAME"
 LEGACY_NESTED="$PROJECT_PATH/.agents/skills/aris"
+
+migrate_legacy_state_dir() {
+    if [[ "$ARIS_DIR_NAME" == "$LEGACY_ARIS_DIR_NAME" ]]; then
+        return 0
+    fi
+    if [[ -e "$PROJECT_ARIS_DIR" || -L "$PROJECT_ARIS_DIR" ]]; then
+        if [[ -e "$LEGACY_PROJECT_ARIS_DIR" || -L "$LEGACY_PROJECT_ARIS_DIR" ]]; then
+            warn "legacy state directory still exists at $LEGACY_PROJECT_ARIS_DIR; using $PROJECT_ARIS_DIR"
+        fi
+        return 0
+    fi
+    if [[ ! -e "$LEGACY_PROJECT_ARIS_DIR" && ! -L "$LEGACY_PROJECT_ARIS_DIR" ]]; then
+        return 0
+    fi
+    if is_symlink "$LEGACY_PROJECT_ARIS_DIR"; then
+        die "$LEGACY_PROJECT_ARIS_DIR is a symlink; refusing to migrate state directory"
+    fi
+    if $DRY_RUN; then
+        log "  (dry-run) migrate $LEGACY_ARIS_DIR_NAME -> $ARIS_DIR_NAME"
+        return 0
+    fi
+    mv "$LEGACY_PROJECT_ARIS_DIR" "$PROJECT_ARIS_DIR"
+    log "  migrated legacy state: $LEGACY_ARIS_DIR_NAME -> $ARIS_DIR_NAME"
+}
 
 check_no_symlinked_parents() {
     local p
@@ -279,7 +307,7 @@ check_no_symlinked_parents() {
 
 check_legacy_nested_install() {
     if [[ -e "$LEGACY_NESTED" || -L "$LEGACY_NESTED" ]]; then
-        die "legacy nested Codex install detected at $LEGACY_NESTED. Remove or migrate it before using the flat .agents/skills/<name> layout."
+        die "nested Codex skill install detected at $LEGACY_NESTED. Remove or migrate it before using the flat .agents/skills/<name> layout."
     fi
 }
 
@@ -320,7 +348,7 @@ acquire_lock() {
     fi
     local owner=""
     [[ -f "$LOCK_DIR/owner.json" ]] && owner="$(cat "$LOCK_DIR/owner.json")"
-    die "another install_aris_codex.sh appears to be running (lock: $LOCK_DIR, owner: $owner)"
+    die "another Codex skill install appears to be running (lock: $LOCK_DIR, owner: $owner)"
 }
 
 compute_plan() {
@@ -495,26 +523,33 @@ update_agents_doc() {
     count="$(wc -l < "$installed_names_file" | tr -d ' ')"
     packages_csv="$(selected_packages | paste -sd, -)"
     local repo_lookup_cmd
-    repo_lookup_cmd="ARIS_REPO=\$(awk -F'\\t' '\$1==\"repo_root\"{print \$2; exit}' \"$PROJECT_PATH/$ARIS_DIR_NAME/$MANIFEST_NAME\")"
+    repo_lookup_cmd="SKILL_REPO=\$(awk -F'\\t' '\$1==\"repo_root\"{print \$2; exit}' \"$PROJECT_PATH/$ARIS_DIR_NAME/$MANIFEST_NAME\")"
     new_block="$BLOCK_BEGIN
-## ARIS Codex Skill Scope
-ARIS Codex packages installed in this project: $packages_csv
+## debuffer Codex Skill Scope
+debuffer Codex packages installed in this project: $packages_csv
 Profile: $PROFILE
 Managed entries: $count
 Manifest: \`$ARIS_DIR_NAME/$MANIFEST_NAME\`
-ARIS repo root: \`$ARIS_REPO\`
+Skill repo root: \`$ARIS_REPO\`
 Project skill path: \`$SKILLS_REL/<skill-name>\`
-For ARIS Codex workflows, prefer the project-local skills under \`$SKILLS_REL/\`.
-When a skill needs ARIS helper scripts, resolve the repo root from the manifest or set it explicitly:
+For debuffer Codex workflows, prefer the project-local skills under \`$SKILLS_REL/\`.
+When a skill needs helper scripts, resolve the repo root from the manifest:
 \`$repo_lookup_cmd\`
-Do not edit or delete symlinked skills in place; update upstream or rerun:
-\`bash $ARIS_REPO/tools/install_aris_codex.sh \"$PROJECT_PATH\" --reconcile\`
+Keep symlinked skills managed from the skill repo; update upstream or rerun:
+\`bash $ARIS_REPO/tools/install_debuffer_codex.sh \"$PROJECT_PATH\" --repo \"$ARIS_REPO\" --reconcile\`
 For copied Codex installs, use:
 \`bash $ARIS_REPO/tools/smart_update_codex.sh --project \"$PROJECT_PATH\"\`
 $BLOCK_END"
 
-    if printf '%s' "$original" | grep -qF "$BLOCK_BEGIN"; then
-        new_content="$(python3 - "$DOC_FILE" "$BLOCK_BEGIN" "$BLOCK_END" "$new_block" <<'PYEOF'
+    local active_begin="$BLOCK_BEGIN"
+    local active_end="$BLOCK_END"
+    if ! printf '%s' "$original" | grep -qF "$active_begin" && printf '%s' "$original" | grep -qF "$LEGACY_BLOCK_BEGIN"; then
+        active_begin="$LEGACY_BLOCK_BEGIN"
+        active_end="$LEGACY_BLOCK_END"
+    fi
+
+    if printf '%s' "$original" | grep -qF "$active_begin"; then
+        new_content="$(python3 - "$DOC_FILE" "$active_begin" "$active_end" "$new_block" <<'PYEOF'
 import pathlib
 import re
 import sys
@@ -524,7 +559,7 @@ text = pathlib.Path(path).read_text() if pathlib.Path(path).exists() else ""
 pattern = re.compile(re.escape(begin) + r".*?" + re.escape(end), re.DOTALL)
 matches = pattern.findall(text)
 if len(matches) > 1:
-    sys.stderr.write("ARIS-CODEX:WARN multiple managed blocks found; skipping update\n")
+    sys.stderr.write("DEBUFFER-CODEX:WARN multiple managed blocks found; skipping update\n")
     sys.stdout.write(text)
 else:
     sys.stdout.write(pattern.sub(body, text))
@@ -541,7 +576,7 @@ PYEOF
         return 0
     fi
 
-    tmp="$DOC_FILE.aris-codex-tmp.$$"
+    tmp="$DOC_FILE.debuffer-codex-tmp.$$"
     printf '%s' "$new_content" > "$tmp"
     current=""
     [[ -f "$DOC_FILE" ]] && current="$(cat "$DOC_FILE")"
@@ -560,11 +595,17 @@ remove_agents_doc_block() {
 
     local original new_content tmp current
     original="$(cat "$DOC_FILE")"
-    if ! printf '%s' "$original" | grep -qF "$BLOCK_BEGIN"; then
+    local active_begin="$BLOCK_BEGIN"
+    local active_end="$BLOCK_END"
+    if ! printf '%s' "$original" | grep -qF "$active_begin" && printf '%s' "$original" | grep -qF "$LEGACY_BLOCK_BEGIN"; then
+        active_begin="$LEGACY_BLOCK_BEGIN"
+        active_end="$LEGACY_BLOCK_END"
+    fi
+    if ! printf '%s' "$original" | grep -qF "$active_begin"; then
         return 0
     fi
 
-    new_content="$(python3 - "$DOC_FILE" "$BLOCK_BEGIN" "$BLOCK_END" <<'PYEOF'
+    new_content="$(python3 - "$DOC_FILE" "$active_begin" "$active_end" <<'PYEOF'
 import pathlib
 import re
 import sys
@@ -574,7 +615,7 @@ text = pathlib.Path(path).read_text()
 pattern = re.compile(r"\n?" + re.escape(begin) + r".*?" + re.escape(end) + r"\n?", re.DOTALL)
 matches = pattern.findall(text)
 if len(matches) > 1:
-    sys.stderr.write("ARIS-CODEX:WARN multiple managed blocks found; skipping removal\n")
+    sys.stderr.write("DEBUFFER-CODEX:WARN multiple managed blocks found; skipping removal\n")
     sys.stdout.write(text)
 else:
     updated = pattern.sub("\n", text)
@@ -587,7 +628,7 @@ PYEOF
         return 0
     fi
 
-    tmp="$DOC_FILE.aris-codex-tmp.$$"
+    tmp="$DOC_FILE.debuffer-codex-tmp.$$"
     printf '%s' "$new_content" > "$tmp"
     current="$(cat "$DOC_FILE")"
     if [[ "$current" != "$original" ]]; then
@@ -602,7 +643,7 @@ PYEOF
 do_uninstall() {
     [[ -f "$MANIFEST_PATH" ]] || die "no manifest at $MANIFEST_PATH; nothing to uninstall"
     local manifest_data
-    manifest_data="$(mktemp -t aris-codex-manifest.XXXX)"
+    manifest_data="$(mktemp -t debuffer-codex-manifest.XXXX)"
     load_manifest "$MANIFEST_PATH" "$manifest_data"
     log ""
     log "Uninstall plan:"
@@ -647,7 +688,7 @@ do_uninstall() {
 }
 
 log ""
-log "ARIS Codex Project Install"
+log "debuffer Codex Project Install"
 log "  Project:   $PROJECT_PATH"
 log "  Repo:      $ARIS_REPO"
 log "  Packages:  $(selected_packages | paste -sd, -)"
@@ -655,6 +696,7 @@ log "  Profile:   $PROFILE"
 log "  Action:    $ACTION$($DRY_RUN && echo ' (dry-run)')"
 log ""
 
+migrate_legacy_state_dir
 check_no_symlinked_parents
 check_legacy_nested_install
 if ! $DRY_RUN; then
@@ -670,13 +712,13 @@ if [[ "$ACTION" == "reconcile" && ! -f "$MANIFEST_PATH" ]]; then
     die "--reconcile requires existing manifest; none found at $MANIFEST_PATH"
 fi
 
-UPSTREAM_FILE="$(mktemp -t aris-codex-upstream.XXXX)"
+UPSTREAM_FILE="$(mktemp -t debuffer-codex-upstream.XXXX)"
 build_upstream_inventory "$ARIS_REPO" "$UPSTREAM_FILE"
 
-MANIFEST_DATA="$(mktemp -t aris-codex-manifest.XXXX)"
+MANIFEST_DATA="$(mktemp -t debuffer-codex-manifest.XXXX)"
 load_manifest "$MANIFEST_PATH" "$MANIFEST_DATA"
 
-PLAN_FILE="$(mktemp -t aris-codex-plan.XXXX)"
+PLAN_FILE="$(mktemp -t debuffer-codex-plan.XXXX)"
 compute_plan "$UPSTREAM_FILE" "$MANIFEST_DATA" "$PLAN_FILE"
 print_plan "$PLAN_FILE"
 
@@ -706,7 +748,7 @@ log "Applying:"
 apply_plan "$PLAN_FILE"
 commit_manifest "$MANIFEST_TMP"
 
-INSTALLED_NAMES="$(mktemp -t aris-codex-names.XXXX)"
+INSTALLED_NAMES="$(mktemp -t debuffer-codex-names.XXXX)"
 awk -F'|' '$1=="REUSE"||$1=="ADOPT"||$1=="CREATE"||$1=="UPDATE_TARGET"{print $3}' "$PLAN_FILE" > "$INSTALLED_NAMES"
 update_agents_doc "$INSTALLED_NAMES"
 

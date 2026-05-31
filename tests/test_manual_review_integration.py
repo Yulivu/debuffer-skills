@@ -1,4 +1,4 @@
-"""End-to-end integration test: simulates a real ARIS skill calling manual-review MCP.
+"""End-to-end integration test: simulates a real debuffer skill calling manual-review MCP.
 
 This test:
 1. Starts the MCP server as a subprocess (exactly how Claude Code would)

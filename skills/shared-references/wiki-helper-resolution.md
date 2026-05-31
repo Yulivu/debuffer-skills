@@ -10,8 +10,8 @@ left a real user's `research-wiki/` empty for a week.
 
 ```bash
 cd "$(git rev-parse --show-toplevel 2>/dev/null || pwd)" || exit 1
-ARIS_REPO="${ARIS_REPO:-$(awk -F'\t' '$1=="repo_root"{print $2; exit}' .aris/installed-skills.txt 2>/dev/null)}"
-WIKI_SCRIPT=".aris/tools/research_wiki.py"
+ARIS_REPO="${ARIS_REPO:-$(awk -F'\t' '$1=="repo_root"{print $2; exit}' .debuffer_skills/installed-skills.txt 2>/dev/null)}"
+WIKI_SCRIPT=".debuffer_skills/tools/research_wiki.py"
 [ -f "$WIKI_SCRIPT" ] || WIKI_SCRIPT="tools/research_wiki.py"
 [ -f "$WIKI_SCRIPT" ] || { [ -n "${ARIS_REPO:-}" ] && WIKI_SCRIPT="$ARIS_REPO/tools/research_wiki.py"; }
 ```
@@ -27,11 +27,11 @@ The skill **is** the wiki tool. If the helper is missing, fail loudly.
 
 ```bash
 [ -f "$WIKI_SCRIPT" ] || {
-  echo "ERROR: research_wiki.py not found at .aris/tools/, tools/, or \$ARIS_REPO/tools/." >&2
+  echo "ERROR: research_wiki.py not found at .debuffer_skills/tools/, tools/, or \$ARIS_REPO/tools/." >&2
   echo "       Fix one of:" >&2
-  echo "         1. rerun 'bash tools/install_aris.sh' from the ARIS repo (creates .aris/tools symlink)" >&2
-  echo "         2. export ARIS_REPO=<path-to-ARIS-repo>" >&2
-  echo "         3. cp <ARIS-repo>/tools/research_wiki.py tools/" >&2
+  echo "         1. rerun 'bash tools/install_aris.sh' from the debuffer repo (creates .debuffer_skills/tools symlink)" >&2
+  echo "         2. export ARIS_REPO=<path-to-debuffer-repo>" >&2
+  echo "         3. cp <debuffer-repo>/tools/research_wiki.py tools/" >&2
   exit 1
 }
 ```
@@ -46,9 +46,9 @@ skipped.
 
 ```bash
 [ -f "$WIKI_SCRIPT" ] || {
-  echo "WARN: research_wiki.py not found at .aris/tools/, tools/, or \$ARIS_REPO/tools/." >&2
+  echo "WARN: research_wiki.py not found at .debuffer_skills/tools/, tools/, or \$ARIS_REPO/tools/." >&2
   echo "      Primary output will still be produced; wiki update is skipped." >&2
-  echo "      Fix: rerun 'bash tools/install_aris.sh', export ARIS_REPO, or 'cp <ARIS-repo>/tools/research_wiki.py tools/'." >&2
+  echo "      Fix: rerun 'bash tools/install_aris.sh', export ARIS_REPO, or 'cp <debuffer-repo>/tools/research_wiki.py tools/'." >&2
   WIKI_SCRIPT=""
 }
 ```
@@ -65,9 +65,9 @@ Three locations correspond to three legitimate install / dev paths:
 
 | Location | When applicable |
 |---|---|
-| `.aris/tools/research_wiki.py` | After running `bash tools/install_aris.sh` in the user project (Phase 0 symlink, added in #174 / #192) |
-| `tools/research_wiki.py` | (a) Manual copy of the helper into the user project (a documented temporary workaround); (b) running a SKILL from inside the ARIS repo itself |
-| `$ARIS_REPO/tools/research_wiki.py` | Env var explicitly set, or auto-resolved from `.aris/installed-skills.txt`'s `repo_root` field |
+| `.debuffer_skills/tools/research_wiki.py` | After running `bash tools/install_aris.sh` in the user project (Phase 0 symlink, added in #174 / #192) |
+| `tools/research_wiki.py` | (a) Manual copy of the helper into the user project (a documented temporary workaround); (b) running a SKILL from inside the debuffer repo itself |
+| `$ARIS_REPO/tools/research_wiki.py` | Env var explicitly set, or auto-resolved from `.debuffer_skills/installed-skills.txt`'s `repo_root` field |
 
 Order matters: the symlinked install is preferred because the symlink
 auto-tracks upstream tool fixes; the manual copy is second because it
@@ -79,7 +79,7 @@ because it's the most fragile.
 - ❌ A 4th layer that searches up the directory tree for `tools/` —
   too much path magic, surprising failure modes.
 - ❌ A 4th layer at `~/.local/share/aris/...` or `/usr/local/share/...`
-  — no installer precedent in ARIS today.
+  — no installer precedent in debuffer today.
 - ❌ Adding `~/.codex/skills/research-wiki/research_wiki.py` — that's
   Codex-side global install, lives in the **Codex** mirror's chain
   (`skills/skills-codex/...`), not the CC chain.
@@ -94,7 +94,7 @@ The `${ARIS_REPO:-$(awk ...)}` substitution propagates the inner
 `awk` exit code to `set -e` even when stderr is suppressed with
 `2>/dev/null`. `awk` returns non-zero (2 on most macOS systems) when
 its input file does not exist — which is the common case (no
-`.aris/installed-skills.txt` yet). With `set -e` enabled, the chain
+`.debuffer_skills/installed-skills.txt` yet). With `set -e` enabled, the chain
 will exit silently with code 2 before reaching the `[ -f ... ]`
 checks, masking the real failure mode and breaking the manual-copy
 fallback.
@@ -103,8 +103,8 @@ If a SKILL author wants strict-mode safety, restructure the manifest
 read instead:
 
 ```bash
-if [ -z "${ARIS_REPO:-}" ] && [ -f .aris/installed-skills.txt ]; then
-    ARIS_REPO=$(awk -F'\t' '$1=="repo_root"{print $2; exit}' .aris/installed-skills.txt 2>/dev/null) || true
+if [ -z "${ARIS_REPO:-}" ] && [ -f .debuffer_skills/installed-skills.txt ]; then
+    ARIS_REPO=$(awk -F'\t' '$1=="repo_root"{print $2; exit}' .debuffer_skills/installed-skills.txt 2>/dev/null) || true
 fi
 ```
 

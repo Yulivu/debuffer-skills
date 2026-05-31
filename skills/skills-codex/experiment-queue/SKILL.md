@@ -144,10 +144,10 @@ If any precondition fails, show user which jobs are blocked and why.
 Resolve the bundled helper directory (`$PROJECT_DIR` / `$RUN_TS` / `$LOCAL_RUN_DIR` already set in Step 1). Phase 3.3 (Arch C) moved the canonical scripts to `skills/experiment-queue/scripts/`; `tools/experiment_queue/` retains `os.execv` shims for legacy resolver layers:
 
 ```bash
-if [ -z "${ARIS_REPO:-}" ] && [ -f .aris/installed-skills-codex.txt ]; then
-    ARIS_REPO=$(awk -F'\t' '$1=="repo_root"{print $2; exit}' .aris/installed-skills-codex.txt 2>/dev/null) || true
+if [ -z "${ARIS_REPO:-}" ] && [ -f .debuffer_skills/installed-skills-codex.txt ]; then
+    ARIS_REPO=$(awk -F'\t' '$1=="repo_root"{print $2; exit}' .debuffer_skills/installed-skills-codex.txt 2>/dev/null) || true
 fi
-[ -n "${ARIS_REPO:-}" ] || { echo "ERROR: ARIS_REPO not set. Use install_aris_codex.sh managed install or export ARIS_REPO=/path/to/ARIS."; exit 1; }
+[ -n "${ARIS_REPO:-}" ] || { echo "ERROR: ARIS_REPO not set. Use install_aris_codex.sh managed install or export ARIS_REPO=/path/to/debuffer."; exit 1; }
 # Prefer the new canonical location; fall back to legacy tools/ shim path.
 QUEUE_TOOLS="$ARIS_REPO/skills/experiment-queue/scripts"
 [ -f "$QUEUE_TOOLS/queue_manager.py" ] || QUEUE_TOOLS="$ARIS_REPO/tools/experiment_queue"
@@ -157,22 +157,22 @@ QUEUE_TOOLS="$ARIS_REPO/skills/experiment-queue/scripts"
 Compute remote paths (note: modern `scp` runs in SFTP mode and does NOT reliably expand `$HOME` in destination paths — use remote-relative for `scp`, `$HOME`-prefixed for `ssh` command strings):
 
 ```bash
-REMOTE_RUN_REL=".aris_queue/runs/$RUN_TS"
+REMOTE_RUN_REL=".debuffer_skills_queue/runs/$RUN_TS"
 REMOTE_RUN_DIR="\$HOME/$REMOTE_RUN_REL"
 ```
 
 Bootstrap remote run dir + copy helpers + copy manifest. Per-invocation, idempotent:
 
 ```bash
-ssh <server> "mkdir -p \"$REMOTE_RUN_DIR/logs\" \"\$HOME/.aris_queue\""
-scp "$QUEUE_TOOLS/queue_manager.py" "$QUEUE_TOOLS/build_manifest.py" <server>:.aris_queue/
+ssh <server> "mkdir -p \"$REMOTE_RUN_DIR/logs\" \"\$HOME/.debuffer_skills_queue\""
+scp "$QUEUE_TOOLS/queue_manager.py" "$QUEUE_TOOLS/build_manifest.py" <server>:.debuffer_skills_queue/
 scp "$LOCAL_RUN_DIR/manifest.json" <server>:"$REMOTE_RUN_REL/manifest.json"
 ```
 
 Launch the scheduler as a detached `nohup` process:
 
 ```bash
-ssh <server> "nohup python3 \"\$HOME/.aris_queue/queue_manager.py\" \\
+ssh <server> "nohup python3 \"\$HOME/.debuffer_skills_queue/queue_manager.py\" \\
   --manifest \"$REMOTE_RUN_DIR/manifest.json\" \\
   --state    \"$REMOTE_RUN_DIR/queue_state.json\" \\
   --log-dir  \"$REMOTE_RUN_DIR/logs\" \\

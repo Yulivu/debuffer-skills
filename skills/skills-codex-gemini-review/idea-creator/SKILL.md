@@ -108,7 +108,7 @@ After this start call, immediately save the returned `jobId` and poll `mcp__gemi
 > This phase does NOT judge idea quality, novelty, or impact — those are the
 > job of the Phase-4 cross-model reviewer (a different model family). Dropping
 > ideas here on a same-family novelty or impact call would pre-filter the
-> reviewer's input with same-family judgment — the opposite of why ARIS uses a
+> reviewer's input with same-family judgment — the opposite of why debuffer uses a
 > cross-model reviewer at all. Phase 3 only (a) clusters near-duplicate ideas
 > and (b) drops ideas that are OBJECTIVELY out of budget; everything else
 > passes through ANNOTATED, not eliminated.

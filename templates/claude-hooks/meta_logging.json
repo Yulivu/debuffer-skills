@@ -1,5 +1,5 @@
 {
-  "$comment": "ARIS Meta-Optimize: Passive event logging for harness optimization. Copy to .claude/settings.json or merge into existing settings.",
+  "$comment": "debuffer Meta-Optimize: Passive event logging for harness optimization. Copy to .claude/settings.json or merge into existing settings.",
   "hooks": {
     "PostToolUse": [
       {

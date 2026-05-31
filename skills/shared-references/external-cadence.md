@@ -25,7 +25,7 @@ different model family (`reviewer-independence.md`).
 
 External cadence is genuinely useful for one shape of work — waiting on
 the external world — and genuinely harmful for another — wrapping
-ARIS's own internal semantic loops. The two look superficially similar
+debuffer's own internal semantic loops. The two look superficially similar
 ("run this skill again later"), so people reach for `/loop` on both. The
 harmful case has a specific pathology:
 
@@ -34,7 +34,7 @@ harmful case has a specific pathology:
   review. It re-runs a verdict-bearing skill on a clock that has nothing
   to do with whether the artifact changed. Zero new signal, full token
   cost.
-- **Thread discontinuity.** ARIS's multi-round review skills carry state
+- **Thread discontinuity.** debuffer's multi-round review skills carry state
   across rounds in the reviewer's own thread: `codex-reply` reuses the
   round-1 `threadId` and the accumulated `REVIEWER_MEMORY` so the
   reviewer can check resolution against its *own* prior critique
@@ -67,7 +67,7 @@ One-liner: **schedule the wait, never the verdict.**
 
 These replace a Claude session that would otherwise sit `sleep`-ing on
 an external event. The cadence is the *only* thing the agent is waiting
-for; no semantic judgment is being re-run. ARIS already validated this
+for; no semantic judgment is being re-run. debuffer already validated this
 pattern in production.
 
 - **GPU / experiment job completion polling.**
@@ -94,7 +94,7 @@ pattern in production.
   external fact is "the world published something new today"; the
   cadence just sets the polling rhythm.
 
-ARIS's own `tools/watchdog.py` makes the additive shape explicit: it
+debuffer's own `tools/watchdog.py` makes the additive shape explicit: it
 aggregates per-task status into a `summary.txt` whose header documents
 it as a "one-line-per-task summary for CronCreate polling." The
 artifact is built *so that* an external low-frequency poller can read

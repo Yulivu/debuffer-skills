@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# smart_update_copilot.sh -- update copied ARIS skills for Copilot CLI safely.
+# smart_update_copilot.sh -- update copied debuffer skills for Copilot CLI safely.
 #
 # Default upstream:
 #   repo/skills (mainline, excluding codex-specific packages)
@@ -14,7 +14,7 @@
 #
 # Customization detection:
 #   On first --apply, records SHA-256 checksums of installed files to
-#   <local>/.aris-copilot-baselines.sha256. On subsequent runs, a file is
+#   <local>/.debuffer-copilot-baselines.sha256. On subsequent runs, a file is
 #   considered "customized" if its current hash differs from the recorded
 #   baseline (i.e., user modified it after install). Files matching their
 #   baseline are safe to overwrite with the new upstream version.
@@ -56,7 +56,7 @@ BASE_UPSTREAM="$REPO_ROOT/skills"
 SKIP_DIRS_PATTERN="^(skills-codex|skills-codex-claude-review|skills-codex-gemini-review)$"
 
 # Baseline checksum file for hash-based customization detection
-BASELINE_FILE_NAME=".aris-copilot-baselines.sha256"
+BASELINE_FILE_NAME=".debuffer-copilot-baselines.sha256"
 
 resolve_upstream() {
     if $HAS_CUSTOM_UPSTREAM; then
@@ -121,14 +121,18 @@ BASELINE_FILE="$LOCAL/$BASELINE_FILE_NAME"
 # Refuse if managed by install_aris_copilot.sh
 if [[ "$MODE" == "project" ]]; then
     local_project="$(cd "$PROJECT_PATH" 2>/dev/null && pwd)"
-    manifest="$local_project/.aris/installed-skills-copilot.txt"
+    manifest="$local_project/.debuffer_skills/installed-skills-copilot.txt"
+    legacy_manifest="$local_project/.aris/installed-skills-copilot.txt"
     if [[ -f "$manifest" ]]; then
         die "this project uses symlink install (manifest: $manifest). Use: git pull && bash tools/install_aris_copilot.sh \"$local_project\" --reconcile"
+    fi
+    if [[ -f "$legacy_manifest" ]]; then
+        die "this project has a legacy symlink install (manifest: $legacy_manifest). Use: git pull && bash tools/install_aris_copilot.sh \"$local_project\" --reconcile"
     fi
 fi
 
 log ""
-log "ARIS Copilot CLI Smart Update"
+log "debuffer Copilot CLI Smart Update"
 log "  Upstream:  $UPSTREAM"
 log "  Local:     $LOCAL"
 log "  Mode:      $MODE"

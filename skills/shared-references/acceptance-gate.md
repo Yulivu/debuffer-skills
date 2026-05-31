@@ -7,7 +7,7 @@ same-family-safe. The thing being judged at that gate — not the loop's
 subject matter, not how many agents ran — decides whether Claude may
 judge it.**
 
-ARIS has loops that keep working until a condition is met: `/auto-review-loop`,
+debuffer has loops that keep working until a condition is met: `/auto-review-loop`,
 `/dse-loop`, the `/experiment-bridge` auto-debug cycle, the
 `/auto-paper-improvement-loop`, and any future "keep going until X"
 skill. Every such loop terminates on a gate it evaluates each iteration:
@@ -157,7 +157,7 @@ the loop decide to stop, the loop is self-acquitting.** A safe Type-B
 loop is *structurally unable* to terminate-accept without an external
 family's verdict.
 
-## ARIS loops mapped to the taxonomy
+## debuffer loops mapped to the taxonomy
 
 The codebase **already** follows this rule. This section makes the
 implicit pattern explicit and operational for the next loop someone
@@ -288,7 +288,7 @@ regardless of how many rounds it runs or how confident it sounds.
   the score. Claude scoring Claude and stopping at 6 is self-acquittal.
 - **`/loop` wrapping an internal semantic loop.** External cadence
   (`/loop`) is additive only for external-world waits (GPU done?
-  overnight heartbeat?). Wrapping ARIS's internal semantic loops with a
+  overnight heartbeat?). Wrapping debuffer's internal semantic loops with a
   timer breaks `threadId` continuity and re-runs Type-B verdicts on a
   clock instead of on the reviewer's turn — noise at best, a corrupted
   acquittal at worst. Keep external cadence outside the acceptance gate.

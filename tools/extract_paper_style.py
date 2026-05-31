@@ -462,7 +462,7 @@ def _cache_root() -> Path:
 def main() -> int:
     ap = argparse.ArgumentParser(
         description="Extract a skeleton-only style profile from a reference paper "
-                    "for opt-in use by ARIS writer skills via --style-ref.",
+                    "for opt-in use by debuffer writer skills via --style-ref.",
     )
     ap.add_argument("--source", required=True,
                     help="Local path, arXiv ID, http(s) URL, or 'arxiv:<id>'. "

@@ -1,6 +1,6 @@
 # Assurance Contract
 
-ARIS audits emit machine-readable verdicts. The `assurance` axis decides whether
+debuffer audits emit machine-readable verdicts. The `assurance` axis decides whether
 those verdicts are advisory (draft mode) or load-bearing gates (submission mode).
 This contract is referenced by `paper-writing`, `paper-claim-audit`, `citation-audit`,
 `proof-checker`, and the external verifier (canonical name `verify_paper_audits.sh`;
@@ -100,7 +100,7 @@ human-readable Markdown sibling). The JSON must contain at minimum:
     "sections/5.evidence.tex":           "sha256:b2d1...",
     "/Users/me/project/results/run_2026_04_19.json": "sha256:c9e4..."
   },
-  "trace_path": ".aris/traces/paper-claim-audit/2026-04-21_run01/",
+  "trace_path": ".debuffer_skills/traces/paper-claim-audit/2026-04-21_run01/",
   "thread_id":  "019dae73-fc12-4ab8-...",
   "reviewer_model": "gpt-5.5",
   "reviewer_reasoning": "xhigh",

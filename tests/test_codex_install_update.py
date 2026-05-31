@@ -64,7 +64,7 @@ def test_install_aris_codex_dry_run_has_no_project_writes(tmp_path: Path) -> Non
     )
 
     assert "(dry-run) no changes made" in dry_run.stdout
-    assert not (project / ".aris").exists()
+    assert not (project / ".debuffer_skills").exists()
     assert not (project / ".agents").exists()
     assert not (project / "AGENTS.md").exists()
 
@@ -72,6 +72,31 @@ def test_install_aris_codex_dry_run_has_no_project_writes(tmp_path: Path) -> Non
 def test_install_aris_codex_avoids_bash4_associative_arrays() -> None:
     text = INSTALL_SCRIPT.read_text(encoding="utf-8")
     assert "declare -A" not in text
+
+
+def test_install_aris_codex_migrates_legacy_state_dir(tmp_path: Path) -> None:
+    repo = make_minimal_aris_repo(tmp_path)
+    project = tmp_path / "project"
+    project.mkdir()
+    legacy_state = project / ".aris"
+    legacy_state.mkdir()
+    (legacy_state / "legacy-marker.txt").write_text("keep\n")
+
+    run(
+        [
+            "bash",
+            str(INSTALL_SCRIPT),
+            str(project),
+            "--aris-repo",
+            str(repo),
+            "--quiet",
+        ]
+    )
+
+    state = project / ".debuffer_skills"
+    assert not legacy_state.exists()
+    assert (state / "legacy-marker.txt").read_text() == "keep\n"
+    assert (state / "installed-skills-codex.txt").exists()
 
 
 def test_install_aris_codex_reconcile_and_uninstall(tmp_path: Path) -> None:
@@ -90,12 +115,12 @@ def test_install_aris_codex_reconcile_and_uninstall(tmp_path: Path) -> None:
         ]
     )
 
-    manifest = project / ".aris" / "installed-skills-codex.txt"
+    manifest = project / ".debuffer_skills" / "installed-skills-codex.txt"
     assert manifest.exists()
     assert (project / "AGENTS.md").exists()
     agents_text = (project / "AGENTS.md").read_text()
-    assert "ARIS Codex Skill Scope" in agents_text
-    assert f"ARIS repo root: `{repo}`" in agents_text
+    assert "debuffer Codex Skill Scope" in agents_text
+    assert f"Skill repo root: `{repo}`" in agents_text
     assert "repo_root" in agents_text
     assert '$1=="repo_root"{print $2; exit}' in agents_text
     assert "$1==repo_root" not in agents_text
@@ -149,8 +174,8 @@ def test_install_aris_codex_reconcile_and_uninstall(tmp_path: Path) -> None:
     )
     assert (project / ".agents" / "skills" / "local-only").exists()
     assert not (project / ".agents" / "skills" / "beta").exists()
-    assert (project / ".aris" / "installed-skills-codex.txt.prev").exists()
-    assert "ARIS Codex Skill Scope" not in (project / "AGENTS.md").read_text()
+    assert (project / ".debuffer_skills" / "installed-skills-codex.txt.prev").exists()
+    assert "debuffer Codex Skill Scope" not in (project / "AGENTS.md").read_text()
 
 
 def test_install_aris_codex_profile_scopes_inventory(tmp_path: Path) -> None:
@@ -180,7 +205,7 @@ def test_install_aris_codex_profile_scopes_inventory(tmp_path: Path) -> None:
 
     installed = {path.name for path in (project / ".agents" / "skills").iterdir()}
     assert installed == {"shared-references", "research-review", "auto-review-loop"}
-    manifest = (project / ".aris" / "installed-skills-codex.txt").read_text()
+    manifest = (project / ".debuffer_skills" / "installed-skills-codex.txt").read_text()
     assert "profile\treview" in manifest
     assert "Profile: review" in (project / "AGENTS.md").read_text()
 
@@ -221,8 +246,8 @@ def test_install_aris_codex_uninstall_uses_manifest_repo_root(tmp_path: Path) ->
     assert not alpha_link.exists()
     assert not (project / ".agents" / "skills" / "beta").exists()
     assert not (project / ".agents" / "skills" / "shared-references").exists()
-    assert not (project / ".aris" / "installed-skills-codex.txt").exists()
-    assert (project / ".aris" / "installed-skills-codex.txt.prev").exists()
+    assert not (project / ".debuffer_skills" / "installed-skills-codex.txt").exists()
+    assert (project / ".debuffer_skills" / "installed-skills-codex.txt.prev").exists()
 
 
 def test_install_aris_codex_reconcile_removes_stale_links_from_manifest_repo(tmp_path: Path) -> None:
@@ -268,7 +293,7 @@ def test_install_aris_codex_reconcile_removes_stale_links_from_manifest_repo(tmp
     assert (project / ".agents" / "skills" / "gamma").resolve() == (
         new_repo / "skills" / "skills-codex" / "gamma"
     )
-    manifest = (project / ".aris" / "installed-skills-codex.txt").read_text()
+    manifest = (project / ".debuffer_skills" / "installed-skills-codex.txt").read_text()
     assert "\talpha\t" not in manifest
     assert f"repo_root\t{new_repo}" in manifest
 
@@ -309,7 +334,7 @@ def test_install_aris_codex_reconcile_accepts_already_deleted_stale_link(tmp_pat
         ]
     )
 
-    manifest = (project / ".aris" / "installed-skills-codex.txt").read_text()
+    manifest = (project / ".debuffer_skills" / "installed-skills-codex.txt").read_text()
     assert "\talpha\t" not in manifest
 
 
@@ -401,7 +426,7 @@ def test_smart_update_codex_allows_unrelated_symlinked_skills(tmp_path: Path) ->
     assert "third-party" in dry_run.stdout
 
 
-def test_smart_update_codex_refuses_aris_symlinked_skills(tmp_path: Path) -> None:
+def test_smart_update_codex_refuses_symlinked_skills(tmp_path: Path) -> None:
     local = tmp_path / "local"
     local.mkdir()
     (local / "auto-review-loop").symlink_to(
@@ -411,7 +436,7 @@ def test_smart_update_codex_refuses_aris_symlinked_skills(tmp_path: Path) -> Non
     refused = run(["bash", str(UPDATE_SCRIPT), "--local", str(local)], check=False)
 
     assert refused.returncode != 0
-    assert "symlink-managed ARIS entry 'auto-review-loop'" in refused.stderr
+    assert "symlink-managed debuffer entry 'auto-review-loop'" in refused.stderr
 
 
 def test_smart_update_codex_ignores_local_only_shared_reference_failures(tmp_path: Path) -> None:

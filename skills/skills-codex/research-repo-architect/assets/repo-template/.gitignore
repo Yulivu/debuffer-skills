@@ -42,11 +42,11 @@ wandb/
 *.csv.gz
 
 # ARIS / agent runtime state
-.aris/traces/
-.aris/cache/
-.aris/runs/
-.aris/meta/events.jsonl
-.aris/*.lock.d/
+.debuffer_skills/traces/
+.debuffer_skills/cache/
+.debuffer_skills/runs/
+.debuffer_skills/meta/events.jsonl
+.debuffer_skills/*.lock.d/
 .agents/skills/
 
 # Editors and OS

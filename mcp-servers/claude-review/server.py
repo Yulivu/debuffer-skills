@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Claude review MCP server for Codex-first ARIS workflows.
+"""Claude review MCP server for Codex-first debuffer workflows.
 
 This server exposes a narrow review-only interface over Claude Code CLI so
 Codex can remain the executor while Claude acts as the external reviewer.

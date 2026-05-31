@@ -3,7 +3,7 @@
 
 This server mirrors the narrow review-only interface used by the existing
 review bridges, but defaults to the direct Gemini API so Codex can reuse the
-original ARIS review-heavy skill structure with minimal changes. Gemini CLI is
+original debuffer review-heavy skill structure with minimal changes. Gemini CLI is
 kept only as an optional fallback. It is intentionally self-contained so it can
 be copied into `~/.codex/mcp-servers/gemini-review/` without depending on this
 repository.

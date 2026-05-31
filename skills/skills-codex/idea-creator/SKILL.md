@@ -33,7 +33,7 @@ Resolve the wiki helper using the Codex-side canonical chain (see
 `../shared-references/wiki-helper-resolution.md`):
 
 ```bash
-ARIS_REPO="${ARIS_REPO:-$(awk -F'\t' '$1=="repo_root"{print $2; exit}' .aris/installed-skills-codex.txt 2>/dev/null)}"
+ARIS_REPO="${ARIS_REPO:-$(awk -F'\t' '$1=="repo_root"{print $2; exit}' .debuffer_skills/installed-skills-codex.txt 2>/dev/null)}"
 WIKI_SCRIPT=""
 [ -n "$ARIS_REPO" ] && [ -f "$ARIS_REPO/tools/research_wiki.py" ] && WIKI_SCRIPT="$ARIS_REPO/tools/research_wiki.py"
 [ -z "$WIKI_SCRIPT" ] && [ -f tools/research_wiki.py ] && WIKI_SCRIPT="tools/research_wiki.py"
@@ -119,7 +119,7 @@ Save a Review Tracing record for this `spawn_agent` call following `../shared-re
 > This phase does NOT judge idea quality, novelty, or impact — those are the
 > job of the Phase-4 cross-model reviewer (a different model family). Dropping
 > ideas here on a same-family novelty or impact call would pre-filter the
-> reviewer's input with same-family judgment — the opposite of why ARIS uses a
+> reviewer's input with same-family judgment — the opposite of why debuffer uses a
 > cross-model reviewer at all. Phase 3 only (a) clusters near-duplicate ideas
 > and (b) drops ideas that are OBJECTIVELY out of budget; everything else
 > passes through ANNOTATED, not eliminated.
@@ -260,7 +260,7 @@ For each recommended and eliminated idea:
 1. Create or update `research-wiki/ideas/<idea_id>.md`.
 2. Include `node_id`, `stage`, `outcome`, `based_on`, `target_gaps`, hypothesis, proposed method, expected outcome, and pilot results when available.
 3. If `WIKI_SCRIPT` is available, add edges from idea to source papers and target gaps, then rebuild `query_pack.md`.
-4. If `WIKI_SCRIPT` is unavailable, write the idea pages and report that graph edges/query-pack rebuild require ARIS `research_wiki.py`.
+4. If `WIKI_SCRIPT` is unavailable, write the idea pages and report that graph edges/query-pack rebuild require debuffer `research_wiki.py`.
 
 Required edge semantics when helper support exists:
 

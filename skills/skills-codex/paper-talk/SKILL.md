@@ -46,7 +46,7 @@ These are non-negotiable across all phases:
 
 - **PAPER_DIR = `paper/`** — Source paper directory. Override via positional argument.
 - **OUTPUT_DIR = `slides/`** — Where the deck artefacts live.
-- **STATE_DIR = `.aris/paper-talk/`** — Workflow state, audit logs, final report.
+- **STATE_DIR = `.debuffer_skills/paper-talk/`** — Workflow state, audit logs, final report.
 - **TALK_TYPE = `spotlight`** — Default talk format. Inherited by `/paper-slides`.
 - **TALK_MINUTES = 15** — Default duration. Inherited by `/paper-slides`.
 - **VENUE = `NeurIPS`** — Default venue (used by `/paper-slides` color schemes when `— style` is not passed).
@@ -84,7 +84,7 @@ slides/
 ├── TALK_SCRIPT.md                  # full word-for-word talk script + Q&A (from /paper-slides)
 └── assets/                         # per-slide PNG previews
 
-.aris/paper-talk/
+.debuffer_skills/paper-talk/
 ├── PIPELINE_STATE.json             # phase pointer, status, timestamps
 ├── FINAL_REPORT.md                 # human-readable summary at end
 ├── audit-input/                    # Phase-4 staging copies of slide text + notes + script (so /paper-claim-audit and /citation-audit can run on slide content as a synthetic "paper")
@@ -118,7 +118,7 @@ The audit JSON files follow the shared 6-state schema; see
    - Codex MCP availability.
    - python-pptx (`python3 -c 'import pptx'`).
 3. **Resolve overrides** from `$ARGUMENTS`: `talk_type`, `minutes`, `assurance`, `reference`, `style`, `effort`.
-4. **State init**: write `.aris/paper-talk/PIPELINE_STATE.json` with `phase: 0`, timestamp, all resolved overrides.
+4. **State init**: write `.debuffer_skills/paper-talk/PIPELINE_STATE.json` with `phase: 0`, timestamp, all resolved overrides.
 5. **Resume mode**: if `slides/SLIDE_OUTLINE.md` exists and `PIPELINE_STATE.json` shows recent in-progress work, prompt the user — resume from last phase or start fresh.
 
 ### Phase 1: Slide Outline (Checkpoint)
@@ -203,7 +203,7 @@ Skip when `assurance ∈ {draft, polished}`.
 JSON under `paper/`. Slides have a different shape, so this phase first
 **stages** slide artefacts into a synthetic paper directory, then invokes
 the audits against that synthetic input. Verdicts are written under
-`.aris/paper-talk/audits/` using the shared 6-state schema (`PASS`,
+`.debuffer_skills/paper-talk/audits/` using the shared 6-state schema (`PASS`,
 `WARN`, `FAIL`, `NOT_APPLICABLE`, `BLOCKED`, `ERROR`) — see
 `../shared-references/assurance-contract.md`.
 
@@ -214,7 +214,7 @@ expected layout: `main.tex` at the root that `\input{}`s `sections/*.tex`,
 plus a `.bib` file and `results/`+`figures/` symlinks.
 
 ```
-.aris/paper-talk/audit-input/
+.debuffer_skills/paper-talk/audit-input/
 ├── main.tex
 │   # contains: \input{sections/slide_text.tex}
 │   #           \input{sections/notes.tex}
@@ -242,12 +242,12 @@ text + speaker notes + full talk script** — talks often smuggle
 unsupported claims into spoken parts that the visible bullets don't show.
 
 ```
-/paper-claim-audit ".aris/paper-talk/audit-input"
+/paper-claim-audit ".debuffer_skills/paper-talk/audit-input"
 ```
 
 The audit emits `audit-input/PAPER_CLAIM_AUDIT.json` with the shared
 6-state schema. Move it to
-`.aris/paper-talk/audits/slide_claim_audit.json` and de-stage the path
+`.debuffer_skills/paper-talk/audits/slide_claim_audit.json` and de-stage the path
 prefix so the verdicts cite slide K rather than synthetic-paper sections.
 
 A `FAIL` or `BLOCKED` verdict on any claim downgrades the Phase-6 final
@@ -259,10 +259,10 @@ Invoke `/citation-audit` over the staged input. Verify any `\cite{...}` in
 slides + notes + script via DBLP / CrossRef; flag fabricated entries.
 
 ```
-/citation-audit ".aris/paper-talk/audit-input"
+/citation-audit ".debuffer_skills/paper-talk/audit-input"
 ```
 
-Output → `.aris/paper-talk/audits/citation_audit.json` (6-state).
+Output → `.debuffer_skills/paper-talk/audits/citation_audit.json` (6-state).
 
 #### 4.3 Anonymity scan
 
@@ -275,7 +275,7 @@ When the talk is for an anonymous-submission venue or the user passed
 - Real submission counts.
 - Real URLs that would deanonymize.
 
-Output → `.aris/paper-talk/audits/anonymity_scan.json` (6-state). Any
+Output → `.debuffer_skills/paper-talk/audits/anonymity_scan.json` (6-state). Any
 `FAIL` (real-content leak) blocks `conference-ready`.
 
 ### Phase 5: Final Export + Integrity
@@ -291,7 +291,7 @@ Then:
 
 1. **Recompile Beamer cleanly**: `cd slides && latexmk -pdf -xelatex main.tex` (or `pdflatex` for non-CJK). Confirm `main.pdf` page count matches outline slide count.
 2. **Render `FINAL_PPTX` → PDF** via `soffice --headless --convert-to pdf <FINAL_PPTX> -outdir slides/`. If unavailable, prompt user.
-3. **Export integrity check** → `.aris/paper-talk/audits/export_integrity.json` (6-state):
+3. **Export integrity check** → `.debuffer_skills/paper-talk/audits/export_integrity.json` (6-state):
    - PPTX-PDF page count == Beamer-PDF page count.
    - Aspect ratio == declared (16:9 default).
    - No fully-blank slide.
@@ -303,7 +303,7 @@ specifics to the user.
 
 ### Phase 6: Final Report
 
-Write `.aris/paper-talk/FINAL_REPORT.md` with:
+Write `.debuffer_skills/paper-talk/FINAL_REPORT.md` with:
 
 - **Verdict**: `draft` | `polished` | `conference-ready` (downgraded if audits failed).
 - **Artefact paths**: Beamer source / PDF, baseline PPTX, polished PPTX, polished PDF, notes, script.

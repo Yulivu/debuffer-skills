@@ -2,7 +2,7 @@
 
 ## Overview
 
-Every ARIS skill accepts an optional `effort` parameter that controls how much work the system does. This affects breadth, depth, iterations, and coverage — but **never** the quality of cross-model review.
+Every debuffer skill accepts an optional `effort` parameter that controls how much work the system does. This affects breadth, depth, iterations, and coverage — but **never** the quality of cross-model review.
 
 ```
 /any-skill "args" — effort: lite | balanced | max | beast
@@ -31,7 +31,7 @@ For budget-constrained users or quick explorations. Minimum viable depth.
 Implies `assurance: draft` (see below).
 
 ### `balanced` (1x tokens) — DEFAULT
-Current ARIS behavior. What existing users get today. No breakage.
+Current debuffer behavior. What existing users get today. No breakage.
 Implies `assurance: draft`.
 
 ### `max` (~2.5x tokens)

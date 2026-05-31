@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# ARIS Smart Skill Update
+# debuffer Smart Skill Update
 # Intelligently compares local skills with upstream, detects personal
 # customizations, and recommends safe update strategy per skill.
 #
@@ -123,7 +123,7 @@ if [[ "$TARGET_SUBDIR" == ".claude/skills/aris" || "$TARGET_SUBDIR" == ".agents/
     echo "" >&2
     echo -e "\033[1;33m⚠️  --target-subdir $TARGET_SUBDIR is DEPRECATED\033[0m" >&2
     echo "" >&2
-    echo "  Reason: the nested 'aris/' subdirectory hides skills from Claude Code's" >&2
+        echo "  Reason: the nested skill subdirectory hides skills from Claude Code's" >&2
     echo "          slash-command discovery (which only scans .claude/skills/ one level deep)." >&2
     echo "" >&2
     echo "  Switch to the flat install (auto-reconciles new/removed skills on re-run):" >&2
@@ -150,7 +150,7 @@ if [[ -L "$LOCAL_DIR" ]]; then
     echo "  → $LINK_TARGET" >&2
     echo "" >&2
     echo "smart_update is for COPIED installs. Symlinked installs are managed by install_aris.sh:" >&2
-    echo "  cd <aris-repo> && git pull           # updates content of existing skills" >&2
+    echo "  cd <skill-repo> && git pull          # updates content of existing skills" >&2
     echo "  bash $REPO_ROOT_FOR_HINT/tools/install_aris.sh <project>   # reconciles new/removed skills" >&2
     echo "" >&2
     exit 2
@@ -188,7 +188,7 @@ PERSONAL_PATTERNS=(
     '122\.'
 )
 
-echo -e "${BLUE}━━━ ARIS Smart Skill Update ━━━${NC}"
+echo -e "${BLUE}━━━ debuffer Smart Skill Update ━━━${NC}"
 echo -e "Scope:    ${SCOPE}"
 echo -e "Upstream: ${UPSTREAM_DIR}"
 echo -e "Local:    ${LOCAL_DIR}"

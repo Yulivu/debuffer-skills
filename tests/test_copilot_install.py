@@ -1,9 +1,18 @@
 """Tests for install_aris_copilot.sh and smart_update_copilot.sh."""
 from __future__ import annotations
 
+import os
+import shutil
 import subprocess
 from pathlib import Path
 
+import pytest
+
+
+pytestmark = pytest.mark.skipif(
+    os.name == "nt" and shutil.which("bash") is None,
+    reason="Copilot installer tests require bash",
+)
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 INSTALL_SCRIPT = REPO_ROOT / "tools" / "install_aris_copilot.sh"
@@ -29,7 +38,7 @@ def make_skill(path: Path, body: str) -> None:
 
 
 def make_minimal_aris_repo(root: Path) -> Path:
-    """Create a minimal ARIS repo structure with mainline skills."""
+    """Create a minimal debuffer repo structure with mainline skills."""
     repo = root / "aris"
     # Mainline skills (what Copilot CLI uses directly)
     make_skill(repo / "skills" / "alpha", "---\nname: alpha\ndescription: Alpha skill\nallowed-tools: Read\n---\n# alpha\n")
@@ -64,7 +73,7 @@ def test_install_copilot_dry_run_has_no_project_writes(tmp_path: Path) -> None:
     )
 
     assert "(dry-run) no changes made" in dry_run.stdout
-    assert not (project / ".aris").exists()
+    assert not (project / ".debuffer_skills").exists()
     assert not (project / ".github").exists()
     assert not (project / "AGENTS.md").exists()
 
@@ -92,7 +101,7 @@ def test_install_copilot_creates_github_skills_symlinks(tmp_path: Path) -> None:
     )
 
     # Verify manifest
-    manifest = project / ".aris" / "installed-skills-copilot.txt"
+    manifest = project / ".debuffer_skills" / "installed-skills-copilot.txt"
     assert manifest.exists()
     manifest_text = manifest.read_text()
     assert "repo_root" in manifest_text
@@ -101,8 +110,8 @@ def test_install_copilot_creates_github_skills_symlinks(tmp_path: Path) -> None:
     # Verify AGENTS.md
     assert (project / "AGENTS.md").exists()
     agents_text = (project / "AGENTS.md").read_text()
-    assert "ARIS Copilot CLI Skill Scope" in agents_text
-    assert f"ARIS repo root: `{repo}`" in agents_text
+    assert "debuffer Copilot CLI Skill Scope" in agents_text
+    assert f"Skill repo root: `{repo}`" in agents_text
 
     # Verify skill symlinks point to mainline skills/
     assert (project / ".github" / "skills" / "alpha").is_symlink()
@@ -227,10 +236,10 @@ def test_install_copilot_uninstall_removes_managed_only(tmp_path: Path) -> None:
     assert not (project / ".github" / "skills" / "alpha").exists()
     assert not (project / ".github" / "skills" / "beta").exists()
     # Manifest archived
-    assert (project / ".aris" / "installed-skills-copilot.txt.prev").exists()
-    assert not (project / ".aris" / "installed-skills-copilot.txt").exists()
+    assert (project / ".debuffer_skills" / "installed-skills-copilot.txt.prev").exists()
+    assert not (project / ".debuffer_skills" / "installed-skills-copilot.txt").exists()
     # AGENTS.md block removed
-    assert "ARIS Copilot CLI Skill Scope" not in (project / "AGENTS.md").read_text()
+    assert "debuffer Copilot CLI Skill Scope" not in (project / "AGENTS.md").read_text()
 
 
 def test_install_copilot_uninstall_uses_manifest_repo_root(tmp_path: Path) -> None:
@@ -362,7 +371,7 @@ def test_install_copilot_reconcile_already_deleted_stale_link(tmp_path: Path) ->
         ]
     )
 
-    manifest = (project / ".aris" / "installed-skills-copilot.txt").read_text()
+    manifest = (project / ".debuffer_skills" / "installed-skills-copilot.txt").read_text()
     assert "\talpha\t" not in manifest
 
 
@@ -414,7 +423,7 @@ def test_smart_update_copilot_copy_install(tmp_path: Path) -> None:
     # Local-only skill preserved
     assert (local / "local-only" / "SKILL.md").exists()
     # Baseline file created with hashes for newly installed skills
-    baseline_file = local / ".aris-copilot-baselines.sha256"
+    baseline_file = local / ".debuffer-copilot-baselines.sha256"
     assert baseline_file.exists()
     baseline_text = baseline_file.read_text()
     assert "alpha" in baseline_text
@@ -479,8 +488,8 @@ def test_smart_update_copilot_refuses_symlink_managed(tmp_path: Path) -> None:
     managed_project.mkdir()
     (managed_project / ".github" / "skills").mkdir(parents=True)
     # Create manifest to signal managed install
-    (managed_project / ".aris").mkdir(parents=True)
-    (managed_project / ".aris" / "installed-skills-copilot.txt").write_text(
+    (managed_project / ".debuffer_skills").mkdir(parents=True)
+    (managed_project / ".debuffer_skills" / "installed-skills-copilot.txt").write_text(
         "version\t1\nrepo_root\t/tmp/aris\n"
     )
 

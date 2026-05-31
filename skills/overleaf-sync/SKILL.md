@@ -1,6 +1,6 @@
 ---
 name: overleaf-sync
-description: "Two-way sync between a local paper directory and an Overleaf project via the Overleaf Git bridge (Premium feature). Lets you keep ARIS audit/edit workflows on the local copy while collaborators edit in the Overleaf web UI. Token never touches the agent — user does the one-time auth via macOS Keychain. Use when user says \"同步 overleaf\", \"overleaf sync\", \"推送到 overleaf\", \"connect overleaf\", \"Overleaf 桥接\", \"pull overleaf\", \"push overleaf\", or wants to bridge their ARIS paper directory with an Overleaf project."
+description: "Two-way sync between a local paper directory and an Overleaf project via the Overleaf Git bridge (Premium feature). Lets you keep local audit/edit workflows on the local copy while collaborators edit in the Overleaf web UI. Token never touches the agent — user does the one-time auth via macOS Keychain. Use when user says \"同步 overleaf\", \"overleaf sync\", \"推送到 overleaf\", \"connect overleaf\", \"Overleaf 桥接\", \"pull overleaf\", \"push overleaf\", or wants to bridge their local paper directory with an Overleaf project."
 argument-hint: [setup <project-id> | pull | push | status]
 allowed-tools: Bash(*), Read, Grep, Glob, Edit, Write
 ---
@@ -10,14 +10,14 @@ allowed-tools: Bash(*), Read, Grep, Glob, Edit, Write
 Bridge a local paper directory with an Overleaf project so that:
 
 - **You** can keep editing in the Overleaf web UI (or share editing access with collaborators)
-- **ARIS** can read your changes, run audits (`/paper-claim-audit`, `/citation-audit`, `/auto-paper-improvement-loop`), and push fixes back
+- **Local skill workflows** can read your changes, run audits (`/paper-claim-audit`, `/citation-audit`, `/auto-paper-improvement-loop`), and push fixes back
 
 This uses the official **Overleaf Git bridge** (Premium feature). The agent **never sees your authentication token** — you do the one-time auth manually so the token lives in macOS Keychain, not in chat history or `.git/config`.
 
 ## When to Use This Skill
 
-- You want to use Overleaf as the editing surface (better collaboration, shared with team) but still run ARIS pipelines locally
-- You want to take an existing local ARIS paper and push it to Overleaf for a co-author to edit
+- You want to use Overleaf as the editing surface (better collaboration, shared with team) but still run local paper workflows
+- You want to take an existing local skill-managed paper and push it to Overleaf for a co-author to edit
 - A collaborator made changes in Overleaf and you want to pull + diff them before continuing local work
 
 ## Constants
@@ -31,11 +31,11 @@ This uses the official **Overleaf Git bridge** (Premium feature). The agent **ne
 ```
 ┌─────────────────┐       git pull/push      ┌─────────────────┐
 │  Local paper/   │ ◄─── rsync ──── ►       │ paper-overleaf/ │ ◄──► Overleaf web
-│  (ARIS audits)  │                          │ (git bridge)    │     (collaborators)
+│  (local audits)  │                          │ (git bridge)    │     (collaborators)
 └─────────────────┘                          └─────────────────┘
 ```
 
-The `paper-overleaf/` directory is a **git clone of the Overleaf project**. The `paper/` directory is the working copy where ARIS skills run. They are kept in sync via `rsync`.
+The `paper-overleaf/` directory is a **git clone of the Overleaf project**. The `paper/` directory is the working copy where paper skills run. They are kept in sync via `rsync`.
 
 **Single-source-of-truth rule**: at any given time, treat *one* of them as authoritative for active editing. Switch directions explicitly with `pull` or `push`, and run a `status` check before either to surface unexpected divergence.
 
@@ -56,7 +56,7 @@ The agent's only role here is to print the user instruction:
 ```
 Run this in your own terminal (NOT through me):
 
-    bash <ARIS_REPO>/tools/overleaf_setup.sh <project-id-or-url>
+    bash <SKILL_REPO>/tools/overleaf_setup.sh <project-id-or-url>
 
 When it finishes, tell me "setup done" and I'll verify.
 ```
@@ -69,7 +69,7 @@ git remote -v                    # must show URL WITHOUT token
 git config --get credential.helper
 git fetch && git log --oneline -3   # must succeed without prompting
 ls .git/hooks/pre-commit         # must exist
-bash <ARIS_REPO>/tools/overleaf_audit.sh .   # must report "Audit clean"
+bash <SKILL_REPO>/tools/overleaf_audit.sh .   # must report "Audit clean"
 ```
 
 If `paper-overleaf/` exists but is empty (new Overleaf project), the agent then mirrors local `paper/` into it (see `push` workflow).
@@ -113,7 +113,7 @@ rsync -av paper-overleaf/sec/0.abstract.tex paper/sec/0.abstract.tex
 
 ### `push` — after local editing
 
-Use after ARIS skills have edited `paper/` and you want collaborators on Overleaf to see the changes.
+Use after local paper skills have edited `paper/` and you want collaborators on Overleaf to see the changes.
 
 ```bash
 # 1. Always pull first to surface remote drift
@@ -133,11 +133,11 @@ git diff --stat
 
 # 4. Commit + push
 git add -A
-git commit -m "<descriptive message — what ARIS changed and why>"
+git commit -m "<descriptive message — what the skill changed and why>"
 git push
 ```
 
-**Commit message protocol**: include the ARIS skill that produced the change so collaborators on Overleaf understand provenance. Examples:
+**Commit message protocol**: include the producing skill that produced the change so collaborators on Overleaf understand provenance. Examples:
 
 - `paper-write: regenerated sec/3.assurance after audit cascade refactor`
 - `citation-audit: fix 14 metadata entries (madaan2023, lee2024, ...)`
@@ -166,16 +166,16 @@ Three-way state assessment:
 |:-------------:|:---------------------------------:|---------|--------------------|
 | No  | No  | Clean       | Nothing to do |
 | Yes | No  | Overleaf has new edits | Run `pull`, then re-run status |
-| No  | Yes | Local ARIS edits unsynced | Run `push` |
+| No  | Yes | Local skill edits unsynced | Run `push` |
 | Yes | Yes | Diverged — needs merge | Stop, surface to user, do NOT auto-resolve |
 
 ## Conflict Resolution
 
 If `git pull --ff-only` fails because of true divergence:
 
-1. **Do not** run `git pull` (which would auto-merge).
-2. **Do not** run `git reset --hard` or `git push --force` (destructive).
-3. Show the user `git log origin/master ^HEAD` (their Overleaf commits) and `git log HEAD ^origin/master` (local ARIS commits).
+1. Keep merge operations explicit; use `git pull --ff-only` for the normal path.
+2. Preserve both sides of the divergence; avoid destructive reset or force-push operations.
+3. Show the user `git log origin/master ^HEAD` (their Overleaf commits) and `git log HEAD ^origin/master` (local skill commits).
 4. Ask the user which side to take per file, or to manually merge in Overleaf and then re-pull.
 
 ## Token Security — Defense in Depth
@@ -201,15 +201,15 @@ Behavioral rules (still apply, but secondary):
 
 The single biggest source of pain in two-way sync is **simultaneous editing on both sides**.
 
-- If the user is in an active Overleaf editing session, ARIS skills should **read-only** access `paper/` until the user runs `/overleaf-sync pull`.
-- If ARIS is in the middle of `/auto-paper-improvement-loop` or `/paper-write`, the user should pause Overleaf editing until the loop finishes and `/overleaf-sync push` is run.
+- If the user is in an active Overleaf editing session, paper skills should use **read-only** access to `paper/` until the user runs `/overleaf-sync pull`.
+- If a paper workflow is in the middle of `/auto-paper-improvement-loop` or `/paper-write`, the user should pause Overleaf editing until the loop finishes and `/overleaf-sync push` is run.
 
 When in doubt, run `status` first.
 
 ## Output Contract
 
 - `paper-overleaf/` directory at repo root, git clone of Overleaf project (origin URL has NO token)
-- `paper/` directory unchanged in role — still the ARIS working copy
+- `paper/` directory unchanged in role — still the skill-managed working copy
 - Each `pull`/`push` operation: a one-line summary back to the user (commits pulled / pushed, file count, link to Overleaf project URL)
 
 ## See Also

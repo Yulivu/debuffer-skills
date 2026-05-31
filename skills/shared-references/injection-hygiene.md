@@ -1,6 +1,6 @@
 # Injection Hygiene
 
-ARIS re-injects model- and web-authored content back into agent context:
+debuffer re-injects model- and web-authored content back into agent context:
 `MEMORY.md`, research-wiki nodes/edges, the `query_pack` that feeds
 `/idea-creator`, fetched paper abstracts, and **community-PR-authored
 `SKILL.md`**. None of that was scanned before. A poisoned entry can carry a
@@ -55,7 +55,7 @@ raw text is preserved depends on the store:
   `add_edge` writes the placeholder into the graph **and appends the raw flagged
   evidence + findings to `graph/quarantine.log`** for review — so nothing is lost.
 
-## Where ARIS scans (current wiring + the surface to extend)
+## Where debuffer scans (current wiring + the surface to extend)
 
 - **research-wiki** (`tools/research_wiki.py`): edge `evidence` is quarantined
   on write (placeholder in the graph, raw preserved in `graph/quarantine.log`);
@@ -68,8 +68,8 @@ raw text is preserved depends on the store:
   abstracts (`research-lit` / `exa-search` / `deepxiv` / `alphaxiv`) at
   `context` (warn); **community-PR `SKILL.md` / fixtures** at `strict` before a
   merge (the security-sensitive-PR class — see the security review memory).
-  *SKILL.md scanning needs tuning first:* legit ARIS skill docs say things like
-  "update `CLAUDE.md`", which `agent_config_mod` would flag — add an ARIS-content
+  *SKILL.md scanning needs tuning first:* legit debuffer skill docs say things like
+  "update `CLAUDE.md`", which `agent_config_mod` would flag — add an debuffer-content
   allowlist before enabling strict scan on skill docs.
 
 ## Known gaps (honest)
@@ -108,8 +108,8 @@ filler-gap between key tokens defeats "ignore all **PRIOR** instructions" evasio
   never be able to forge a reviewer verdict into a reviewer's context.
 
 > Pattern set adapted from [`NousResearch/hermes-agent`](https://github.com/NousResearch/hermes-agent)
-> `tools/threat_patterns.py` (MIT, © 2025 Nous Research), with ARIS-runtime
-> adaptations + an added entry-level quarantine. ARIS's increment over Hermes:
+> `tools/threat_patterns.py` (MIT, © 2025 Nous Research), with debuffer-runtime
+> adaptations + an added entry-level quarantine. debuffer's increment over Hermes:
 > Hermes scans memory/context injection but leaves *learned-content correctness*
-> to one model; ARIS routes everything that passes the regex to the cross-model
+> to one model; debuffer routes everything that passes the regex to the cross-model
 > jury before it's trusted.

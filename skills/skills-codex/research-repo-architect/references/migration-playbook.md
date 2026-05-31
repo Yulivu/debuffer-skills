@@ -15,7 +15,7 @@ Then inspect likely sources of truth:
 - Main scripts: files under `scripts/`, `run*.py`, `train*.py`, `main*.py`, notebooks, shell wrappers.
 - Configs: YAML, JSON, TOML, Hydra config folders, command examples in README.
 - Artifacts: `data/`, `outputs/`, `results/`, `runs/`, `wandb/`, `mlruns/`, checkpoints, figures.
-- ARIS state: `skills/`, `skills/skills-codex/`, `skills/shared-references/`, `tools/`, `.aris/`, `.agents/skills/`, `research-wiki/`, `idea-stage/`, `refine-logs/`, `review-stage/`, `paper/`.
+- Skill-pack state: `skills/`, `skills/skills-codex/`, `skills/shared-references/`, `tools/`, `.debuffer_skills/`, `.agents/skills/`, `research-wiki/`, `idea-stage/`, `refine-logs/`, `review-stage/`, `paper/`.
 
 ## Migration Map
 
@@ -38,11 +38,11 @@ Use these default mappings:
 - Reviewed result tables -> `experiments/results/`.
 - Paper-facing figures -> `experiments/visualizations/`.
 - Internal notes -> `docs/`.
-- ARIS skill definitions -> keep under `skills/<name>/SKILL.md`.
-- ARIS Codex mirrors -> keep under `skills/skills-codex/<name>/SKILL.md`.
-- ARIS shared contracts -> keep under `skills/shared-references/`.
-- ARIS shared helpers -> keep under `tools/`, or `skills/<owner>/scripts/` for single-owner helpers.
-- ARIS runtime traces/caches/runs -> keep under `.aris/` and ignore by default.
+- Skill definitions -> keep under `skills/<name>/SKILL.md`.
+- Codex mirrors -> keep under `skills/skills-codex/<name>/SKILL.md`.
+- Shared contracts -> keep under `skills/shared-references/`.
+- Shared helpers -> keep under `tools/`, or `skills/<owner>/scripts/` for single-owner helpers.
+- Runtime traces/caches/runs -> keep under `.debuffer_skills/` and ignore by default.
 
 ## Phased Execution
 
@@ -54,7 +54,7 @@ Use these default mappings:
 6. Update README with the new install, smoke, data, and experiment commands.
 7. Run import checks, tests, and one tiny smoke experiment.
 
-For ARIS framework repos, insert an ARIS phase before step 7:
+For skill-pack repos, insert a skill inventory phase before step 7:
 
 - Update `docs/SKILLS_CATALOG.md`, Codex mirrors, overlay boundaries, and count-bearing docs/tests when adding or removing skills.
 - Verify every helper invocation follows the resolver chain from `skills/shared-references/integration-contract.md`.
@@ -64,8 +64,8 @@ For ARIS framework repos, insert an ARIS phase before step 7:
 
 - Do not delete old files until the new commands pass.
 - Do not overwrite `data/raw/`, `experiments/results/`, or historical outputs without explicit user instruction.
-- Do not move or rename `research-wiki/`, `idea-stage/`, `refine-logs/`, `review-stage/`, or `paper/` unless downstream ARIS skill paths are updated in the same change.
-- Do not edit symlinked skills under project-local `.agents/skills/`; update the upstream ARIS repo or rerun the installer/reconcile flow.
+- Keep `research-wiki/`, `idea-stage/`, `refine-logs/`, `review-stage/`, and `paper/` in their workflow paths unless downstream skill paths are updated in the same change.
+- Update the upstream skill repo or rerun the installer/reconcile flow when project-local `.agents/skills/` symlinks need refreshing.
 - Preserve unrelated user changes in a dirty worktree.
 - Prefer moving code in small commits or clearly separated phases.
 - If notebooks are the only source of truth, extract reusable code to `src/` and keep notebooks as documentation or exploration artifacts.

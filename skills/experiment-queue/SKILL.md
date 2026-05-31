@@ -152,7 +152,7 @@ If any precondition fails, show user which jobs are blocked and why.
 
 The canonical scheduler implementation lives in `skills/experiment-queue/scripts/queue_manager.py` (Phase 3.3 move, Arch C). `tools/experiment_queue/queue_manager.py` is now a Python `os.execv` shim retained for legacy resolver-chain compatibility. Three preliminaries before launch.
 
-**3a. Resolve the local helper directory.** The two helpers (`queue_manager.py`, `build_manifest.py`) now sit under `skills/experiment-queue/scripts/` in the ARIS repo, with shims at `tools/experiment_queue/` for legacy resolver layers. Use this hybrid chain so the skill works from any project layout:
+**3a. Resolve the local helper directory.** The two helpers (`queue_manager.py`, `build_manifest.py`) now sit under `skills/experiment-queue/scripts/` in the debuffer repo, with shims at `tools/experiment_queue/` for legacy resolver layers. Use this hybrid chain so the skill works from any project layout:
 
 ```bash
 # Layer 0: self-contained (CC 1.0+ exposes $CLAUDE_SKILL_DIR).
@@ -163,38 +163,38 @@ fi
 # Layers 1-3: legacy chain via tools/experiment_queue/ shims.
 if [ -z "$QUEUE_TOOLS" ]; then
   cd "$(git rev-parse --show-toplevel 2>/dev/null || pwd)" || exit 1
-  if [ -z "${ARIS_REPO:-}" ] && [ -f .aris/installed-skills.txt ]; then
-      ARIS_REPO=$(awk -F'\t' '$1=="repo_root"{print $2; exit}' .aris/installed-skills.txt 2>/dev/null) || true
+  if [ -z "${ARIS_REPO:-}" ] && [ -f .debuffer_skills/installed-skills.txt ]; then
+      ARIS_REPO=$(awk -F'\t' '$1=="repo_root"{print $2; exit}' .debuffer_skills/installed-skills.txt 2>/dev/null) || true
   fi
-  QUEUE_TOOLS=".aris/tools/experiment_queue"
+  QUEUE_TOOLS=".debuffer_skills/tools/experiment_queue"
   [ -f "$QUEUE_TOOLS/queue_manager.py" ] || QUEUE_TOOLS="tools/experiment_queue"
   [ -f "$QUEUE_TOOLS/queue_manager.py" ] || { [ -n "${ARIS_REPO:-}" ] && QUEUE_TOOLS="$ARIS_REPO/tools/experiment_queue"; }
   [ -f "$QUEUE_TOOLS/queue_manager.py" ] || QUEUE_TOOLS=""
 fi
-[ -z "$QUEUE_TOOLS" ] && { echo "ERROR: experiment_queue helpers not found (layer 0: \$CLAUDE_SKILL_DIR/scripts/; layers 1-3: .aris/tools/, tools/, \$ARIS_REPO/tools/). Rerun install_aris.sh, set ARIS_REPO, or copy the canonical scripts from \$ARIS_REPO/skills/experiment-queue/scripts/." >&2; exit 1; }
+[ -z "$QUEUE_TOOLS" ] && { echo "ERROR: experiment_queue helpers not found (layer 0: \$CLAUDE_SKILL_DIR/scripts/; layers 1-3: .debuffer_skills/tools/, tools/, \$ARIS_REPO/tools/). Rerun install_aris.sh, set ARIS_REPO, or copy the canonical scripts from \$ARIS_REPO/skills/experiment-queue/scripts/." >&2; exit 1; }
 ```
 
-The `.aris/tools` symlink is set up by `install_aris.sh` (#174). Older installs without that symlink fall through to `tools/experiment_queue` (works if invoked from inside the ARIS repo) or `$ARIS_REPO/tools/experiment_queue`. After Phase 3.3, each of those legacy paths contains a Python `os.execv` shim that forwards to the canonical `skills/experiment-queue/scripts/` location, so existing users do not need to re-run anything.
+The `.debuffer_skills/tools` symlink is set up by `install_aris.sh` (#174). Older installs without that symlink fall through to `tools/experiment_queue` (works if invoked from inside the debuffer repo) or `$ARIS_REPO/tools/experiment_queue`. After Phase 3.3, each of those legacy paths contains a Python `os.execv` shim that forwards to the canonical `skills/experiment-queue/scripts/` location, so existing users do not need to re-run anything.
 
 **3b. Compute remote paths.** Use both a remote-relative form (for `scp` destinations — modern `scp` runs in SFTP mode and does NOT reliably expand `$HOME` in destination paths) and a `$HOME`-prefixed form (for `ssh ... command` strings, where remote bash WILL expand `$HOME`):
 
 ```bash
-REMOTE_RUN_REL=".aris_queue/runs/$RUN_TS"          # for scp destinations (relative to remote home)
+REMOTE_RUN_REL=".debuffer_skills_queue/runs/$RUN_TS"          # for scp destinations (relative to remote home)
 REMOTE_RUN_DIR="\$HOME/$REMOTE_RUN_REL"            # for ssh command strings (literal $HOME, expanded on remote)
 ```
 
 **3c. Bootstrap the remote run directory and copy helpers + manifest.** Per-invocation and idempotent. Use a unique run directory rather than `/tmp` so concurrent queues do not collide and so resume-after-crash is reproducible.
 
 ```bash
-ssh <server> "mkdir -p \"$REMOTE_RUN_DIR/logs\" \"\$HOME/.aris_queue\""
-scp "$QUEUE_TOOLS/queue_manager.py" "$QUEUE_TOOLS/build_manifest.py" <server>:.aris_queue/
+ssh <server> "mkdir -p \"$REMOTE_RUN_DIR/logs\" \"\$HOME/.debuffer_skills_queue\""
+scp "$QUEUE_TOOLS/queue_manager.py" "$QUEUE_TOOLS/build_manifest.py" <server>:.debuffer_skills_queue/
 scp "$LOCAL_RUN_DIR/manifest.json" <server>:"$REMOTE_RUN_REL/manifest.json"
 ```
 
 **3d. Launch the scheduler as a detached `nohup` process on the SSH host:**
 
 ```bash
-ssh <server> "nohup python3 \"\$HOME/.aris_queue/queue_manager.py\" \\
+ssh <server> "nohup python3 \"\$HOME/.debuffer_skills_queue/queue_manager.py\" \\
   --manifest \"$REMOTE_RUN_DIR/manifest.json\" \\
   --state    \"$REMOTE_RUN_DIR/queue_state.json\" \\
   --log-dir  \"$REMOTE_RUN_DIR/logs\" \\

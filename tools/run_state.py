@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Resumable run-state for ARIS multi-phase workflows.
+"""Resumable run-state for debuffer multi-phase workflows.
 
-A long ARIS workflow (research-pipeline, paper-writing, idea-discovery) can fail
+A long debuffer workflow (research-pipeline, paper-writing, idea-discovery) can fail
 mid-run, and today there is no record of *which phase* already finished — a
 resume restarts from scratch. This helper models a run as an ordered list of
 phases with status, so resume can pick up where it left off.
 
-The ARIS increment over a naive "resume = reopen" (which is all Hermes does):
+The debuffer increment over a naive "resume = reopen" (which is all Hermes does):
 the phase status enum SPLITS execution from acceptance —
 
     done      executor (Claude) finished writing the artifact.
@@ -27,7 +27,7 @@ only `accept` writes `accepted`, and it REQUIRES a verdict id + reviewer AND tha
 the phase already be `done` (use --force to override) — you cannot acquit a phase
 that never ran, nor mark one accepted without recording who acquitted it.
 
-State at ``<root>/.aris/runs/<run_id>.json`` (file-based, no DB). Single-writer
+State at ``<root>/.debuffer_skills/runs/<run_id>.json`` (file-based, no DB). Single-writer
 contract (one orchestrator per run); a best-effort flock guards against a
 concurrent resumer. See shared-references/resumable-runs.md.
 """
@@ -52,6 +52,8 @@ except ImportError:  # pragma: no cover - Windows
 EXECUTOR_STATUSES = {"pending", "running", "done", "failed", "skipped"}
 TERMINAL_STATUSES = {"accepted", "skipped"}  # resume skips these
 ALL_STATUSES = EXECUTOR_STATUSES | {"accepted"}
+STATE_DIR_NAME = ".debuffer_skills"
+LEGACY_STATE_DIR_NAME = ".aris"
 
 
 def _now() -> str:
@@ -62,7 +64,16 @@ def _run_path(root: str, run_id: str) -> Path:
     safe = "".join(c for c in run_id if c.isalnum() or c in "-_.")
     if not safe or safe != run_id or run_id in (".", ".."):
         raise ValueError(f"invalid run_id {run_id!r} (use [A-Za-z0-9-_.])")
-    return Path(root) / ".aris" / "runs" / f"{run_id}.json"
+    return _state_dir(root) / "runs" / f"{run_id}.json"
+
+
+def _state_dir(root: str) -> Path:
+    configured = os.environ.get("DEBUFFER_STATE_DIR", STATE_DIR_NAME)
+    path = Path(root) / configured
+    legacy = Path(root) / LEGACY_STATE_DIR_NAME
+    if configured == STATE_DIR_NAME and not path.exists() and legacy.exists():
+        return legacy
+    return path
 
 
 @contextmanager
@@ -221,7 +232,7 @@ def _print_status(state: dict) -> None:
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description="ARIS resumable run-state (done vs accepted).")
+    ap = argparse.ArgumentParser(description="debuffer resumable run-state (done vs accepted).")
     sub = ap.add_subparsers(dest="cmd", required=True)
     s = sub.add_parser("start"); s.add_argument("root"); s.add_argument("run_id"); s.add_argument("--phases", required=True, help="comma-separated phase names")
     s = sub.add_parser("set"); s.add_argument("root"); s.add_argument("run_id"); s.add_argument("phase"); s.add_argument("status", choices=sorted(EXECUTOR_STATUSES)); s.add_argument("--artifact")
@@ -247,7 +258,7 @@ def main() -> int:
         elif a.cmd == "status":
             _print_status(_load(a.root, a.run_id))
         elif a.cmd == "list":
-            d = Path(a.root) / ".aris" / "runs"
+            d = _state_dir(a.root) / "runs"
             for f in sorted(d.glob("*.json")) if d.exists() else []:
                 print(f.stem)
     except (FileNotFoundError, KeyError, ValueError) as e:

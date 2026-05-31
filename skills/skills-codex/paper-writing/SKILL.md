@@ -95,8 +95,8 @@ verifier reads the same value. **Run once at pipeline start, before Phase 1.**
 **Action:**
 
 ```bash
-mkdir -p paper/.aris
-echo "<resolved-level>" > paper/.aris/assurance.txt   # draft or submission
+mkdir -p paper/.debuffer_skills
+echo "<resolved-level>" > paper/.debuffer_skills/assurance.txt   # draft or submission
 ```
 
 **What each level does downstream:**
@@ -429,7 +429,7 @@ uses the **same derivation rule as Phase 0** so a run where Phase 0 was
 skipped or its write failed cannot silently downgrade a `beast` / `max` /
 `— assurance: submission` invocation back to draft.
 
-**Resolution at the gate** (re-derive; do not trust `.aris/assurance.txt`
+**Resolution at the gate** (re-derive; do not trust `.debuffer_skills/assurance.txt`
 alone):
 
 1. Parse `$ARGUMENTS` for an explicit `— assurance: draft | submission` or
@@ -438,19 +438,19 @@ alone):
    - explicit `assurance:` wins
    - else `lite` / `balanced` → `draft`, `max` / `beast` → `submission`
    - else `draft`
-3. Read `paper/.aris/assurance.txt`. If the file is missing, write it now
+3. Read `paper/.debuffer_skills/assurance.txt`. If the file is missing, write it now
    with the derived level.
 4. If the file's value **disagrees** with the derived level (e.g. file
    says `draft` but `$ARGUMENTS` says `beast`), **overwrite** the file
    with the derived level and surface a one-line warning in-chat:
-   `⚠️ .aris/assurance.txt was draft but $ARGUMENTS says submission; overriding.`
+   `⚠️ .debuffer_skills/assurance.txt was draft but $ARGUMENTS says submission; overriding.`
 5. Use the re-derived level as authoritative for the rest of Phase 6.
 
 ```bash
 # Final authoritative value, written and read from the same source
 ASSURANCE=<derived-from-$ARGUMENTS>        # draft | submission
-mkdir -p paper/.aris
-echo "$ASSURANCE" > paper/.aris/assurance.txt
+mkdir -p paper/.debuffer_skills
+echo "$ASSURANCE" > paper/.debuffer_skills/assurance.txt
 ```
 
 If `ASSURANCE=draft`, skip directly to the Final Report template below —
@@ -476,12 +476,12 @@ skipping audits while claiming to have run them.
    [ ] 5. Block Final Report iff verifier exit code != 0
 ```
 
-> `<ARIS_REPO>` placeholder — replace with the absolute path to your ARIS
-> clone (e.g. `~/Desktop/Auto-claude-code-research-in-sleep`). In a Codex
-> project install, derive it from `.aris/installed-skills-codex.txt`:
-> `ARIS_REPO="$(awk -F '\t' '$1=="repo_root"{print $2; exit}' .aris/installed-skills-codex.txt)"`.
+> `<SKILL_REPO>` placeholder — replace with the absolute path to your debuffer
+> clone (e.g. `~/Desktop/debuffer-skills`). In a Codex
+> project install, derive it from `.debuffer_skills/installed-skills-codex.txt`:
+> `SKILL_REPO="$(awk -F '\t' '$1=="repo_root"{print $2; exit}' .debuffer_skills/installed-skills-codex.txt)"`.
 > For an unmanaged flat symlink install, use the skill directory symlink:
-> `ARIS_REPO="$(cd "$(readlink .agents/skills/paper-writing)/../../.." && pwd)"`.
+> `SKILL_REPO="$(cd "$(readlink .agents/skills/paper-writing)/../../.." && pwd)"`.
 > The path is stable across runs; store it in a shell variable if you prefer.
 
 #### Invoking the three audits
@@ -515,15 +515,15 @@ Report rather than producing an unverified `submission-ready` claim.
 
 ```bash
 # Resolve the audit verifier (Policy A — gate; Codex-side chain).
-if [ -z "${ARIS_REPO:-}" ] && [ -f .aris/installed-skills-codex.txt ]; then
-    ARIS_REPO=$(awk -F'\t' '$1=="repo_root"{print $2; exit}' .aris/installed-skills-codex.txt 2>/dev/null) || true
+if [ -z "${SKILL_REPO:-}" ] && [ -f .debuffer_skills/installed-skills-codex.txt ]; then
+    SKILL_REPO=$(awk -F'\t' '$1=="repo_root"{print $2; exit}' .debuffer_skills/installed-skills-codex.txt 2>/dev/null) || true
 fi
 AUDIT_VERIFIER=""
-[ -n "${ARIS_REPO:-}" ] && [ -f "$ARIS_REPO/tools/verify_paper_audits.sh" ] && AUDIT_VERIFIER="$ARIS_REPO/tools/verify_paper_audits.sh"
+[ -n "${SKILL_REPO:-}" ] && [ -f "$SKILL_REPO/tools/verify_paper_audits.sh" ] && AUDIT_VERIFIER="$SKILL_REPO/tools/verify_paper_audits.sh"
 [ -z "$AUDIT_VERIFIER" ] && [ -f tools/verify_paper_audits.sh ] && AUDIT_VERIFIER="tools/verify_paper_audits.sh"
 [ -z "$AUDIT_VERIFIER" ] && [ -f ~/.codex/skills/paper-writing/verify_paper_audits.sh ] && AUDIT_VERIFIER="$HOME/.codex/skills/paper-writing/verify_paper_audits.sh"
 [ -z "$AUDIT_VERIFIER" ] && {
-  echo "ERROR: verify_paper_audits.sh not resolved at \$ARIS_REPO/tools/, tools/, or ~/.codex/skills/paper-writing/." >&2
+  echo "ERROR: verify_paper_audits.sh not resolved at \$SKILL_REPO/tools/, tools/, or ~/.codex/skills/paper-writing/." >&2
   echo "       assurance=submission requires the verifier; aborting Final Report." >&2
   exit 1
 }
@@ -533,7 +533,7 @@ bash "$AUDIT_VERIFIER" paper/ --assurance submission
 
 - **Exit 0** — All mandatory audits present, JSON schema-valid, hashes fresh,
   no blocking verdicts. Proceed to the Final Report below.
-- **Exit 1** — Surface `paper/.aris/audit-verifier-report.json` to the user
+- **Exit 1** — Surface `paper/.debuffer_skills/audit-verifier-report.json` to the user
   verbatim, **refuse to generate the Final Report**, and list the specific
   remediation for each failing row:
   - `MISSING` → rerun that audit
@@ -555,7 +555,7 @@ Codex stop hook if their local Codex runtime supports hooks:
 {
   "hooks": {
     "Stop": [
-      {"command": "bash <ARIS_REPO>/tools/verify_paper_audits.sh paper/ --assurance submission"}
+      {"command": "bash <SKILL_REPO>/tools/verify_paper_audits.sh paper/ --assurance submission"}
     ]
   }
 }
@@ -582,7 +582,7 @@ or directly if `assurance=draft`)
 
 | Phase | Status | Output |
 |-------|--------|--------|
-| 0. Assurance Setup | ✅ | paper/.aris/assurance.txt = [draft\|submission] |
+| 0. Assurance Setup | ✅ | paper/.debuffer_skills/assurance.txt = [draft\|submission] |
 | 1. Paper Plan | ✅ | PAPER_PLAN.md |
 | 2. Figures | ✅ | figures/ ([N] auto + [M] manual) |
 | 3. LaTeX Writing | ✅ | paper/sections/*.tex ([N] sections, [M] citations) |
@@ -591,7 +591,7 @@ or directly if `assurance=draft`)
 | 4.5 Proof Audit | [PASS\|WARN\|FAIL\|NOT_APPLICABLE\|BLOCKED\|ERROR] | PROOF_AUDIT.{md,json} |
 | 5.5 Paper Claim Audit | [PASS\|WARN\|FAIL\|NOT_APPLICABLE\|BLOCKED\|ERROR] | PAPER_CLAIM_AUDIT.{md,json} |
 | 5.8 Citation Audit | [PASS\|WARN\|FAIL\|NOT_APPLICABLE\|BLOCKED\|ERROR] | CITATION_AUDIT.{md,json} |
-| 6.0 Assurance Verifier | [OK\|STALE\|BLOCKING_VERDICT\|HAS_ISSUES\|SCHEMA_INVALID\|MISSING] per audit; exit [0\|1] overall (N/A if draft) | .aris/audit-verifier-report.json |
+| 6.0 Assurance Verifier | [OK\|STALE\|BLOCKING_VERDICT\|HAS_ISSUES\|SCHEMA_INVALID\|MISSING] per audit; exit [0\|1] overall (N/A if draft) | .debuffer_skills/audit-verifier-report.json |
 
 ## Improvement Scores
 | Round | Score | Key Changes |
@@ -609,7 +609,7 @@ or directly if `assurance=draft`)
 - paper/PROOF_AUDIT.{md,json} — Proof-obligation verification (always emitted at `assurance=submission`; `NOT_APPLICABLE` when no theorems)
 - paper/PAPER_CLAIM_AUDIT.{md,json} — Numerical claim verification (always emitted at `assurance=submission`; `NOT_APPLICABLE` when no numeric claims; omitted in `draft` mode if Phase 5.5 detector was negative)
 - paper/CITATION_AUDIT.{md,json} — Bibliography verification (always emitted at `assurance=submission`; `NOT_APPLICABLE` when no `.bib` or no `\cite{...}`; omitted in `draft` mode if Phase 5.8 detector was negative)
-- paper/.aris/audit-verifier-report.json — External verifier report (submission only)
+- paper/.debuffer_skills/audit-verifier-report.json — External verifier report (submission only)
 
 ## Remaining Issues (if any)
 - [items from final review that weren't addressed]

@@ -11,7 +11,7 @@ Compose a polished paper into a new venue under text-only constraints: **$ARGUME
 
 ## Why This Exists
 
-Most ARIS writing workflows assume the input is either a narrative report (Workflow 3) or an in-progress paper that may still need experiments / bib changes / structural edits. Resubmit is a fundamentally different scope:
+Most debuffer writing workflows assume the input is either a narrative report (Workflow 3) or an in-progress paper that may still need experiments / bib changes / structural edits. Resubmit is a fundamentally different scope:
 
 - The paper is **already polished** — proofs are done, experiments are done, bibliography is curated.
 - The user wants to absorb prior reviewer concerns from a previous venue and re-submit, **without** introducing new experiments, new citations, or framework changes (LLM hallucination paranoia + tight resubmit timing + closed compute budget).
@@ -38,7 +38,7 @@ Existing skills cover adjacent territory but none of this exact composition: `/r
 - **REVIEWER_MODEL** = inherits from `/auto-paper-improvement-loop`'s default (`gpt-5.5` via Codex MCP) unless the user passes `— reviewer-model: gpt-5.4` (legacy) or another OpenAI model. Codex reasoning effort is fixed at `xhigh` for all reviewer calls per the existing skill convention.
 - **ROUNDS** = 2 (default; matches `/auto-paper-improvement-loop`'s diminishing-returns line). A 3rd round only fires if Phase 2 reports non-convergence AND the user explicitly approves at the round-2 checkpoint.
 - **EFFORT** = `max` (default for resubmit; resubmit is high-stakes). The user can override with `— effort: balanced` if time is extremely tight.
-- **EDIT_WHITELIST_PATH** = `<paper-base-dir>/../<NewVenue>/.aris/edit_whitelist.yaml` (auto-generated in Phase 0; user can override with a custom path).
+- **EDIT_WHITELIST_PATH** = `<paper-base-dir>/../<NewVenue>/.debuffer_skills/edit_whitelist.yaml` (auto-generated in Phase 0; user can override with a custom path).
 - **NEVER_OVERWRITE** = true (always; this is a hard contract — prior submission directories are immutable).
 - **ASSURANCE_LEVEL** = `submission` (default; resubmit always targets a real submission).
 
@@ -77,7 +77,7 @@ mkdir "$NEW_VENUE_DIR" 2>/dev/null || {
     echo "ERROR: $NEW_VENUE_DIR already exists; resubmit-pipeline never overwrites prior submissions. Pick a different target-venue or rename the existing dir." >&2
     exit 1
 }
-mkdir -p "$NEW_VENUE_DIR/.aris"
+mkdir -p "$NEW_VENUE_DIR/.debuffer_skills"
 ```
 
 **Composition rules** (all `cp`, never `\input{../...}`, never symlink):
@@ -87,7 +87,7 @@ mkdir -p "$NEW_VENUE_DIR/.aris"
 3. **`math_commands.tex`** (and any other macro file the sections depend on) — physical `cp` into `$NEW_VENUE_DIR/`.
 4. **`Figure/` (or `figures/`)** — copy the directory in (`cp -r`). **Path trap**: existing sections likely write `\includegraphics{Figure/foo.pdf}`. If you set `\graphicspath{{../Figure/}}` from a child directory, it resolves `../Figure/Figure/foo.pdf` — wrong. Either copy `Figure/` in directly (preferred), or use `\graphicspath{{../}}`.
 5. **Bibliography** — write `\bibliographystyle{<venue-bst>}` + `\bibliography{../references}` directly in the new `main.tex`. **Never** `\input` an existing `ref.tex` or `references.tex` that already contains its own `\bibliography{}` command (path resolution silently breaks).
-6. **`.aris/`** — create `$NEW_VENUE_DIR/.aris/` and write `assurance.txt` containing `submission` (matches the verifier's expected location).
+6. **`.debuffer_skills/`** — create `$NEW_VENUE_DIR/.debuffer_skills/` and write `assurance.txt` containing `submission` (matches the verifier's expected location).
 
 **Output of Phase 0**: a new sibling dir with all source files, no edits to text content yet, ready for compile.
 
@@ -181,7 +181,7 @@ For each file under $REVIEW_CORPUS:
 
 The load-bearing phase. `/auto-paper-improvement-loop` is invoked with **two safety mechanisms**:
 
-1. **`— edit-whitelist <path>`** — a YAML file enumerating allowed paths and forbidden operations. Auto-generated in Phase 0 at `$NEW_VENUE_DIR/.aris/edit_whitelist.yaml`:
+1. **`— edit-whitelist <path>`** — a YAML file enumerating allowed paths and forbidden operations. Auto-generated in Phase 0 at `$NEW_VENUE_DIR/.debuffer_skills/edit_whitelist.yaml`:
 
    ```yaml
    allowed_paths:
@@ -208,15 +208,15 @@ The load-bearing phase. `/auto-paper-improvement-loop` is invoked with **two saf
    ```bash
    # Snapshot the new venue dir BEFORE auto-loop runs (for diff baseline,
    # works whether or not paper-base-dir is a git repo)
-   SNAPSHOT_DIR="$NEW_VENUE_DIR/.aris/snapshots/round-0"
+   SNAPSHOT_DIR="$NEW_VENUE_DIR/.debuffer_skills/snapshots/round-0"
    mkdir -p "$SNAPSHOT_DIR"
-   rsync -a --exclude='.aris' --exclude='*.pdf' --exclude='*.aux' \
+   rsync -a --exclude='.debuffer_skills' --exclude='*.pdf' --exclude='*.aux' \
          "$NEW_VENUE_DIR/" "$SNAPSHOT_DIR/"
 
    # Single auto-loop invocation; rounds + checkpoints are loop-internal.
    # The whitelist file is the only resubmit-specific param.
    /auto-paper-improvement-loop "$NEW_VENUE_DIR/" \
-       --edit-whitelist "$NEW_VENUE_DIR/.aris/edit_whitelist.yaml" \
+       --edit-whitelist "$NEW_VENUE_DIR/.debuffer_skills/edit_whitelist.yaml" \
        — assurance: submission \
        — effort: "$EFFORT" \
        — human checkpoint: true
@@ -228,24 +228,24 @@ The load-bearing phase. `/auto-paper-improvement-loop` is invoked with **two saf
    for ROUND in 1 2; do  # auto-loop's MAX_ROUNDS = 2
      # auto-loop pauses at HUMAN_CHECKPOINT after each round
      # diff this round vs prior snapshot (works without git)
-     diff -ruN "$NEW_VENUE_DIR/.aris/snapshots/round-$((ROUND-1))" "$NEW_VENUE_DIR" \
-         > "$NEW_VENUE_DIR/.aris/round-$ROUND-diff.txt"
+     diff -ruN "$NEW_VENUE_DIR/.debuffer_skills/snapshots/round-$((ROUND-1))" "$NEW_VENUE_DIR" \
+         > "$NEW_VENUE_DIR/.debuffer_skills/round-$ROUND-diff.txt"
 
      # Whitelist compliance check on the diff
-     check_whitelist_compliance "$NEW_VENUE_DIR/.aris/round-$ROUND-diff.txt" \
-                                  "$NEW_VENUE_DIR/.aris/edit_whitelist.yaml"
+     check_whitelist_compliance "$NEW_VENUE_DIR/.debuffer_skills/round-$ROUND-diff.txt" \
+                                  "$NEW_VENUE_DIR/.debuffer_skills/edit_whitelist.yaml"
 
      # Selective regression audits (only fire if relevant files touched)
-     if grep -qE 'theorem|lemma|proposition|corollary' "$NEW_VENUE_DIR/.aris/round-$ROUND-diff.txt"; then
+     if grep -qE 'theorem|lemma|proposition|corollary' "$NEW_VENUE_DIR/.debuffer_skills/round-$ROUND-diff.txt"; then
          /proof-checker "$NEW_VENUE_DIR/main.tex" --restatement-check
      fi
-     if grep -qE '[0-9]+(\.[0-9]+)?\s*(%|±|x|×)' "$NEW_VENUE_DIR/.aris/round-$ROUND-diff.txt"; then
+     if grep -qE '[0-9]+(\.[0-9]+)?\s*(%|±|x|×)' "$NEW_VENUE_DIR/.debuffer_skills/round-$ROUND-diff.txt"; then
          /paper-claim-audit "$NEW_VENUE_DIR/"
      fi
 
      # Snapshot this round for next-round diff
-     rsync -a --exclude='.aris' --exclude='*.pdf' --exclude='*.aux' \
-           "$NEW_VENUE_DIR/" "$NEW_VENUE_DIR/.aris/snapshots/round-$ROUND/"
+     rsync -a --exclude='.debuffer_skills' --exclude='*.pdf' --exclude='*.aux' \
+           "$NEW_VENUE_DIR/" "$NEW_VENUE_DIR/.debuffer_skills/snapshots/round-$ROUND/"
 
      # Convergence check — see "Convergence Criteria" section below
      # If converged, signal HUMAN_CHECKPOINT to terminate early
@@ -305,10 +305,10 @@ Verifies no Phase 2 microedit accidentally introduced a numerical claim that's n
 **Diff report**:
 
 ```bash
-diff -u $PAPER_BASE_DIR/main.tex $NEW_VENUE_DIR/main.tex > $NEW_VENUE_DIR/.aris/DIFF_REPORT.md
+diff -u $PAPER_BASE_DIR/main.tex $NEW_VENUE_DIR/main.tex > $NEW_VENUE_DIR/.debuffer_skills/DIFF_REPORT.md
 for f in $PAPER_BASE_DIR/sec/*.tex; do
     base=$(basename $f)
-    diff -u "$f" "$NEW_VENUE_DIR/sec/$base" >> $NEW_VENUE_DIR/.aris/DIFF_REPORT.md
+    diff -u "$f" "$NEW_VENUE_DIR/sec/$base" >> $NEW_VENUE_DIR/.debuffer_skills/DIFF_REPORT.md
 done
 ```
 
@@ -409,15 +409,15 @@ The skill emits one of 7 verdicts (the 6 from the assurance contract + a `USER_D
 - `<NEW_VENUE_DIR>/KILL_ARGUMENT.json` + `.md` — Phase 3 adversarial gate
 - `<NEW_VENUE_DIR>/COMPILE_REPORT.json` — Phase 4 compile + page-limit check
 - `<NEW_VENUE_DIR>/DIFF_REPORT.md` — full diff vs base venue body
-- `<NEW_VENUE_DIR>/.aris/edit_whitelist.yaml` — Phase 0-generated whitelist
-- `<NEW_VENUE_DIR>/.aris/round-N-diff.txt` — per-round diff for the gate
-- `<NEW_VENUE_DIR>/.aris/traces/<phase>/<date>_runNN/` — Codex traces per phase
+- `<NEW_VENUE_DIR>/.debuffer_skills/edit_whitelist.yaml` — Phase 0-generated whitelist
+- `<NEW_VENUE_DIR>/.debuffer_skills/round-N-diff.txt` — per-round diff for the gate
+- `<NEW_VENUE_DIR>/.debuffer_skills/traces/<phase>/<date>_runNN/` — Codex traces per phase
 
 The new venue dir is **the** deliverable; the prior venue dir is untouched.
 
 ## Review Tracing
 
-Every Codex MCP reviewer call across all phases saves traces per `shared-references/review-tracing.md` to `<NEW_VENUE_DIR>/.aris/traces/<phase-name>/<date>_run<NN>/`. Both threads of `/kill-argument` are preserved separately. The master `RESUBMIT_REPORT.json` `trace_path` field points to the top-level traces directory.
+Every Codex MCP reviewer call across all phases saves traces per `shared-references/review-tracing.md` to `<NEW_VENUE_DIR>/.debuffer_skills/traces/<phase-name>/<date>_run<NN>/`. Both threads of `/kill-argument` are preserved separately. The master `RESUBMIT_REPORT.json` `trace_path` field points to the top-level traces directory.
 
 ## Notes
 

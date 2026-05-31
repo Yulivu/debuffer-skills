@@ -1,6 +1,6 @@
 # SpectralStore-Style Research Repo Architecture
 
-This reference covers ordinary research code repositories. If the repo contains ARIS skill infrastructure such as `skills/<name>/SKILL.md`, `skills/skills-codex/`, `skills/shared-references/`, `tools/install_aris*.sh`, `.aris/`, `research-wiki/`, `idea-stage/`, or `refine-logs/`, also read `aris-architecture.md` before moving files.
+This reference covers ordinary research code repositories. If the repo contains skill-pack infrastructure such as `skills/<name>/SKILL.md`, `skills/skills-codex/`, `skills/shared-references/`, `.debuffer_skills/`, `research-wiki/`, `idea-stage/`, or `refine-logs/`, also read `skill-pack-architecture.md` before moving files.
 
 ## Directory Contract
 
@@ -22,7 +22,7 @@ scripts/
 src/<package_name>/      Reusable implementation.
 ```
 
-ARIS workflow artifacts may coexist at the repo root and should not be automatically moved into `docs/` or `experiments/`: `RESEARCH_BRIEF.md`, `EXPERIMENT_PLAN.md`, `NARRATIVE_REPORT.md`, `idea-stage/`, `refine-logs/`, `review-stage/`, `paper/`, and `research-wiki/`.
+Skill workflow artifacts may coexist at the repo root and should remain in their workflow paths: `RESEARCH_BRIEF.md`, `EXPERIMENT_PLAN.md`, `NARRATIVE_REPORT.md`, `idea-stage/`, `refine-logs/`, `review-stage/`, `paper/`, and `research-wiki/`.
 
 ## Source Code Rules
 
@@ -75,7 +75,7 @@ Each run output bundle should prefer:
 - Ignore generated run outputs by default.
 - Treat `experiments/results/` as curated. Do not point ordinary runners there by default.
 - Track paper-facing PDFs and small summary CSVs only when intentionally curated.
-- If ARIS is installed, ignore `.aris/traces/`, `.aris/cache/`, `.aris/runs/`, `.aris/meta/events.jsonl`, and project-local `.agents/skills/` symlinks by default.
+- If project-local skills are installed, ignore `.debuffer_skills/traces/`, `.debuffer_skills/cache/`, `.debuffer_skills/runs/`, `.debuffer_skills/meta/events.jsonl`, and project-local `.agents/skills/` symlinks by default.
 
 ## README Contract
 

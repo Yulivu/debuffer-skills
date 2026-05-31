@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-ARIS FigureSpec → SVG Renderer v2
+debuffer FigureSpec → SVG Renderer v2
 
 Converts a FigureSpec JSON into publication-quality SVG for academic papers.
 Deterministic: same spec = same SVG, every time.
@@ -723,7 +723,7 @@ FigureSpec JSON Schema:
 # ============================================================
 
 def main():
-    parser = argparse.ArgumentParser(description="ARIS FigureSpec → SVG Renderer")
+    parser = argparse.ArgumentParser(description="debuffer FigureSpec → SVG Renderer")
     subparsers = parser.add_subparsers(dest="command")
 
     p_render = subparsers.add_parser("render", help="Render FigureSpec JSON to SVG")

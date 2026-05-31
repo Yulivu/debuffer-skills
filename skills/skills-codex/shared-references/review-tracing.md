@@ -35,7 +35,7 @@ the resolver returns the empty string, write the four files inline
 ## Trace Directory
 
 ```text
-.aris/traces/<skill-name>/<YYYY-MM-DD>_run<NN>/
+.debuffer_skills/traces/<skill-name>/<YYYY-MM-DD>_run<NN>/
   run.meta.json
   001-<purpose>.request.json
   001-<purpose>.response.md
@@ -99,12 +99,12 @@ Respect inline parameter `--- trace: off | meta | full`:
 
 ## Events
 
-After writing a trace, append a compact event to `.aris/meta/events.jsonl`:
+After writing a trace, append a compact event to `.debuffer_skills/meta/events.jsonl`:
 
 ```json
-{"event":"review_trace","skill":"auto-review-loop","purpose":"round-1-review","agent_id":"...","trace_path":".aris/traces/auto-review-loop/2026-04-15_run01/","status":"ok"}
+{"event":"review_trace","skill":"auto-review-loop","purpose":"round-1-review","agent_id":"...","trace_path":".debuffer_skills/traces/auto-review-loop/2026-04-15_run01/","status":"ok"}
 ```
 
 ## Privacy
 
-`.aris/traces/` is project-local and should not be committed. Use `--- trace: off` for strict confidentiality projects.
+`.debuffer_skills/traces/` is project-local and should not be committed. Use `--- trace: off` for strict confidentiality projects.

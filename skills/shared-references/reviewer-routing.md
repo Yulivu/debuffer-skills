@@ -90,7 +90,7 @@ If Oracle is not installed, `— reviewer: oracle-pro` gracefully falls back to 
 
 ### Upstream development & known issues
 
-Oracle MCP is maintained at [`steipete/oracle`](https://github.com/steipete/oracle). When you invoke `— reviewer: oracle-pro` (and especially the `o3-deep-research` / `gpt-5.5-pro` paths), it's worth checking the **[open PRs](https://github.com/steipete/oracle/pulls)** for in-flight fixes that may affect your run — e.g., model routing changes, browser-mode auth fixes, rate-limit handling, or new model alias support. ARIS does not vendor Oracle MCP; you're running the published version from `npm install -g @steipete/oracle`. If a behavior surprises you, the upstream PR queue is the first place to check before opening an issue here.
+Oracle MCP is maintained at [`steipete/oracle`](https://github.com/steipete/oracle). When you invoke `— reviewer: oracle-pro` (and especially the `o3-deep-research` / `gpt-5.5-pro` paths), it's worth checking the **[open PRs](https://github.com/steipete/oracle/pulls)** for in-flight fixes that may affect your run — e.g., model routing changes, browser-mode auth fixes, rate-limit handling, or new model alias support. debuffer does not vendor Oracle MCP; you're running the published version from `npm install -g @steipete/oracle`. If a behavior surprises you, the upstream PR queue is the first place to check before opening an issue here.
 
 ## Optional: Manual Review (any model, zero API cost)
 
@@ -144,7 +144,7 @@ claude mcp add manual-review -s user -- python3 /path/to/mcp-servers/manual-revi
 ### Modes
 
 - **Browser mode** (default): opens a local web page on Windows/macOS/Linux desktop
-- **File mode** (`MANUAL_REVIEW_MODE=file`): writes prompt to a per-thread subdirectory. Read `.aris/pending_review/pending_review.json` for the `prompt_file` and `response_file` paths — for headless/SSH environments
+- **File mode** (`MANUAL_REVIEW_MODE=file`): writes prompt to a per-thread subdirectory. Read `.debuffer_skills/pending_review/pending_review.json` for the `prompt_file` and `response_file` paths — for headless/SSH environments
 
 ### Skills That Support `— reviewer: manual`
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Manual Review MCP Server for ARIS.
+"""Manual Review MCP Server for debuffer.
 
 A human-in-the-loop reviewer bridge: when the pipeline needs cross-model
 review, this server opens a browser page (or writes a file on headless Linux)
@@ -41,7 +41,7 @@ SERVER_NAME = os.environ.get("MANUAL_REVIEW_SERVER_NAME", "manual-review")
 DEFAULT_TIMEOUT_SEC = int(os.environ.get("MANUAL_REVIEW_TIMEOUT_SEC", "86400"))
 MODE = os.environ.get("MANUAL_REVIEW_MODE", "browser")  # "browser" or "file"
 AUTO_OPEN = os.environ.get("MANUAL_REVIEW_AUTO_OPEN", "true").lower() in {"1", "true", "yes"}
-PENDING_DIR = Path(os.environ.get("MANUAL_REVIEW_PENDING_DIR", ".aris/pending_review"))
+PENDING_DIR = Path(os.environ.get("MANUAL_REVIEW_PENDING_DIR", ".debuffer_skills/pending_review"))
 DEBUG_LOG_RAW = os.environ.get("MANUAL_REVIEW_DEBUG_LOG", "").strip()
 DEBUG_LOG = Path(DEBUG_LOG_RAW).expanduser() if DEBUG_LOG_RAW else None
 DEFAULT_PORT = int(os.environ.get("MANUAL_REVIEW_PORT", "17900"))
@@ -341,9 +341,9 @@ class _ReviewHandler(http.server.BaseHTTPRequestHandler):
         self.send_error(403, "CORS not allowed")
 
 
-FILE_MODE_WARNING = """# ARIS Manual Review - Cross-Model Warning
+FILE_MODE_WARNING = """# debuffer Manual Review - Cross-Model Warning
 
-If this workflow is running from Claude Code, do NOT paste this prompt into any Claude product (claude.ai, Claude API, Claude App). Using the same model family as executor defeats the purpose of ARIS cross-model review.
+If this workflow is running from Claude Code, do NOT paste this prompt into any Claude product (claude.ai, Claude API, Claude App). Using the same model family as executor defeats the purpose of debuffer cross-model review.
 
 如果此流程由 Claude Code 执行，请勿将此提示词粘贴到任何 Claude 产品。请使用 ChatGPT、DeepSeek、Kimi、Gemini、Qwen、本地模型或其他非 Claude 模型。
 

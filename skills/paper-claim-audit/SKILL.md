@@ -266,7 +266,7 @@ Skip if `RENDER_HTML = false` is set in the project's `CLAUDE.md` or passed as `
 
 ## Review Tracing
 
-After each `mcp__codex__codex` or `mcp__codex__codex-reply` reviewer call, save the trace following `shared-references/review-tracing.md` (Policy C — forensic; never silently skip). Use `save_trace.sh` (resolved per the chain in `shared-references/integration-contract.md` §2) or write files directly to `.aris/traces/<skill>/<date>_run<NN>/`. Respect the `--- trace:` parameter (default: `full`).
+After each `mcp__codex__codex` or `mcp__codex__codex-reply` reviewer call, save the trace following `shared-references/review-tracing.md` (Policy C — forensic; never silently skip). Use `save_trace.sh` (resolved per the chain in `shared-references/integration-contract.md` §2) or write files directly to `.debuffer_skills/traces/<skill>/<date>_run<NN>/`. Respect the `--- trace:` parameter (default: `full`).
 
 ## Submission Artifact Emission
 
@@ -290,7 +290,7 @@ The artifact conforms to the schema in `shared-references/assurance-contract.md`
     "sections/5.evidence.tex":               "sha256:...",
     "/abs/path/to/results/run_2026_04_19.json": "sha256:..."
   },
-  "trace_path":       ".aris/traces/paper-claim-audit/<date>_run<NN>/",
+  "trace_path":       ".debuffer_skills/traces/paper-claim-audit/<date>_run<NN>/",
   "thread_id":        "<codex mcp thread id>",
   "reviewer_model":   "gpt-5.5",
   "reviewer_reasoning": "xhigh",

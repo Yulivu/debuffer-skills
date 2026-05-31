@@ -1,5 +1,5 @@
 #Requires -Version 5.1
-# ARIS Smart Skill Update (PowerShell)
+# debuffer Smart Skill Update (PowerShell)
 # Intelligently compares local skills with upstream, detects personal
 # customizations, and recommends safe update strategy per skill.
 #
@@ -73,7 +73,7 @@ if ($PSCmdlet.ParameterSetName -eq 'Project') {
         Write-Host ""
         Write-Host "⚠️  -TargetSubdir $TargetSubdir is DEPRECATED" -ForegroundColor Yellow
         Write-Host ""
-        Write-Host "  Reason: nested 'aris/' subdirectory hides skills from Claude Code's slash-command discovery" -ForegroundColor Yellow
+        Write-Host "  Reason: nested skill subdirectory hides skills from Claude Code's slash-command discovery" -ForegroundColor Yellow
         Write-Host "          (CC only scans .claude/skills/ one level deep)." -ForegroundColor Yellow
         Write-Host ""
         Write-Host "  Switch to the flat install (use the bash version via WSL, or manual junctions —" -ForegroundColor Yellow
@@ -124,7 +124,7 @@ if (Test-Path $LocalDir) {
         Write-Host "  → $($item.Target)"
         Write-Host ""
         Write-Host "smart_update is for COPIED installs. Symlinked installs are updated by:"
-        Write-Host "  cd <aris-repo>; git pull"
+        Write-Host "  cd <skill-repo>; git pull"
         Write-Host ""
         Write-Host "If you need per-project customization, switch to a copied install:"
         Write-Host "  Remove-Item $LocalDir -Force"
@@ -166,7 +166,7 @@ function Test-IsRegexPattern {
 
 # ─── Header ────────────────────────────────────────────────────────────────────
 Write-Host ''
-Write-Host '=== ARIS Smart Skill Update ===' -ForegroundColor Cyan
+Write-Host '=== debuffer Smart Skill Update ===' -ForegroundColor Cyan
 Write-Host "Scope:    $Scope"
 Write-Host "Upstream: $UpstreamDir"
 Write-Host "Local:    $LocalDir"

@@ -657,7 +657,7 @@ The artifact conforms to the schema in `shared-references/assurance-contract.md`
     "main.tex":                 "sha256:...",
     "sections/4.theory.tex":    "sha256:..."
   },
-  "trace_path":       ".aris/traces/proof-checker/<date>_run<NN>/",
+  "trace_path":       ".debuffer_skills/traces/proof-checker/<date>_run<NN>/",
   "thread_id":        "<codex mcp thread id>",
   "reviewer_model":   "gpt-5.5",
   "reviewer_reasoning": "xhigh",

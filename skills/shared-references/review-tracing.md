@@ -16,7 +16,7 @@ Do NOT trace: purely informational LLM calls (e.g., `codex exec` for code genera
 ## Trace Directory
 
 ```
-.aris/traces/<skill-name>/<YYYY-MM-DD>_run<NN>/
+.debuffer_skills/traces/<skill-name>/<YYYY-MM-DD>_run<NN>/
   ├── run.meta.json                      # Run-level metadata
   ├── 001-<purpose>.request.json         # Request snapshot
   ├── 001-<purpose>.response.md          # Full response text
@@ -25,7 +25,7 @@ Do NOT trace: purely informational LLM calls (e.g., `codex exec` for code genera
   └── ...
 ```
 
-- `<skill-name>`: the ARIS skill that triggered this call (e.g., `auto-review-loop`)
+- `<skill-name>`: the debuffer skill that triggered this call (e.g., `auto-review-loop`)
 - `<YYYY-MM-DD>_run<NN>`: date + sequential run number (start from `01`)
 - `<purpose>`: short kebab-case label (e.g., `round-1-review`, `critique`, `ideation`, `audit`, `patch-gate`)
 
@@ -39,10 +39,10 @@ The full invocation:
 ```bash
 # Resolve $TRACE_HELPER (canonical strict-safe chain; see integration-contract.md §2).
 cd "$(git rev-parse --show-toplevel 2>/dev/null || pwd)" || exit 1
-if [ -z "${ARIS_REPO:-}" ] && [ -f .aris/installed-skills.txt ]; then
-    ARIS_REPO=$(awk -F'\t' '$1=="repo_root"{print $2; exit}' .aris/installed-skills.txt 2>/dev/null) || true
+if [ -z "${ARIS_REPO:-}" ] && [ -f .debuffer_skills/installed-skills.txt ]; then
+    ARIS_REPO=$(awk -F'\t' '$1=="repo_root"{print $2; exit}' .debuffer_skills/installed-skills.txt 2>/dev/null) || true
 fi
-TRACE_HELPER=".aris/tools/save_trace.sh"
+TRACE_HELPER=".debuffer_skills/tools/save_trace.sh"
 [ -f "$TRACE_HELPER" ] || TRACE_HELPER="tools/save_trace.sh"
 [ -f "$TRACE_HELPER" ] || { [ -n "${ARIS_REPO:-}" ] && TRACE_HELPER="$ARIS_REPO/tools/save_trace.sh"; }
 [ -f "$TRACE_HELPER" ] || TRACE_HELPER=""
@@ -61,7 +61,7 @@ else
   # required (unless `--- trace: off` was explicitly set on this
   # SKILL invocation). Write the four files below directly per the
   # schemas in "File Schemas", into:
-  #   .aris/traces/<skill-name>/<YYYY-MM-DD>_run<NN>/
+  #   .debuffer_skills/traces/<skill-name>/<YYYY-MM-DD>_run<NN>/
   #     run.meta.json
   #     <NNN>-<purpose>.request.json
   #     <NNN>-<purpose>.response.md
@@ -130,16 +130,16 @@ Tracing respects three modes, set via inline parameter `--- trace: off | meta | 
 
 ## Integration with events.jsonl
 
-After writing a trace, append a compact summary event to `.aris/meta/events.jsonl`:
+After writing a trace, append a compact summary event to `.debuffer_skills/meta/events.jsonl`:
 
 ```json
-{"event":"review_trace","skill":"auto-review-loop","purpose":"round-1-review","thread_id":"...","trace_path":".aris/traces/auto-review-loop/2026-04-15_run01/","status":"ok"}
+{"event":"review_trace","skill":"auto-review-loop","purpose":"round-1-review","thread_id":"...","trace_path":".debuffer_skills/traces/auto-review-loop/2026-04-15_run01/","status":"ok"}
 ```
 
 This allows `/meta-optimize` to discover traces without reading the full trace files.
 
 ## Privacy
 
-- `.aris/traces/` should be in `.gitignore` — traces are project-local, never committed
+- `.debuffer_skills/traces/` should be in `.gitignore` — traces are project-local, never committed
 - Traces may contain sensitive research content; treat them as confidential
 - Use `--- trace: off` for projects with strict confidentiality requirements

@@ -341,4 +341,4 @@ User describes invention directly ──→ /patent-pipeline
 
 ## Acknowledgements
 
-Built on the ARIS (Auto-claude-code-research-in-sleep) skill architecture. Patent writing principles adapted from MPEP (US), CN Patent Examination Guidelines (CN), and EPO Guidelines for Examination (EP).
+Built on the debuffer skill architecture. Patent writing principles adapted from MPEP (US), CN Patent Examination Guidelines (CN), and EPO Guidelines for Examination (EP).

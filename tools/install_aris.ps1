@@ -1,16 +1,16 @@
 #Requires -Version 5.1
 <#
 .SYNOPSIS
-    Project-local ARIS skill installation for Windows.
+    Project-local debuffer skill installation for Windows.
 
 .DESCRIPTION
-    Creates one flat junction per ARIS skill so Claude Code and Codex can
+    Creates one flat junction per skill so Claude Code and Codex can
     discover slash commands at one directory level:
 
       Claude: <project>\.claude\skills\<skill-name>
       Codex:  <project>\.agents\skills\<skill-name>
 
-    Managed entries are tracked in .aris manifests. The script never replaces
+    Managed entries are tracked in .debuffer_skills manifests. The script never replaces
     real files or user-owned skill directories; conflicts must be resolved
     explicitly.
 #>
@@ -26,6 +26,7 @@ param(
     [ValidateSet('core-research', 'paper', 'review', 'full')]
     [string]$Profile = 'full',
 
+    [Alias('Repo')]
     [string]$ArisRepo = '',
 
     [switch]$DryRun,
@@ -46,6 +47,8 @@ param(
 $ErrorActionPreference = 'Stop'
 $Utf8NoBom = New-Object System.Text.UTF8Encoding($false)
 $ManifestVersion = '1'
+$StateDirName = '.debuffer_skills'
+$LegacyStateDirName = '.aris'
 $SafeNameRegex = '^[A-Za-z0-9][A-Za-z0-9._-]*$'
 $SupportNames = @('shared-references')
 $script:LockDir = $null
@@ -218,17 +221,17 @@ function Resolve-ArisRepo {
         return (Resolve-Path -LiteralPath $env:ARIS_REPO).ProviderPath
     }
     foreach ($candidate in @(
-        (Join-Path $env:USERPROFILE 'Auto-claude-code-research-in-sleep'),
+        (Join-Path $env:USERPROFILE 'debuffer-skills'),
         (Join-Path $env:USERPROFILE 'aris_repo'),
-        (Join-Path $env:USERPROFILE 'Desktop\Auto-claude-code-research-in-sleep'),
-        (Join-Path $env:USERPROFILE '.codex\Auto-claude-code-research-in-sleep'),
-        (Join-Path $env:USERPROFILE '.claude\Auto-claude-code-research-in-sleep')
+        (Join-Path $env:USERPROFILE 'Desktop\debuffer-skills'),
+        (Join-Path $env:USERPROFILE '.codex\debuffer-skills'),
+        (Join-Path $env:USERPROFILE '.claude\debuffer-skills')
     )) {
         if (Test-Path -LiteralPath (Join-Path $candidate 'skills') -PathType Container) {
             return (Resolve-Path -LiteralPath $candidate).ProviderPath
         }
     }
-    Die 'cannot find ARIS repo. Use -ArisRepo PATH or set ARIS_REPO.'
+    Die 'cannot find skill repo. Use -ArisRepo PATH or set ARIS_REPO.'
 }
 
 function Detect-Platform {
@@ -262,9 +265,11 @@ function New-Config {
             ManifestPrevName = 'installed-skills.txt.prev'
             LockName = '.install.lock.d'
             DocName = 'CLAUDE.md'
-            BlockBegin = '<!-- ARIS:BEGIN -->'
-            BlockEnd = '<!-- ARIS:END -->'
-            Title = 'ARIS Skill Scope'
+            BlockBegin = '<!-- DEBUFFER:BEGIN -->'
+            BlockEnd = '<!-- DEBUFFER:END -->'
+            LegacyBlockBegin = '<!-- debuffer:BEGIN -->'
+            LegacyBlockEnd = '<!-- debuffer:END -->'
+            Title = 'debuffer Skill Scope'
         }
     }
     return [pscustomobject]@{
@@ -279,9 +284,11 @@ function New-Config {
         ManifestPrevName = 'installed-skills-codex.txt.prev'
         LockName = '.install-codex.lock.d'
         DocName = 'AGENTS.md'
-        BlockBegin = '<!-- ARIS-CODEX:BEGIN -->'
-        BlockEnd = '<!-- ARIS-CODEX:END -->'
-        Title = 'ARIS Codex Skill Scope'
+        BlockBegin = '<!-- DEBUFFER-CODEX:BEGIN -->'
+        BlockEnd = '<!-- DEBUFFER-CODEX:END -->'
+        LegacyBlockBegin = '<!-- debuffer-CODEX:BEGIN -->'
+        LegacyBlockEnd = '<!-- debuffer-CODEX:END -->'
+        Title = 'debuffer Codex Skill Scope'
     }
 }
 
@@ -356,7 +363,7 @@ function Build-Inventory {
         }
         $resolved = Resolve-ReparseChain $dir.FullName
         if (-not (Test-PathInside $resolved $resolvedRepoRoot)) {
-            Write-Warning "skipping upstream link leading outside ARIS repo: $name -> $resolved"
+            Write-Warning "skipping upstream link leading outside skill repo: $name -> $resolved"
             continue
         }
         $kind = $null
@@ -509,7 +516,7 @@ function Compute-Plan {
 function Print-Plan {
     param($Plan, [string]$Mode)
     Write-Host ''
-    Write-Host "ARIS Windows Install Plan"
+    Write-Host "debuffer Windows Install Plan"
     Write-Host "  Mode: $Mode"
     foreach ($action in @('CREATE', 'ADOPT', 'UPDATE_TARGET', 'REUSE', 'REMOVE', 'CONFLICT')) {
         $count = @($Plan | Where-Object { $_.Action -eq $action }).Count
@@ -592,6 +599,31 @@ function Remove-LinkPath {
     [System.IO.Directory]::Delete($Path, $false)
 }
 
+function Move-LegacyStateDir {
+    param([string]$ProjectRoot, [string]$StateDir, [string]$LegacyStateDir)
+    if ($StateDir -eq $LegacyStateDir) { return }
+    $newPath = Join-Path $ProjectRoot $StateDir
+    $legacyPath = Join-Path $ProjectRoot $LegacyStateDir
+    $newItem = Get-PathItem $newPath
+    $legacyItem = Get-PathItem $legacyPath
+    if ($null -ne $newItem) {
+        if ($null -ne $legacyItem) {
+            Write-Warning "legacy state directory still exists at $legacyPath; using $newPath"
+        }
+        return
+    }
+    if ($null -eq $legacyItem) { return }
+    if (Test-LinkItem $legacyItem) {
+        Die "$legacyPath is a link; refusing to migrate state directory"
+    }
+    if ($DryRun) {
+        Write-Host "  (dry-run) migrate $LegacyStateDir -> $StateDir"
+        return
+    }
+    Move-Item -LiteralPath $legacyPath -Destination $newPath
+    Write-Host "  migrated legacy state: $LegacyStateDir -> $StateDir"
+}
+
 function Get-LegacyState {
     param($Config, [string]$ProjectRoot)
     $path = Join-Path $ProjectRoot $Config.LegacyNestedRel
@@ -620,7 +652,7 @@ function Assert-LegacyMigrationAllowed {
     }
     switch ($Legacy.Kind) {
         'link_to_repo' { return }
-        'link_to_other' { Die "legacy nested link points outside expected ARIS source: $($Legacy.Path) -> $($Legacy.Target)" }
+        'link_to_other' { Die "nested link points outside expected skill source: $($Legacy.Path) -> $($Legacy.Target)" }
         'real_file' { Die "legacy nested path is a real file; move it manually before installing: $($Legacy.Path)" }
         'real_dir' {
             if (-not $MigrateCopy) {
@@ -663,18 +695,18 @@ function Ensure-ToolsJunction {
     $linkPath = Join-Path $ArisDir 'tools'
     $expectedTarget = Join-Path $RepoRoot 'tools'
     if (-not (Test-Path -LiteralPath $expectedTarget -PathType Container)) {
-        Write-Warning "ARIS tools directory not found: $expectedTarget"
+        Write-Warning "skill tools directory not found: $expectedTarget"
         return
     }
     $item = Get-PathItem $linkPath
     if (Test-LinkItem $item) {
         $currentTarget = Get-LinkTarget $linkPath
         if (Same-Path $currentTarget $expectedTarget) { return }
-        Write-Warning ".aris\tools already points to $currentTarget; leaving it unchanged"
+        Write-Warning "$StateDirName\tools already points to $currentTarget; leaving it unchanged"
         return
     }
     if ($null -ne $item) {
-        Write-Warning ".aris\tools already exists as a real path; leaving it unchanged"
+        Write-Warning "$StateDirName\tools already exists as a real path; leaving it unchanged"
         return
     }
     if ($DryRun) {
@@ -683,7 +715,7 @@ function Ensure-ToolsJunction {
     }
     New-Item -ItemType Directory -Force -Path $ArisDir | Out-Null
     New-Junction $linkPath $expectedTarget
-    Write-Host "  + .aris\tools"
+    Write-Host "  + $StateDirName\tools"
 }
 
 function Remove-ToolsJunction {
@@ -700,7 +732,7 @@ function Remove-ToolsJunction {
         if (-not (Test-Path -LiteralPath $otherManifestPath -PathType Leaf)) { continue }
         $otherManifest = Load-Manifest $otherManifestPath
         if ($otherManifest.Headers.ContainsKey('repo_root') -and (Same-Path $otherManifest.Headers['repo_root'] $RepoRoot)) {
-            Write-Host "  = .aris\tools (kept; $manifestName still uses this ARIS repo)"
+            Write-Host "  = $StateDirName\tools (kept; $manifestName still uses this skill repo)"
             return
         }
     }
@@ -708,7 +740,7 @@ function Remove-ToolsJunction {
         Write-Host "  (dry-run) remove $linkPath"
     } else {
         Remove-LinkPath $linkPath
-        Write-Host "  - .aris\tools"
+        Write-Host "  - $StateDirName\tools"
     }
 }
 
@@ -740,7 +772,7 @@ function Apply-Plan {
                     Die "link target changed during install for $($entry.Name)"
                 }
                 if (-not (Test-ResolvedPathInside $currentTarget $RepoRoot)) {
-                    Die "refusing to relink $($entry.Name); current target is outside ARIS repo: $currentTarget"
+                    Die "refusing to relink $($entry.Name); current target is outside skill repo: $currentTarget"
                 }
                 Remove-LinkPath $entry.TargetPath
                 New-Junction $entry.TargetPath $entry.ExpectedTarget
@@ -811,17 +843,17 @@ function Commit-Manifest {
 function Update-ManagedDoc {
     param($Config, [string]$DocPath, [string]$RepoRoot, [string]$ProjectRoot, [int]$Count)
     if ($NoDoc) { return }
-    $reconcileCommand = "powershell -NoProfile -ExecutionPolicy Bypass -File `"$RepoRoot\tools\install_aris.ps1`" `"$ProjectRoot`" -Platform $($Config.Platform) -Reconcile"
+    $reconcileCommand = "powershell -NoProfile -ExecutionPolicy Bypass -File `"$RepoRoot\tools\install_debuffer.ps1`" `"$ProjectRoot`" -Platform $($Config.Platform) -Repo `"$RepoRoot`" -Reconcile"
     $block = @"
 $($Config.BlockBegin)
 ## $($Config.Title)
-ARIS skills installed in this project: $Count entries.
+debuffer skills installed in this project: $Count entries.
 Profile: ``$Profile``
-Manifest: ``.aris/$($Config.ManifestName)``
-ARIS repo root: ``$RepoRoot``
+Manifest: ``$StateDirName/$($Config.ManifestName)``
+Skill repo root: ``$RepoRoot``
 Project skill path: ``$($Config.TargetRelDisplay)/<skill-name>``
-For ARIS workflows, prefer the project-local skills under ``$($Config.TargetRelDisplay)/``.
-Do not edit or delete junctioned skills in place; update upstream or rerun:
+For debuffer workflows, prefer the project-local skills under ``$($Config.TargetRelDisplay)/``.
+Keep junctioned skills managed from the skill repo; update upstream or rerun:
 ``$reconcileCommand``
 $($Config.BlockEnd)
 "@
@@ -830,8 +862,14 @@ $($Config.BlockEnd)
         $original = Read-Text $DocPath
     }
     $newContent = $null
-    if ($original.Contains($Config.BlockBegin)) {
-        $pattern = [regex]::Escape($Config.BlockBegin) + '.*?' + [regex]::Escape($Config.BlockEnd)
+    $activeBegin = $Config.BlockBegin
+    $activeEnd = $Config.BlockEnd
+    if (-not $original.Contains($activeBegin) -and ($Config.PSObject.Properties.Name -contains 'LegacyBlockBegin') -and $original.Contains($Config.LegacyBlockBegin)) {
+        $activeBegin = $Config.LegacyBlockBegin
+        $activeEnd = $Config.LegacyBlockEnd
+    }
+    if ($original.Contains($activeBegin)) {
+        $pattern = [regex]::Escape($activeBegin) + '.*?' + [regex]::Escape($activeEnd)
         $newContent = [regex]::Replace(
             $original,
             $pattern,
@@ -856,8 +894,14 @@ function Remove-ManagedDocBlock {
         return
     }
     $original = Read-Text $DocPath
-    if (-not $original.Contains($Config.BlockBegin)) { return }
-    $pattern = "`r?`n?" + [regex]::Escape($Config.BlockBegin) + '.*?' + [regex]::Escape($Config.BlockEnd) + "`r?`n?"
+    $activeBegin = $Config.BlockBegin
+    $activeEnd = $Config.BlockEnd
+    if (-not $original.Contains($activeBegin) -and ($Config.PSObject.Properties.Name -contains 'LegacyBlockBegin') -and $original.Contains($Config.LegacyBlockBegin)) {
+        $activeBegin = $Config.LegacyBlockBegin
+        $activeEnd = $Config.LegacyBlockEnd
+    }
+    if (-not $original.Contains($activeBegin)) { return }
+    $pattern = "`r?`n?" + [regex]::Escape($activeBegin) + '.*?' + [regex]::Escape($activeEnd) + "`r?`n?"
     $newContent = [regex]::Replace(
         $original,
         $pattern,
@@ -927,7 +971,7 @@ function Invoke-Main {
         $selectedPlatform = Detect-Platform $projectRoot
     }
     $config = New-Config $projectRoot $repoRoot $selectedPlatform
-    $arisDir = Join-Path $projectRoot '.aris'
+    $arisDir = Join-Path $projectRoot $StateDirName
     $manifestPath = Join-Path $arisDir $config.ManifestName
     $manifestPrevPath = Join-Path $arisDir $config.ManifestPrevName
     $docPath = Join-Path $projectRoot $config.DocName
@@ -936,7 +980,7 @@ function Invoke-Main {
     $mode = $(if ($DryRun) { 'DRY-RUN' } elseif ($Uninstall) { 'UNINSTALL' } elseif ($Reconcile) { 'RECONCILE' } else { 'APPLY' })
 
     Write-Host ''
-    Write-Host 'ARIS Project Install'
+    Write-Host 'debuffer Project Install'
     Write-Host "  Project:  $projectRoot"
     Write-Host "  Platform: $selectedPlatform"
     Write-Host "  Repo:     $repoRoot"
@@ -944,6 +988,7 @@ function Invoke-Main {
     Write-Host "  Profile:  $Profile"
     Write-Host "  Mode:     $mode"
 
+    Move-LegacyStateDir $projectRoot $StateDirName $LegacyStateDirName
     Check-NoSymlinkedParents @($arisDir, (Split-Path -Parent $targetRoot), $targetRoot)
 
     if ($Uninstall) {

@@ -170,10 +170,10 @@ on failure, never abort the whole aggregate):
 ```bash
 # Canonical strict-safe resolver (see shared-references/integration-contract.md §2).
 cd "$(git rev-parse --show-toplevel 2>/dev/null || pwd)" || exit 1
-if [ -z "${ARIS_REPO:-}" ] && [ -f .aris/installed-skills.txt ]; then
-    ARIS_REPO=$(awk -F'\t' '$1=="repo_root"{print $2; exit}' .aris/installed-skills.txt 2>/dev/null) || true
+if [ -z "${ARIS_REPO:-}" ] && [ -f .debuffer_skills/installed-skills.txt ]; then
+    ARIS_REPO=$(awk -F'\t' '$1=="repo_root"{print $2; exit}' .debuffer_skills/installed-skills.txt 2>/dev/null) || true
 fi
-ARXIV_FETCHER=".aris/tools/arxiv_fetch.py"
+ARXIV_FETCHER=".debuffer_skills/tools/arxiv_fetch.py"
 [ -f "$ARXIV_FETCHER" ] || ARXIV_FETCHER="tools/arxiv_fetch.py"
 [ -f "$ARXIV_FETCHER" ] || { [ -n "${ARIS_REPO:-}" ] && ARXIV_FETCHER="$ARIS_REPO/tools/arxiv_fetch.py"; }
 [ -f "$ARXIV_FETCHER" ] || ARXIV_FETCHER=""
@@ -211,11 +211,11 @@ When the user explicitly requests `— sources: semantic-scholar` (or `— sourc
 ```bash
 # Re-resolve $ARIS_REPO (SKILL bash blocks may run in separate shells).
 cd "$(git rev-parse --show-toplevel 2>/dev/null || pwd)" || exit 1
-if [ -z "${ARIS_REPO:-}" ] && [ -f .aris/installed-skills.txt ]; then
-    ARIS_REPO=$(awk -F'\t' '$1=="repo_root"{print $2; exit}' .aris/installed-skills.txt 2>/dev/null) || true
+if [ -z "${ARIS_REPO:-}" ] && [ -f .debuffer_skills/installed-skills.txt ]; then
+    ARIS_REPO=$(awk -F'\t' '$1=="repo_root"{print $2; exit}' .debuffer_skills/installed-skills.txt 2>/dev/null) || true
 fi
 # Resolve $S2_FETCHER (Policy D2 — warn-and-skip on missing).
-S2_FETCHER=".aris/tools/semantic_scholar_fetch.py"
+S2_FETCHER=".debuffer_skills/tools/semantic_scholar_fetch.py"
 [ -f "$S2_FETCHER" ] || S2_FETCHER="tools/semantic_scholar_fetch.py"
 [ -f "$S2_FETCHER" ] || { [ -n "${ARIS_REPO:-}" ] && S2_FETCHER="$ARIS_REPO/tools/semantic_scholar_fetch.py"; }
 [ -f "$S2_FETCHER" ] || S2_FETCHER=""
@@ -249,11 +249,11 @@ When the user explicitly requests `— sources: deepxiv` (or includes `deepxiv` 
 ```bash
 # Re-resolve $ARIS_REPO (SKILL bash blocks may run in separate shells).
 cd "$(git rev-parse --show-toplevel 2>/dev/null || pwd)" || exit 1
-if [ -z "${ARIS_REPO:-}" ] && [ -f .aris/installed-skills.txt ]; then
-    ARIS_REPO=$(awk -F'\t' '$1=="repo_root"{print $2; exit}' .aris/installed-skills.txt 2>/dev/null) || true
+if [ -z "${ARIS_REPO:-}" ] && [ -f .debuffer_skills/installed-skills.txt ]; then
+    ARIS_REPO=$(awk -F'\t' '$1=="repo_root"{print $2; exit}' .debuffer_skills/installed-skills.txt 2>/dev/null) || true
 fi
 # Resolve $DEEPXIV_FETCHER (Policy D2 — warn-and-skip on missing).
-DEEPXIV_FETCHER=".aris/tools/deepxiv_fetch.py"
+DEEPXIV_FETCHER=".debuffer_skills/tools/deepxiv_fetch.py"
 [ -f "$DEEPXIV_FETCHER" ] || DEEPXIV_FETCHER="tools/deepxiv_fetch.py"
 [ -f "$DEEPXIV_FETCHER" ] || { [ -n "${ARIS_REPO:-}" ] && DEEPXIV_FETCHER="$ARIS_REPO/tools/deepxiv_fetch.py"; }
 [ -f "$DEEPXIV_FETCHER" ] || DEEPXIV_FETCHER=""
@@ -292,11 +292,11 @@ When the user explicitly requests `— sources: exa` (or includes `exa` in a com
 ```bash
 # Re-resolve $ARIS_REPO (SKILL bash blocks may run in separate shells).
 cd "$(git rev-parse --show-toplevel 2>/dev/null || pwd)" || exit 1
-if [ -z "${ARIS_REPO:-}" ] && [ -f .aris/installed-skills.txt ]; then
-    ARIS_REPO=$(awk -F'\t' '$1=="repo_root"{print $2; exit}' .aris/installed-skills.txt 2>/dev/null) || true
+if [ -z "${ARIS_REPO:-}" ] && [ -f .debuffer_skills/installed-skills.txt ]; then
+    ARIS_REPO=$(awk -F'\t' '$1=="repo_root"{print $2; exit}' .debuffer_skills/installed-skills.txt 2>/dev/null) || true
 fi
 # Resolve $EXA_FETCHER (Policy D2 — warn-and-skip on missing).
-EXA_FETCHER=".aris/tools/exa_search.py"
+EXA_FETCHER=".debuffer_skills/tools/exa_search.py"
 [ -f "$EXA_FETCHER" ] || EXA_FETCHER="tools/exa_search.py"
 [ -f "$EXA_FETCHER" ] || { [ -n "${ARIS_REPO:-}" ] && EXA_FETCHER="$ARIS_REPO/tools/exa_search.py"; }
 [ -f "$EXA_FETCHER" ] || EXA_FETCHER=""
@@ -380,11 +380,11 @@ When the user explicitly requests `— sources: openalex` (or includes `openalex
 ```bash
 # Re-resolve $ARIS_REPO (SKILL bash blocks may run in separate shells).
 cd "$(git rev-parse --show-toplevel 2>/dev/null || pwd)" || exit 1
-if [ -z "${ARIS_REPO:-}" ] && [ -f .aris/installed-skills.txt ]; then
-    ARIS_REPO=$(awk -F'\t' '$1=="repo_root"{print $2; exit}' .aris/installed-skills.txt 2>/dev/null) || true
+if [ -z "${ARIS_REPO:-}" ] && [ -f .debuffer_skills/installed-skills.txt ]; then
+    ARIS_REPO=$(awk -F'\t' '$1=="repo_root"{print $2; exit}' .debuffer_skills/installed-skills.txt 2>/dev/null) || true
 fi
 # Resolve $OPENALEX_FETCHER (Policy D2 — warn-and-skip on missing).
-OPENALEX_FETCHER=".aris/tools/openalex_fetch.py"
+OPENALEX_FETCHER=".debuffer_skills/tools/openalex_fetch.py"
 [ -f "$OPENALEX_FETCHER" ] || OPENALEX_FETCHER="tools/openalex_fetch.py"
 [ -f "$OPENALEX_FETCHER" ] || { [ -n "${ARIS_REPO:-}" ] && OPENALEX_FETCHER="$ARIS_REPO/tools/openalex_fetch.py"; }
 [ -f "$OPENALEX_FETCHER" ] || OPENALEX_FETCHER=""
@@ -461,10 +461,10 @@ After all sources are searched and papers are ranked by relevance:
 ```bash
 # Re-resolve $ARXIV_FETCHER (SKILL bash blocks may run in separate shells).
 cd "$(git rev-parse --show-toplevel 2>/dev/null || pwd)" || exit 1
-if [ -z "${ARIS_REPO:-}" ] && [ -f .aris/installed-skills.txt ]; then
-    ARIS_REPO=$(awk -F'\t' '$1=="repo_root"{print $2; exit}' .aris/installed-skills.txt 2>/dev/null) || true
+if [ -z "${ARIS_REPO:-}" ] && [ -f .debuffer_skills/installed-skills.txt ]; then
+    ARIS_REPO=$(awk -F'\t' '$1=="repo_root"{print $2; exit}' .debuffer_skills/installed-skills.txt 2>/dev/null) || true
 fi
-ARXIV_FETCHER=".aris/tools/arxiv_fetch.py"
+ARXIV_FETCHER=".debuffer_skills/tools/arxiv_fetch.py"
 [ -f "$ARXIV_FETCHER" ] || ARXIV_FETCHER="tools/arxiv_fetch.py"
 [ -f "$ARXIV_FETCHER" ] || { [ -n "${ARIS_REPO:-}" ] && ARXIV_FETCHER="$ARIS_REPO/tools/arxiv_fetch.py"; }
 [ -f "$ARXIV_FETCHER" ] || ARXIV_FETCHER=""
@@ -492,19 +492,19 @@ rather than silently dropping candidates.
 ```bash
 # 1. Resolve $VERIFY_PAPERS via the canonical strict-safe chain (§2).
 cd "$(git rev-parse --show-toplevel 2>/dev/null || pwd)" || exit 1
-if [ -z "${ARIS_REPO:-}" ] && [ -f .aris/installed-skills.txt ]; then
-    ARIS_REPO=$(awk -F'\t' '$1=="repo_root"{print $2; exit}' .aris/installed-skills.txt 2>/dev/null) || true
+if [ -z "${ARIS_REPO:-}" ] && [ -f .debuffer_skills/installed-skills.txt ]; then
+    ARIS_REPO=$(awk -F'\t' '$1=="repo_root"{print $2; exit}' .debuffer_skills/installed-skills.txt 2>/dev/null) || true
 fi
-VERIFY_PAPERS=".aris/tools/verify_papers.py"
+VERIFY_PAPERS=".debuffer_skills/tools/verify_papers.py"
 [ -f "$VERIFY_PAPERS" ] || VERIFY_PAPERS="tools/verify_papers.py"
 [ -f "$VERIFY_PAPERS" ] || { [ -n "${ARIS_REPO:-}" ] && VERIFY_PAPERS="$ARIS_REPO/tools/verify_papers.py"; }
 [ -f "$VERIFY_PAPERS" ] || VERIFY_PAPERS=""
 
-# 2. Emit candidates as JSON. Verification scratch lives under .aris/
+# 2. Emit candidates as JSON. Verification scratch lives under .debuffer_skills/
 #    (NOT under research-wiki/ — Step 6's wiki ingest predicate is
 #    "research-wiki/ exists", and we must not trip it from Step 1.5).
-mkdir -p .aris/verify-papers
-cat > .aris/verify-papers/candidate_papers.json <<'JSON'
+mkdir -p .debuffer_skills/verify-papers
+cat > .debuffer_skills/verify-papers/candidate_papers.json <<'JSON'
 [
   {"id": "p1", "arxiv_id": "2307.03172", "doi": null, "title": "Lost in the Middle"},
   {"id": "p2", "arxiv_id": null, "doi": "10.1145/...", "title": "..."},
@@ -520,14 +520,14 @@ JSON
 verify_ok=false
 if [ -n "$VERIFY_PAPERS" ]; then
   if python3 "$VERIFY_PAPERS" \
-        --input  .aris/verify-papers/candidate_papers.json \
-        --output .aris/verify-papers/verified_papers.json; then
+        --input  .debuffer_skills/verify-papers/candidate_papers.json \
+        --output .debuffer_skills/verify-papers/verified_papers.json; then
     verify_ok=true
   else
     echo "WARN: verify_papers.py invocation failed (resolved at $VERIFY_PAPERS); falling back to [UNVERIFIED] tagging." >&2
   fi
 else
-  echo "WARN: verify_papers.py not resolved at .aris/tools/, tools/, or \$ARIS_REPO/tools/." >&2
+  echo "WARN: verify_papers.py not resolved at .debuffer_skills/tools/, tools/, or \$ARIS_REPO/tools/." >&2
   echo "      Fix: rerun bash tools/install_aris.sh, export ARIS_REPO, or copy the helper to tools/." >&2
 fi
 if [ "$verify_ok" = "false" ]; then
@@ -539,19 +539,19 @@ if [ "$verify_ok" = "false" ]; then
   echo "      Emitting unverified candidate set with [UNVERIFIED] tags." >&2
   python3 - <<'PY'
 import json
-cands = json.load(open('.aris/verify-papers/candidate_papers.json'))
+cands = json.load(open('.debuffer_skills/verify-papers/candidate_papers.json'))
 out = {
   'verdict': 'WARN',
   'reason_code': 'verify_papers_unavailable',
   'summary': 'verify_papers.py helper unresolved or invocation failed; all candidates tagged [UNVERIFIED] for audit visibility.',
   'papers': [dict(p, status='unverified', method='none') for p in cands],
 }
-with open('.aris/verify-papers/verified_papers.json', 'w') as f:
+with open('.debuffer_skills/verify-papers/verified_papers.json', 'w') as f:
   json.dump(out, f, indent=2)
 PY
 fi
 
-# 4. Read verdict + per-paper status from .aris/verify-papers/verified_papers.json;
+# 4. Read verdict + per-paper status from .debuffer_skills/verify-papers/verified_papers.json;
 #    surface warnings to the user.
 ```
 
@@ -604,7 +604,7 @@ CrossRef rate limits to the polite pool.
 > admission verdicts, and here admission is the deterministic Step-1.5 gate, so
 > the invariant is satisfied without a model jury.
 
-For **every** paper in `.aris/verify-papers/verified_papers.json`
+For **every** paper in `.debuffer_skills/verify-papers/verified_papers.json`
 (verified, unverified, `verify_pending`, and `error` alike — see
 Retention rule above), extract:
 - **Problem**: What gap does it address?
@@ -660,12 +660,12 @@ chain documented in
 
 ```bash
 cd "$(git rev-parse --show-toplevel 2>/dev/null || pwd)" || exit 1
-ARIS_REPO="${ARIS_REPO:-$(awk -F'\t' '$1=="repo_root"{print $2; exit}' .aris/installed-skills.txt 2>/dev/null)}"
-WIKI_SCRIPT=".aris/tools/research_wiki.py"
+ARIS_REPO="${ARIS_REPO:-$(awk -F'\t' '$1=="repo_root"{print $2; exit}' .debuffer_skills/installed-skills.txt 2>/dev/null)}"
+WIKI_SCRIPT=".debuffer_skills/tools/research_wiki.py"
 [ -f "$WIKI_SCRIPT" ] || WIKI_SCRIPT="tools/research_wiki.py"
 [ -f "$WIKI_SCRIPT" ] || { [ -n "${ARIS_REPO:-}" ] && WIKI_SCRIPT="$ARIS_REPO/tools/research_wiki.py"; }
 [ -f "$WIKI_SCRIPT" ] || {
-  echo "WARN: research_wiki.py not found; literature synthesis will be reported but wiki ingest will be skipped. Fix: bash tools/install_aris.sh, export ARIS_REPO, or cp <ARIS-repo>/tools/research_wiki.py tools/." >&2
+  echo "WARN: research_wiki.py not found; literature synthesis will be reported but wiki ingest will be skipped. Fix: bash tools/install_aris.sh, export ARIS_REPO, or cp <debuffer-repo>/tools/research_wiki.py tools/." >&2
   WIKI_SCRIPT=""
 }
 ```
@@ -693,7 +693,7 @@ WIKI_SCRIPT=".aris/tools/research_wiki.py"
 (skips an existing paper by arXiv id), page rendering, `index.md`
 rebuild, `query_pack.md` rebuild, and log append in a single call —
 **do not manually write `papers/<slug>.md`**. If the helper is
-unavailable (e.g., offline on a non-ARIS machine, or `$WIKI_SCRIPT`
+unavailable (e.g., offline on a non-debuffer machine, or `$WIKI_SCRIPT`
 empty), log the gap and let `/research-wiki sync --arxiv-ids …`
 backfill later.
 

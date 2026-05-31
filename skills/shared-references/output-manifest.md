@@ -9,7 +9,7 @@ If `MANIFEST.md` does not exist, create it with this header:
 ```markdown
 # Research Output Manifest
 
-> Auto-maintained by ARIS skills. Tracks all generated artifacts across the research lifecycle.
+> Auto-maintained by debuffer skills. Tracks all generated artifacts across the research lifecycle.
 
 | Timestamp | Skill | File | Stage | Description |
 |-----------|-------|------|-------|-------------|

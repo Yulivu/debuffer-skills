@@ -45,8 +45,7 @@ def _arxiv_user_agent() -> str:
     so no address is hard-coded. Falls back to a contactless UA when unset.
     """
     contact = os.environ.get("ARIS_VERIFY_EMAIL", "").strip()
-    base = ("arxiv-skill/1.0 "
-            "(+https://github.com/wanshuiyin/Auto-claude-code-research-in-sleep)")
+    base = "arxiv-skill/1.0 (+https://github.com/Yulivu/debuffer-skills)"
     return f"{base} (mailto:{contact})" if contact else base
 
 

@@ -1,8 +1,8 @@
 # Integration Contract
 
-When one ARIS skill delegates work to another (or to persistent project
+When one debuffer skill delegates work to another (or to persistent project
 state), the coupling must be **engineered**, not assumed. This document
-formalizes what every cross-skill integration inside ARIS must provide.
+formalizes what every cross-skill integration inside debuffer must provide.
 
 Rule of thumb: **SKILL.md prose can *describe* an integration; it cannot
 *guarantee* one.** Any integration whose silent failure would damage the
@@ -31,7 +31,7 @@ prose without a canonical helper, a concrete artifact, or a verifier**.
 
 ## Required components
 
-Every integration between two ARIS skills (or between a skill and a
+Every integration between two debuffer skills (or between a skill and a
 persistent project artifact) must provide all six:
 
 ### 1. Activation predicate — single, explicit, observable
@@ -53,15 +53,15 @@ an existing helper. Every caller invokes the same entrypoint, but
 every caller must also resolve **where** that entrypoint lives,
 because the helper may sit at any of:
 
-- `<project>/.aris/tools/<helper>` — symlinked by `install_aris.sh` (Phase 0, #174)
-- `<project>/tools/<helper>` — manual copy or running from inside the ARIS repo
+- `<project>/.debuffer_skills/tools/<helper>` — symlinked by `install_aris.sh` (Phase 0, #174)
+- `<project>/tools/<helper>` — manual copy or running from inside the debuffer repo
 - `$ARIS_REPO/tools/<helper>` — env var or auto-resolved from the install manifest
 
 Every caller — including those primarily exercised from inside the
-ARIS repo — MUST use the resolution chain. The chain's middle layer
+debuffer repo — MUST use the resolution chain. The chain's middle layer
 (`tools/<helper>`) covers the in-repo case at the same code path,
 with no special-casing needed. The exception that used to live here
-("helpers run from inside ARIS repo may stay plain `tools/...`")
+("helpers run from inside debuffer repo may stay plain `tools/...`")
 caused the canonical user-report bug: `/paper-writing` invoked from
 a downstream paper project could not find `verify_paper_audits.sh`
 because the prose endorsed the hardcoded form.
@@ -74,10 +74,10 @@ because the prose endorsed the hardcoded form.
 # and `|| true` consumes a non-zero awk exit so chain evaluation
 # continues. Run `chmod +x` not required: the block uses `[ -f ]`.
 cd "$(git rev-parse --show-toplevel 2>/dev/null || pwd)" || exit 1
-if [ -z "${ARIS_REPO:-}" ] && [ -f .aris/installed-skills.txt ]; then
-    ARIS_REPO=$(awk -F'\t' '$1=="repo_root"{print $2; exit}' .aris/installed-skills.txt 2>/dev/null) || true
+if [ -z "${ARIS_REPO:-}" ] && [ -f .debuffer_skills/installed-skills.txt ]; then
+    ARIS_REPO=$(awk -F'\t' '$1=="repo_root"{print $2; exit}' .debuffer_skills/installed-skills.txt 2>/dev/null) || true
 fi
-HELPER=".aris/tools/<helper>"
+HELPER=".debuffer_skills/tools/<helper>"
 [ -f "$HELPER" ] || HELPER="tools/<helper>"
 [ -f "$HELPER" ] || { [ -n "${ARIS_REPO:-}" ] && HELPER="$ARIS_REPO/tools/<helper>"; }
 [ -f "$HELPER" ] || HELPER=""
@@ -92,7 +92,7 @@ does not clobber one with another.
 If the SKILL is invoked from a subdirectory of a non-git project (no
 `.git/` anywhere up the tree), `git rev-parse --show-toplevel` fails
 and the `|| pwd` fallback keeps the resolver in the current directory.
-SKILLs that need to discover `.aris/` from a deeper subdirectory MUST
+SKILLs that need to discover `.debuffer_skills/` from a deeper subdirectory MUST
 either run from project root or set `$ARIS_REPO` explicitly — the
 resolver intentionally does not walk parent directories.
 
@@ -108,7 +108,7 @@ verifiers whose exit code gates submission readiness (e.g.
 
 ```bash
 [ -n "$AUDIT_VERIFIER" ] || {
-  echo "ERROR: verify_paper_audits.sh not resolved at .aris/tools/, tools/, or \$ARIS_REPO/tools/." >&2
+  echo "ERROR: verify_paper_audits.sh not resolved at .debuffer_skills/tools/, tools/, or \$ARIS_REPO/tools/." >&2
   echo "       assurance=submission requires the verifier; aborting Final Report." >&2
   exit 1
 }
@@ -285,7 +285,7 @@ Three properties of layer 0:
 3. **Backwards-compatible.** The canonical 3-layer chain still works
    because Phase 3 keeps the legacy entry at `tools/<helper>` as a
    thin `os.execv` shim that forwards to the canonical location. So
-   `.aris/tools/<helper>` (layer 1), `tools/<helper>` (layer 2), and
+   `.debuffer_skills/tools/<helper>` (layer 1), `tools/<helper>` (layer 2), and
    `$ARIS_REPO/tools/<helper>` (layer 3) all resolve to a working
    Python script for any user who has not re-run `install_aris.sh`.
 
@@ -376,7 +376,7 @@ helper should not have to guess what to backfill.
 
 - ✅ `/research-wiki sync --arxiv-ids 2501.12345,1706.03762`
 - ✅ `/research-wiki sync --from-file ids.txt`
-- ⚠️ `/research-wiki sync` that scans `.aris/traces/` for arxiv IDs —
+- ⚠️ `/research-wiki sync` that scans `.debuffer_skills/traces/` for arxiv IDs —
      only as a best-effort secondary mode, not the primary UX, and
      clearly labeled as heuristic.
 
@@ -416,14 +416,14 @@ When reviewing a new integration proposal, reject any of:
 - **"Trust the LLM to self-report completion"** — missing verifier (§6)
   when the failure is load-bearing.
 
-## Known ARIS integrations under this contract
+## Known debuffer integrations under this contract
 
 Helper names in the table below are **canonical names**; callers
 resolve actual paths via §2.
 
 | Integration | Predicate | Helper | Artifact | Checklist | Backfill | Verifier |
 |---|---|---|---|---|---|---|
-| Submission audits (`max`/`beast`) | `paper/.aris/assurance.txt = submission` | `verify_paper_audits.sh` + 3 audit skills emit JSON | `paper/PROOF_AUDIT.json`, `PAPER_CLAIM_AUDIT.json`, `CITATION_AUDIT.json` + `paper/.aris/audit-verifier-report.json` | Phase 6.0 pre-flight checklist | Rerun the failed audit | `verify_paper_audits.sh` (exit 1 blocks) |
+| Submission audits (`max`/`beast`) | `paper/.debuffer_skills/assurance.txt = submission` | `verify_paper_audits.sh` + 3 audit skills emit JSON | `paper/PROOF_AUDIT.json`, `PAPER_CLAIM_AUDIT.json`, `CITATION_AUDIT.json` + `paper/.debuffer_skills/audit-verifier-report.json` | Phase 6.0 pre-flight checklist | Rerun the failed audit | `verify_paper_audits.sh` (exit 1 blocks) |
 | Research wiki ingest | `research-wiki/` exists | `research_wiki.py ingest_paper` | `research-wiki/papers/<slug>.md` + `log.md` entry | Step in each paper-reading skill | `research_wiki.py sync --arxiv-ids …` | `verify_wiki_coverage.sh` (diagnostic) |
 | paper-illustration-image2 finalization | `paper_illustration_image2.py preflight --workspace <cwd>` returns `ok=true` | `paper_illustration_image2.py` (`preflight`, `finalize`, `verify`) | `figures/ai_generated/figure_final.png`, `latex_include.tex`, `review_log.json` | Step 0 checklist in `paper-illustration-image2` | `paper_illustration_image2.py finalize --workspace <cwd> --best-image <png>` | `paper_illustration_image2.py verify` (skill-local gate; exit 1 on missing artifacts blocks finalize claim, parent workflow may continue with the alternate illustration path) |
 

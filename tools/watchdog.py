@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-watchdog.py — Server-side unified monitoring daemon for ARIS.
+watchdog.py — Server-side unified monitoring daemon for debuffer.
 
 One process per server, monitors all registered tasks (training / download).
 Outputs per-task status JSON + aggregated summary.txt for low-frequency polling.
@@ -346,7 +346,7 @@ def run_watchdog(base_dir, interval):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="ARIS Watchdog — server-side task monitoring daemon",
+        description="debuffer Watchdog — server-side task monitoring daemon",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:

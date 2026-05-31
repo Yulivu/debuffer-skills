@@ -260,7 +260,7 @@ def test_codex_high_risk_skills_preserve_claude_semantics() -> None:
         "arxiv": [
             "Update Research Wiki",
             "integration-contract.md",
-            ".aris/installed-skills-codex.txt",
+            ".debuffer_skills/installed-skills-codex.txt",
         ],
         "rebuttal": [
             "Review Tracing",
@@ -370,7 +370,7 @@ def test_codex_skill_instructions_use_codex_paths() -> None:
 
     assert "~/.codex/feishu.json" in auto_paper
     assert "~/.claude/feishu.json" not in auto_paper
-    assert ".aris/installed-skills-codex.txt" in paper_writing
+    assert ".debuffer_skills/installed-skills-codex.txt" in paper_writing
     assert ".agents/skills/paper-writing" in paper_writing
     assert "~/.claude/skills/paper-writing/SKILL.md" not in paper_writing
     assert "~/.claude/settings.json" not in paper_writing
@@ -389,4 +389,4 @@ def test_codex_experiment_queue_points_to_bundled_helpers() -> None:
     assert "tools/experiment_queue/build_manifest.py" in text
     assert "tools/queue_manager.py" not in text
     assert "tools/build_manifest.py" not in text
-    assert ".aris/installed-skills-codex.txt" in text
+    assert ".debuffer_skills/installed-skills-codex.txt" in text

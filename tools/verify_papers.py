@@ -9,8 +9,8 @@ fabricated references propagate through downstream skills.
 
 Used by `/research-lit` (Step 1.5, mandatory), `/idea-creator`, `/novelty-check`.
 
-Helper resolution chain: `.aris/tools/verify_papers.py` →
-`tools/verify_papers.py` → `$ARIS_REPO/tools/verify_papers.py`. See
+Helper resolution chain: `.debuffer_skills/tools/verify_papers.py` →
+`tools/verify_papers.py` → `$DEBUFFER_SKILLS_REPO/tools/verify_papers.py`. See
 `skills/shared-references/wiki-helper-resolution.md` for the canonical pattern.
 
 CLI:
@@ -73,11 +73,11 @@ Top-level verdict:
 
 Cache key priority: arxiv > doi > title-hash. Cache value retains all identifiers.
 
-Email for CrossRef User-Agent: reads `ARIS_VERIFY_EMAIL` env, falls back to
-`aris-research@anonymous.local` (placeholder, not a real address). Set the env
+Email for CrossRef User-Agent: reads `DEBUFFER_VERIFY_EMAIL` env, falls back to
+the legacy `ARIS_VERIFY_EMAIL` env. Set the env
 to reduce CrossRef rate-limit risk:
 
-  export ARIS_VERIFY_EMAIL="you@institution.edu"
+  export DEBUFFER_VERIFY_EMAIL="you@institution.edu"
 """
 from __future__ import annotations
 
@@ -111,8 +111,8 @@ DEFAULT_CACHE_TTL_DAYS = 30
 DEFAULT_HALLUCINATION_WARN_THRESHOLD = 0.2
 
 def _arxiv_user_agent() -> str:
-    contact = os.environ.get("ARIS_VERIFY_EMAIL", "").strip()
-    base = "verify-papers/1.0 (+https://github.com/wanshuiyin/Auto-claude-code-research-in-sleep)"
+    contact = os.environ.get("DEBUFFER_VERIFY_EMAIL", os.environ.get("ARIS_VERIFY_EMAIL", "")).strip()
+    base = "verify-papers/1.0 (+https://github.com/Yulivu/debuffer-skills)"
     return f"{base} (mailto:{contact})" if contact else base
 
 
@@ -193,9 +193,11 @@ def resolve_cache_path(scope: str, cache_dir: str | None) -> Path | None:
     if cache_dir:
         return Path(cache_dir) / "verify_papers.json"
     if scope == "user":
-        return Path.home() / ".aris-cache" / "verify_papers.json"
+        return Path.home() / ".debuffer_skills-cache" / "verify_papers.json"
     if scope == "project":
-        return Path(".aris/cache/verify_papers.json")
+        path = Path(".debuffer_skills/cache/verify_papers.json")
+        legacy = Path(".aris/cache/verify_papers.json")
+        return legacy if not path.exists() and legacy.exists() else path
     return None
 
 
@@ -293,7 +295,7 @@ def verify_doi(doi: str, user_email: str) -> str:
     """Return verified | unverified | verify_pending."""
     encoded = urllib.parse.quote(normalize_doi(doi), safe="/")
     url = f"{CROSSREF_API}/{encoded}"
-    headers = {"User-Agent": f"ARIS-verify-papers/1.0 (mailto:{user_email})"}
+    headers = {"User-Agent": f"debuffer-verify-papers/1.0 (mailto:{user_email})"}
     for attempt in range(2):
         status, _ = http_get(url, headers=headers, timeout=15)
         if status == 200:

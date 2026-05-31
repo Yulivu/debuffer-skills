@@ -1,17 +1,17 @@
 ---
 name: meta-optimize
-description: "Analyze ARIS usage logs and propose optimizations to SKILL.md files, reviewer prompts, and workflow defaults. Outer-loop harness optimization inspired by Meta-Harness (Lee et al., 2026). Use when user says \"优化技能\", \"meta optimize\", \"improve skills\", \"分析使用记录\", or wants to optimize ARIS's own harness components based on accumulated experience."
+description: "Analyze skill usage logs and propose optimizations to SKILL.md files, reviewer prompts, and workflow defaults. Outer-loop harness optimization inspired by Meta-Harness (Lee et al., 2026). Use when user says \"优化技能\", \"meta optimize\", \"improve skills\", \"分析使用记录\", or wants to improve the skill pack based on accumulated experience."
 argument-hint: [target-skill-or-all]
 allowed-tools: Bash(*), Read, Write, Edit, Grep, Glob, mcp__codex__codex, mcp__codex__codex-reply
 ---
 
-# Meta-Optimize: Outer-Loop Harness Optimization for ARIS
+# Meta-Optimize: Outer-Loop Harness Optimization
 
 Analyze accumulated usage logs and propose optimizations for: **$ARGUMENTS**
 
 ## Context
 
-ARIS is a **research harness** — a system of skills, bridges, workflows, and artifact contracts that wraps around LLMs to orchestrate research. This skill implements a prototype **outer loop** that observes how the harness is used and proposes improvements to the harness itself (not to the research artifacts it produces).
+This skill pack is a **research harness**: a system of skills, bridges, workflows, and artifact contracts that wraps around LLMs to orchestrate research. This skill implements a prototype **outer loop** that observes how the harness is used and proposes improvements to the harness itself (not to the research artifacts it produces).
 
 Inspired by Meta-Harness (Lee et al., 2026): the key insight is that harness design matters as much as model weights, and harness engineering can be partially automated by logging execution traces and using them to guide improvements.
 
@@ -26,19 +26,19 @@ Inspired by Meta-Harness (Lee et al., 2026): the key insight is that harness des
 | Artifact schemas | What fields go in EXPERIMENT_LOG.md, idea-stage/IDEA_REPORT.md | Cautious |
 | MCP bridge config | Which reviewer model, routing rules | No (infra) |
 
-**Not optimized**: The research artifacts themselves (papers, code, experiments). That's what the regular workflows do.
+**Scope**: skill prompts, workflow defaults, reviewer instructions, and artifact contracts. Research artifacts themselves stay under the regular research workflows.
 
 ## Prerequisites
 
 1. **Logging must be active.** Copy `templates/claude-hooks/meta_logging.json` into your project's `.claude/settings.json` (or merge the hooks section).
-2. **Sufficient data.** At least 5 complete workflow runs logged in `.aris/meta/events.jsonl`. The skill will check and warn if insufficient.
+2. **Sufficient data.** At least 5 complete workflow runs logged in `.debuffer_skills/meta/events.jsonl`. The skill will check and warn if insufficient.
 
 ## Workflow
 
 ### Step 0: Check Data Availability
 
 ```bash
-EVENTS_FILE=".aris/meta/events.jsonl"
+EVENTS_FILE=".debuffer_skills/meta/events.jsonl"
 if [ ! -f "$EVENTS_FILE" ]; then
     echo "ERROR: No event log found at $EVENTS_FILE"
     echo "Enable logging first: copy templates/claude-hooks/meta_logging.json into .claude/settings.json"
@@ -52,14 +52,14 @@ SESSIONS=$(grep -c '"session_start"' "$EVENTS_FILE" || echo 0)
 echo "📊 Event log: $EVENT_COUNT events, $SKILL_INVOCATIONS skill invocations, $SESSIONS sessions"
 
 if [ "$SKILL_INVOCATIONS" -lt 5 ]; then
-    echo "⚠️  Insufficient data (<5 skill invocations). Continue using ARIS normally and re-run later."
+    echo "⚠️  Insufficient data (<5 skill invocations). Continue using the skill pack normally and re-run later."
     exit 0
 fi
 ```
 
 ### Step 1: Analyze Usage Patterns
 
-Read `.aris/meta/events.jsonl` and compute:
+Read `.debuffer_skills/meta/events.jsonl` and compute:
 
 **Frequency analysis:**
 - Which skills are invoked most often?
@@ -130,7 +130,7 @@ mcp__codex__codex:
   model: gpt-5.5
   config: {"model_reasoning_effort": "xhigh"}
   prompt: |
-    You are reviewing a proposed optimization to an ARIS SKILL.md file.
+    You are reviewing a proposed optimization to a debuffer SKILL.md file.
     
     ## Original Skill (relevant section)
     [paste original]
@@ -155,7 +155,7 @@ mcp__codex__codex:
 Output a structured report:
 
 ```markdown
-# ARIS Meta-Optimization Report
+# Skill Pack Meta-Optimization Report
 
 **Date**: [today]
 **Data**: [N] events, [M] skill invocations, [K] sessions
@@ -173,8 +173,8 @@ Output a structured report:
 
 ### Change 2: ...
 
-## Changes NOT Made (insufficient evidence)
-- [pattern observed but too few samples]
+## Deferred Opportunities
+- [pattern observed but needing more samples]
 
 ## Recommendations
 - [ ] Apply Change 1 (reviewer approved)
@@ -189,9 +189,9 @@ Run `/meta-optimize apply 1` to apply a specific change, or
 ### Step 6: Apply Changes (if user approves)
 
 If user runs `/meta-optimize apply [N]`:
-1. Back up original SKILL.md to `.aris/meta/backups/`
+1. Back up original SKILL.md to `.debuffer_skills/meta/backups/`
 2. Apply the patch
-3. Log the change to `.aris/meta/optimizations.jsonl`
+3. Log the change to `.debuffer_skills/meta/optimizations.jsonl`
 4. Remind user to test the changed skill on their next run
 
 **Never auto-apply without user approval.**
@@ -208,7 +208,7 @@ If user runs `/meta-optimize apply [N]`:
 
 ## Event Schema Reference
 
-The log at `.aris/meta/events.jsonl` contains JSONL records with these shapes:
+The log at `.debuffer_skills/meta/events.jsonl` contains JSONL records with these shapes:
 
 ```jsonl
 {"ts":"...","session":"...","event":"skill_invoke","skill":"auto-review-loop","args":"difficulty: hard"}
@@ -225,17 +225,17 @@ The log at `.aris/meta/events.jsonl` contains JSONL records with these shapes:
 
 This skill is NOT part of the standard W1→W1.5→W2→W3→W4 pipeline. It is a **maintenance workflow** with three trigger mechanisms:
 
-1. **Passive logging** (always on): Claude Code hooks record events to `.aris/meta/events.jsonl` automatically during normal usage. Zero user effort.
+1. **Passive logging** (always on): Claude Code hooks record events to `.debuffer_skills/meta/events.jsonl` automatically during normal usage. Zero user effort.
 
 2. **Automatic readiness check** (SessionEnd hook): When a Claude Code session ends, `check_ready.sh` counts skill invocations since the last `/meta-optimize` run. If ≥5 new invocations have accumulated, it prints a reminder:
    ```
-   📊 ARIS has logged 8 skill runs since last optimization. Run /meta-optimize to check for improvement opportunities.
+   📊 The skill pack has logged 8 skill runs since last optimization. Run /meta-optimize to check for improvement opportunities.
    ```
-   This is a **suggestion only** — it does not auto-run optimization.
+   This is an advisory readiness signal; the user decides when to run optimization.
 
 3. **Manual trigger**: User runs `/meta-optimize` when they see the reminder or whenever they want.
 
-**After each `/meta-optimize` run**, the skill writes the current timestamp to `.aris/meta/.last_optimize` so the readiness check only counts new invocations.
+**After each `/meta-optimize` run**, the skill writes the current timestamp to `.debuffer_skills/meta/.last_optimize` so the readiness check only counts new invocations.
 
 ## Acknowledgements
 
@@ -250,4 +250,4 @@ Inspired by [Meta-Harness](https://arxiv.org/abs/2603.28052) (Lee et al., 2026) 
 
 ## Review Tracing
 
-After each `mcp__codex__codex` or `mcp__codex__codex-reply` reviewer call, save the trace following `shared-references/review-tracing.md` (Policy C — forensic; never silently skip). Use `save_trace.sh` (resolved per the chain in `shared-references/integration-contract.md` §2) or write files directly to `.aris/traces/<skill>/<date>_run<NN>/`. Respect the `--- trace:` parameter (default: `full`).
+After each `mcp__codex__codex` or `mcp__codex__codex-reply` reviewer call, save the trace following `shared-references/review-tracing.md` (Policy C — forensic; never silently skip). Use `save_trace.sh` (resolved per the chain in `shared-references/integration-contract.md` §2) or write files directly to `.debuffer_skills/traces/<skill>/<date>_run<NN>/`. Respect the `--- trace:` parameter (default: `full`).

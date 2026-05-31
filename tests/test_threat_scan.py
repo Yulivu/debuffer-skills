@@ -1,4 +1,4 @@
-"""Tests for tools/threat_scan.py — the ARIS injection scanner (layer 1)."""
+"""Tests for tools/threat_scan.py — the debuffer injection scanner (layer 1)."""
 
 import sys
 from pathlib import Path
@@ -39,7 +39,7 @@ def test_false_positive_discipline():
 
 
 def test_no_false_positive_on_real_aris_content():
-    """Phrases that actually occur in ARIS skills/wiki must stay clean at strict."""
+    """Phrases that actually occur in debuffer skills/wiki must stay clean at strict."""
     clean = [
         "We register each worker as a node in the compute cluster.",      # ML research, not c2_node_registration
         "Pull tasks from the experiment queue and run them in waves.",    # experiment-queue, not c2_task_pull

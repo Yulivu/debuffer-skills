@@ -1,17 +1,15 @@
 # debuffer-skills
 
-这是一个面向科研项目的轻量化 ARIS/Codex skills 定制包。它保留 79 个可组合 skill 和 Codex mirror，但默认不追求全自动化：本地做结构、代码、审计、测试和 tiny smoke；重型 GPU 任务优先准备 AutoDL/HPC；外部评审优先输出 prompt，让另一个隔离对话执行评审。
+这是一个面向科研项目的轻量化 Codex skills 定制包。当前提供 **79 个 skill**，主线与 Codex mirror 均为 **79 个 skill**，完整清单见 [docs/SKILLS_CATALOG.md](docs/SKILLS_CATALOG.md)。
 
-当前包含 **79 个 skill**。主线与 Codex mirror 均为 **79 个 skill**，完整清单见 [docs/SKILLS_CATALOG.md](docs/SKILLS_CATALOG.md)。
+## 当前提供
 
-## 设计原则
-
-- 本地轻量：不默认跑大规模训练、长 sweep、重型评测或长时间后台任务。
-- AutoDL 优先：需要 GPU 时，优先准备 preflight、smoke、数据清单、结果回传和正式运行审批。
-- 评审分离：默认写 `review-prompts/`，把 prompt 交给另一个启用本 skill 包的独立对话评审。
-- 放弃默认 SSH 自动化：`ssh`、`scp`、`rsync`、`screen`、`tmux`、`nohup` 只默认输出命令块并等待批准。
-- 文档克制：本仓库只保留根中文 `README.md` 和紧凑技能目录；项目文档按阶段生成并定期融合。
-- 可复现优先：每个项目都维护宏观阶段、下一道 gate、证据边界和阻塞项。
+- 本地轻量工作流：仓库结构、代码编辑、审计准备、测试、lint、配置解析和 tiny smoke。
+- AutoDL/HPC 运行准备：preflight、smoke suite、数据清单、结果回传和正式运行审批。
+- prompt-only 外部评审：把上下文整理到 `review-prompts/`，交给独立对话评审，再消费粘贴回来的反馈。
+- 多起步阶段适配：`venue-only`、`reference-paper`、`reference-codebase`、`idea-doc`、`existing-repo`、`partial-results`。
+- 论文与审计链路：实验计划、结果审计、claim/citation/proof 检查、LaTeX 写作、rebuttal 和 resubmit。
+- 紧凑项目记忆：`PROJECT_STATUS.md`、`PROJECT_BRIEF.md`、`NEXT_ACTIONS.md`、`findings.md`、`EXPERIMENT_LOG.md` 和阶段性 `PROJECT_GUIDE.md`。
 
 <a id="quick-start"></a>
 
@@ -25,27 +23,70 @@ cd debuffer-skills
 给 Codex 项目安装 project-local skills：
 
 ```bash
-bash tools/install_aris_codex.sh /path/to/project --aris-repo "$PWD" --profile core-research
+read -r -p "Target repo path: " target_repo
+bash tools/install_debuffer_codex.sh "$target_repo" --repo "$PWD" --profile core-research
 ```
 
 Windows PowerShell：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File tools\install_aris.ps1 C:\path\to\project -Platform codex -ArisRepo (Get-Location).Path -Profile core-research
+$targetRepo = Read-Host "Target repo path"
+powershell -ExecutionPolicy Bypass -File tools\install_debuffer.ps1 $targetRepo -Platform codex -Repo (Get-Location).Path -Profile core-research
 ```
 
-可用 profile：`core-research`、`paper`、`review`、`full`。默认 `full` 保持兼容；新科研项目建议从 `core-research` 开始。
+可用 profile：`core-research`、`paper`、`review`、`full`。新科研项目建议从 `core-research` 开始。
+
+安装后，目标项目只会增加项目本地入口：`.agents/skills/`（Codex）和 `.debuffer_skills/`（安装 manifest、锁、helper 链接与运行状态）。这些是本地工作区状态，默认不要提交；已有旧版状态目录时，重新运行安装器会自动迁移到 `.debuffer_skills/`。
+
+Windows 上可以直接双击根目录的 `Install Debuffer Skills.cmd`，在窗口里选择要安装 skills 的目标 repo、profile 和是否 reconcile，然后点击 Install。
+
+macOS 上可以直接双击根目录的 `Install Debuffer Skills.command`，在弹出的选择器里选择目标 repo 和 profile。若 Finder 提示无法执行，先在终端运行：
+
+```bash
+chmod +x "Install Debuffer Skills.command"
+```
+
+也可以把便携脚本复制到任意项目根目录后运行。脚本会把所在目录作为目标项目，并自动发现中央 `debuffer-skills` 仓库；找不到时可通过 `-Repo` / `--repo` 指定，或使用 clone 选项。
+
+Windows PowerShell：
+
+```powershell
+# 在 debuffer-skills 仓库根目录运行
+$skillRepo = (Get-Location).Path
+$targetRepo = Read-Host "Target repo path"
+Copy-Item (Join-Path $skillRepo "tools\use_debuffer_skills.ps1") $targetRepo
+Set-Location $targetRepo
+powershell -ExecutionPolicy Bypass -File .\use_debuffer_skills.ps1 -Repo $skillRepo -Profile core-research
+```
+
+Git Bash / Linux / AutoDL：
+
+```bash
+# 在 debuffer-skills 仓库根目录运行
+skill_repo="$(pwd)"
+read -r -p "Target repo path: " target_repo
+cp "$skill_repo/tools/use_debuffer_skills.sh" "$target_repo/"
+cd "$target_repo"
+bash use_debuffer_skills.sh --repo "$skill_repo" --profile core-research
+```
+
+显式指定中央库：
+
+```powershell
+$skillRepo = Read-Host "debuffer-skills repo path"
+powershell -ExecutionPolicy Bypass -File .\use_debuffer_skills.ps1 -Repo $skillRepo
+```
 
 <a id="skills-catalog"></a>
 
 ## 主要入口
 
-- `research-repo-architect`：按不同起步阶段创建或迁移科研仓库，并维护项目宏观状态。
-- `autodl-hpc`：准备 AutoDL/HPC 的 deploy key、离线数据策略、preflight、smoke gate、结果传输和正式运行审批。
+- `research-repo-architect`：创建或迁移科研仓库，匹配起步阶段，维护项目宏观状态。
+- `autodl-hpc`：准备 AutoDL/HPC 运行、数据策略、preflight、smoke gate、结果传输和正式运行审批。
 - `idea-discovery` / `research-refine` / `experiment-plan`：从方向、参考论文、代码库或初步 idea 走到可验证实验计划。
-- `research-review` / `auto-review-loop` / `paper-claim-audit` / `citation-audit`：默认生成独立评审 prompt，并消费粘贴回来的反馈。
+- `research-review` / `auto-review-loop` / `paper-claim-audit` / `citation-audit`：生成独立评审 prompt，并整理反馈为行动项。
 - `paper-writing` / `paper-write` / `paper-compile`：把已审计证据组织成论文草稿、LaTeX 和提交前检查。
-- `rebuttal` / `resubmit-pipeline`：适配会议/期刊反馈、rebuttal 和换 venue 投稿。
+- `rebuttal` / `resubmit-pipeline`：处理会议/期刊反馈、rebuttal 和换 venue 投稿。
 
 完整表见 [docs/SKILLS_CATALOG.md](docs/SKILLS_CATALOG.md)。
 
@@ -53,34 +94,33 @@ powershell -ExecutionPolicy Bypass -File tools\install_aris.ps1 C:\path\to\proje
 
 ## 起步阶段
 
-`research-repo-architect` 会先判断项目属于哪种状态，再决定生成多少材料：
+| 阶段 | 产物 |
+|---|---|
+| `venue-only` | 目标 venue 风险、问题假设、文献问题和下一步验证问题 |
+| `reference-paper` | claim map、复现/扩展计划和最小实验路线 |
+| `reference-codebase` | license、入口、环境、测试和可复用边界审查 |
+| `idea-doc` | 假设、非目标和最小可证伪计划 |
+| `existing-repo` | inventory、迁移图和小步结构调整 |
+| `partial-results` | 日志、图表、配置、证据链和补充审计 |
 
-- `venue-only`：只知道目标期刊/会议和大方向，先生成 brief、风险清单和下一步验证问题。
-- `reference-paper`：已有参考论文，先做 claim map、复现/扩展计划和最小实验路线。
-- `reference-codebase`：已有代码库，先审查 license、入口、环境、测试和可复用边界。
-- `idea-doc`：已有初步想法文档，先抽取假设、非目标和最小可证伪计划。
-- `existing-repo`：已有仓库，先做迁移图，再小步调整结构。
-- `partial-results`：已有结果，先盘点日志、图表、配置和证据链，再补审计。
-
-每个阶段都应维护 `PROJECT_STATUS.md`：当前宏观阶段、目标 venue、最近接受的产物、下一道 gate、阻塞和下一步。
+每个项目维护 `PROJECT_STATUS.md`：当前宏观阶段、目标 venue、最近接受的产物、下一道 gate、阻塞和下一步。
 
 <a id="autodl--gpu"></a>
 
 ## AutoDL 与 GPU
 
-默认策略是“本地准备，远端执行，人工批准”：
+推荐流程是“本地准备，远端执行，人工批准”：
 
-- 本地只跑格式检查、单元测试、tiny smoke 和配置解析。
-- AutoDL/HPC 项目应生成 `docs/runbooks/AUTODL_HPC_RUNBOOK.md`、`data/DATA_MANIFEST.md`、`experiments/suites/*smoke*` 和 `scripts/hpc/*`。
-- preflight 和 smoke 通过只说明工程准备就绪，不自动升级为正式实验。
-- 正式 suite、长 sweep、大数据下载和 SSH 执行都需要用户确认。
-- 结果回传后，原始输出先进 `experiments/runs/`，审计后再进入 `experiments/results/` 和论文图表。
+- 本地执行格式检查、单元测试、tiny smoke 和配置解析。
+- AutoDL/HPC 项目生成 `docs/runbooks/AUTODL_HPC_RUNBOOK.md`、`data/DATA_MANIFEST.md`、`experiments/suites/*smoke*` 和 `scripts/hpc/*`。
+- preflight、smoke、formal suite、长 sweep、数据下载和结果回传都有清晰命令块和审批点。
+- 原始输出进入 `experiments/runs/`，审计后的稳定证据进入 `experiments/results/` 和论文图表。
 
 <a id="review"></a>
 
 ## 外部评审
 
-本包不默认要求接入新的 reviewer API。需要独立评审时，skills 优先写：
+独立评审入口是 `review-prompts/`：
 
 ```text
 review-prompts/
@@ -90,19 +130,17 @@ review-prompts/
   tpami_review_prompt.md
 ```
 
-然后在另一个独立对话中加载这个 skill 包，把 prompt、论文、代码路径和结果证据交给评审者。AAAI/ICLR 更重 novelty、实验说服力和叙事；JMLR 更重完整性、严谨性和长期可复现；TPAMI 更重技术深度、视觉/模式识别定位、实验覆盖和工程可信度。
+AAAI/ICLR 侧重 novelty、实验说服力和叙事；JMLR 侧重完整性、严谨性和长期可复现；TPAMI 侧重技术深度、视觉/模式识别定位、实验覆盖和工程可信度。
 
 <a id="maintenance"></a>
 
 ## 文档维护
 
-本仓库只保留根中文 `README.md` 和 `docs/SKILLS_CATALOG.md`。不要把教程全集、论文 PDF、演示图片、生成 HTML 或平台迁移旧文档放回主包。
+仓库文档入口为根中文 `README.md` 和 `docs/SKILLS_CATALOG.md`。项目运行文档采用少量、阶段化、可融合的结构：
 
-项目运行中生成文档也遵循少量、阶段化、可融合：
-
-- 起步阶段只生成 `PROJECT_BRIEF.md`、`PROJECT_STATUS.md`、`NEXT_ACTIONS.md` 等必要文件。
-- 形成实验证据后再维护 `findings.md`、`EXPERIMENT_LOG.md`、`PROJECT_GUIDE.md`。
-- `PROJECT_GUIDE.md` 只在阶段门或重要交接时刷新，不作为每轮对话默认产物。
+- 起步阶段产出 `PROJECT_BRIEF.md`、`PROJECT_STATUS.md`、`NEXT_ACTIONS.md`。
+- 形成实验证据后维护 `findings.md`、`EXPERIMENT_LOG.md`、`PROJECT_GUIDE.md`。
+- 阶段门或重要交接时刷新 `PROJECT_GUIDE.md`。
 
 ## 仓库结构
 
@@ -113,13 +151,13 @@ skills/shared-references/       跨 skill 契约和协议
 tools/                          安装器、同步器和共享 helper
 templates/                      项目产物模板
 docs/SKILLS_CATALOG.md          中文紧凑技能目录
-mcp-servers/                    可选 bridge，默认不强制使用
+mcp-servers/                    可选 bridge
 tests/                          inventory、mirror 和安装器测试
 ```
 
 ## 校验
 
-修改 skill、mirror、目录结构或 README 后至少运行：
+修改 skill、mirror、目录结构或 README 后运行：
 
 ```bash
 python tools/check_skills_inventory.py
@@ -127,10 +165,10 @@ python -m pytest tests/test_codex_skill_mirror.py -q
 git diff --check
 ```
 
-如果改了安装器或 helper，再补跑对应 `tests/test_install_*.py` 和 helper 测试。
+安装器或 helper 改动再补跑对应 `tests/test_install_*.py` 和 helper 测试。
 
 <a id="license"></a>
 
 ## 许可证
 
-继承上游 MIT License。详见 [LICENSE](LICENSE)。
+MIT License。详见 [LICENSE](LICENSE)。

@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# install_aris.sh — Project-local ARIS skill installation (flat per-skill symlinks).
+# install_aris.sh — Project-local debuffer skill installation (flat per-skill symlinks).
 #
-# Each ARIS skill is symlinked into `<project>/.claude/skills/<skill-name>` so
+# Each skill is symlinked into `<project>/.claude/skills/<skill-name>` so
 # Claude Code's slash-command discovery (which only scans one level deep) finds it.
-# A versioned manifest at `<project>/.aris/installed-skills.txt` tracks every
+# A versioned manifest at `<project>/.debuffer_skills/installed-skills.txt` tracks every
 # entry this installer created — uninstall and reconcile read from the manifest
 # and never touch user-owned skills with the same name.
 #
@@ -16,7 +16,7 @@
 #   --uninstall      remove only entries in manifest; delete manifest
 #
 # Options:
-#   --aris-repo PATH       override aris-repo discovery
+#   --aris-repo PATH       override skill repo discovery
 #   --dry-run              show plan, no writes
 #   --quiet                no prompts; abort on any condition that would prompt
 #   --no-doc               skip CLAUDE.md update
@@ -33,7 +33,7 @@
 #
 # Safety rules enforced:
 #   S1  Never delete a path that is not a symlink.
-#   S2  Never delete a symlink whose target is outside the configured aris-repo.
+#   S2  Never delete a symlink whose target is outside the configured skill repo.
 #   S3  Never delete a symlink not listed in the manifest (except via --uninstall
 #       which only deletes manifest entries).
 #   S4  Never overwrite an existing path during CREATE — abort by default.
@@ -41,13 +41,13 @@
 #   S6  Concurrent runs in same project serialize via mkdir lockdir.
 #   S7  Crash mid-apply leaves the previous manifest intact; rerun adopts.
 #   S8  Uninstall revalidates each managed symlink's target before removing.
-#   S9  If .aris/, .claude/, or .claude/skills/ is itself a symlink, abort.
-#   S10 Reject upstream entries that are symlinks to outside aris-repo.
+#   S9  If .debuffer_skills/, .claude/, or .claude/skills/ is itself a symlink, abort.
+#   S10 Reject upstream entries that are symlinks to outside the skill repo.
 #   S11 Revalidate exact target match (lstat + readlink) before every mutation.
-#   S12 The optional `.aris/tools` symlink (added in #174) is the only managed
+#   S12 The optional `.debuffer_skills/tools` symlink is the only managed
 #       artifact NOT tracked in the manifest. It is identified at uninstall
-#       time by exact target match against `<aris-repo>/tools`. Any other
-#       path or differently-targeted symlink at `.aris/tools` is left alone.
+#       time by exact target match against `<skill-repo>/tools`. Any other
+#       path or differently-targeted symlink at `.debuffer_skills/tools` is left alone.
 #   S12 Temp files live in the same directory as the destination.
 #   S13 Skill names must match ^[A-Za-z0-9][A-Za-z0-9._-]*$ (slug regex).
 
@@ -57,12 +57,15 @@ set -euo pipefail
 MANIFEST_VERSION="1"
 MANIFEST_NAME="installed-skills.txt"
 MANIFEST_PREV_NAME="installed-skills.txt.prev"
-ARIS_DIR_NAME=".aris"
+ARIS_DIR_NAME=".debuffer_skills"
+LEGACY_ARIS_DIR_NAME=".aris"
 LOCK_DIR_NAME=".install.lock.d"
 SKILLS_REL=".claude/skills"
 DOC_FILE_NAME="CLAUDE.md"
-BLOCK_BEGIN="<!-- ARIS:BEGIN -->"
-BLOCK_END="<!-- ARIS:END -->"
+BLOCK_BEGIN="<!-- DEBUFFER:BEGIN -->"
+BLOCK_END="<!-- DEBUFFER:END -->"
+LEGACY_BLOCK_BEGIN="<!-- debuffer:BEGIN -->"
+LEGACY_BLOCK_END="<!-- debuffer:END -->"
 SAFE_NAME_REGEX='^[A-Za-z0-9][A-Za-z0-9._-]*$'
 SUPPORT_NAMES=("shared-references")
 EXCLUDE_TOP_NAMES=("skills-codex" "skills-codex.bak")  # not skills, not symlinked
@@ -86,7 +89,7 @@ while [[ $# -gt 0 ]]; do
     case "$1" in
         --reconcile)         ACTION="reconcile"; shift ;;
         --uninstall)         ACTION="uninstall"; shift ;;
-        --aris-repo)         ARIS_REPO_OVERRIDE="${2:?--aris-repo requires path}"; shift 2 ;;
+        --repo|--aris-repo)  ARIS_REPO_OVERRIDE="${2:?--repo requires path}"; shift 2 ;;
         --dry-run)           DRY_RUN=true; shift ;;
         --quiet)             QUIET=true; shift ;;
         --no-doc)            NO_DOC=true; shift ;;
@@ -96,7 +99,7 @@ while [[ $# -gt 0 ]]; do
         --adopt-existing)    ADOPT_NAMES+=("${2:?--adopt-existing requires NAME}"); shift 2 ;;
         --replace-link)      REPLACE_LINK_NAMES+=("${2:?--replace-link requires NAME}"); shift 2 ;;
         --platform)
-            echo "Error: --platform is removed. ARIS now only supports Claude Code (.claude/skills/)." >&2
+            echo "Error: --platform is not supported by this Claude installer." >&2
             echo "       Codex CLI users: see docs for the manual codex setup." >&2
             exit 2 ;;
         --force)
@@ -149,7 +152,7 @@ canonicalize() {
 # True if $1 is a symlink (lstat-style; doesn't follow)
 is_symlink() { [[ -L "$1" ]]; }
 
-# Find aris-repo location
+# Find skill repo location
 resolve_aris_repo() {
     local p
     if [[ -n "$ARIS_REPO_OVERRIDE" ]]; then
@@ -163,21 +166,21 @@ resolve_aris_repo() {
     if [[ -d "$parent/skills" ]]; then echo "$parent"; return; fi
     if [[ -n "${ARIS_REPO:-}" && -d "$ARIS_REPO/skills" ]]; then abs_path "$ARIS_REPO"; return; fi
     for guess in \
+        "$HOME/Desktop/debuffer-skills" \
+        "$HOME/debuffer-skills" \
+        "$HOME/.codex/debuffer-skills" \
+        "$HOME/.claude/debuffer-skills" \
         "$HOME/Desktop/aris_repo" \
-        "$HOME/aris_repo" \
-        "$HOME/.aris" \
-        "$HOME/Desktop/Auto-claude-code-research-in-sleep" \
-        "$HOME/.codex/Auto-claude-code-research-in-sleep" \
-        "$HOME/.claude/Auto-claude-code-research-in-sleep" ; do
+        "$HOME/aris_repo" ; do
         [[ -d "$guess/skills" ]] && { abs_path "$guess"; return; }
     done
-    die "cannot find ARIS repo. Use --aris-repo PATH or set ARIS_REPO env var."
+    die "cannot find skill repo. Use --aris-repo PATH or set ARIS_REPO env var."
 }
 
 # Build the upstream inventory: array of "kind|name" entries
-# Skills = top-level dirs in <aris-repo>/skills/ containing SKILL.md
+# Skills = top-level dirs in <skill-repo>/skills/ containing SKILL.md
 # Support = explicitly listed support directories (shared-references)
-# Rejects: anything in EXCLUDE_TOP_NAMES, names failing slug regex, symlinks to outside aris-repo (S10)
+# Rejects: anything in EXCLUDE_TOP_NAMES, names failing slug regex, symlinks to outside the skill repo (S10)
 build_upstream_inventory() {
     local repo="$1"
     local skills_dir="$repo/skills"
@@ -237,7 +240,7 @@ manifest_kind_of() {
     awk -F'\t' -v n="$2" '$2==n {print $1; exit}' "$1"
 }
 
-# ─── Resolve project path & aris-repo ─────────────────────────────────────────
+# ─── Resolve project path & skill repo ────────────────────────────────────────
 PROJECT_PATH="${PROJECT_PATH:-$(pwd)}"
 [[ -d "$PROJECT_PATH" ]] || die "project path does not exist: $PROJECT_PATH"
 PROJECT_PATH="$(abs_path "$PROJECT_PATH")"
@@ -245,13 +248,38 @@ ARIS_REPO="$(resolve_aris_repo)"
 SKILLS_DIR_ABS="$ARIS_REPO/skills"
 PROJECT_SKILLS_DIR="$PROJECT_PATH/$SKILLS_REL"
 PROJECT_ARIS_DIR="$PROJECT_PATH/$ARIS_DIR_NAME"
+LEGACY_PROJECT_ARIS_DIR="$PROJECT_PATH/$LEGACY_ARIS_DIR_NAME"
 MANIFEST_PATH="$PROJECT_ARIS_DIR/$MANIFEST_NAME"
 MANIFEST_PREV="$PROJECT_ARIS_DIR/$MANIFEST_PREV_NAME"
 LOCK_DIR="$PROJECT_ARIS_DIR/$LOCK_DIR_NAME"
 DOC_FILE="$PROJECT_PATH/$DOC_FILE_NAME"
 
-# ─── S9: refuse if .aris / .claude / .claude/skills is itself a symlink ───────
-# (.aris and .claude/skills may not exist yet — only check if present.)
+migrate_legacy_state_dir() {
+    if [[ "$ARIS_DIR_NAME" == "$LEGACY_ARIS_DIR_NAME" ]]; then
+        return 0
+    fi
+    if [[ -e "$PROJECT_ARIS_DIR" || -L "$PROJECT_ARIS_DIR" ]]; then
+        if [[ -e "$LEGACY_PROJECT_ARIS_DIR" || -L "$LEGACY_PROJECT_ARIS_DIR" ]]; then
+            warn "legacy state directory still exists at $LEGACY_PROJECT_ARIS_DIR; using $PROJECT_ARIS_DIR"
+        fi
+        return 0
+    fi
+    if [[ ! -e "$LEGACY_PROJECT_ARIS_DIR" && ! -L "$LEGACY_PROJECT_ARIS_DIR" ]]; then
+        return 0
+    fi
+    if is_symlink "$LEGACY_PROJECT_ARIS_DIR"; then
+        die "$LEGACY_PROJECT_ARIS_DIR is a symlink; refusing to migrate state directory"
+    fi
+    if $DRY_RUN; then
+        log "  (dry-run) migrate $LEGACY_ARIS_DIR_NAME -> $ARIS_DIR_NAME"
+        return 0
+    fi
+    mv "$LEGACY_PROJECT_ARIS_DIR" "$PROJECT_ARIS_DIR"
+    log "  migrated legacy state: $LEGACY_ARIS_DIR_NAME -> $ARIS_DIR_NAME"
+}
+
+# ─── S9: refuse if state / .claude / .claude/skills is itself a symlink ───────
+# (.debuffer_skills and .claude/skills may not exist yet — only check if present.)
 check_no_symlinked_parents() {
     local p
     for p in "$PROJECT_ARIS_DIR" "$PROJECT_PATH/.claude" "$PROJECT_SKILLS_DIR"; do
@@ -290,7 +318,7 @@ acquire_lock() {
     fi
     local owner=""
     [[ -f "$LOCK_DIR/owner.json" ]] && owner="$(cat "$LOCK_DIR/owner.json")"
-    die "another install_aris.sh is running in this project (lock: $LOCK_DIR)
+    die "another skill install is running in this project (lock: $LOCK_DIR)
        owner: $owner
        if you are sure no install is in progress, rerun with --clear-stale-lock"
 }
@@ -346,7 +374,7 @@ migrate_legacy() {
        This may contain user edits. Choose explicitly:
          --migrate-copy keep-user        (keep nested copy intact, install flat alongside;
                                           old copy becomes inert for Claude discovery)
-         --migrate-copy prefer-upstream  (archive nested copy to .aris/legacy-copy-backup-<ts>/
+         --migrate-copy prefer-upstream  (archive nested copy to .debuffer_skills/legacy-copy-backup-<ts>/
                                           AFTER new flat install is verified, then flatten)"
             fi
             # actual handling deferred until after apply (for prefer-upstream)
@@ -500,9 +528,9 @@ apply_plan() {
                     warn "S11: $target_path target changed since plan ($plan_saw_target vs $extra) — skipping"
                     continue
                 fi
-                # S2: stale target must point inside aris-repo
+                # S2: stale target must point inside the skill repo
                 if [[ "$plan_saw_target" != "$ARIS_REPO"/* ]]; then
-                    warn "S2: refusing to replace symlink pointing outside aris-repo: $target_path -> $plan_saw_target"
+                    warn "S2: refusing to replace symlink pointing outside skill repo: $target_path -> $plan_saw_target"
                     continue
                 fi
                 if $DRY_RUN; then log "  (dry-run) update target: $target_path -> $expected_target"
@@ -515,10 +543,10 @@ apply_plan() {
             REMOVE)
                 # S1: must be a symlink
                 is_symlink "$target_path" || { warn "S1: $target_path is not a symlink, refusing to remove"; continue; }
-                # S2: target must be inside aris-repo
+                # S2: target must be inside the skill repo
                 local cur; cur="$(read_link_target "$target_path")"
                 [[ "$cur" != /* ]] && cur="$(canonicalize "$(dirname "$target_path")/$cur")"
-                [[ "$cur" == "$ARIS_REPO"/* ]] || { warn "S2: $target_path target $cur outside aris-repo, refusing"; continue; }
+                [[ "$cur" == "$ARIS_REPO"/* ]] || { warn "S2: $target_path target $cur outside skill repo, refusing"; continue; }
                 if $DRY_RUN; then log "  (dry-run) rm $target_path"
                 else rm -f "$target_path"; log "  - $name"
                 fi
@@ -530,12 +558,12 @@ apply_plan() {
     done < "$plan"
 }
 
-# Phase 0 (#174): ensure project-local `.aris/tools` symlink exists, pointing
-# to the canonical aris-repo `tools/` dir. Pure-additive: existing users who
+# Phase 0: ensure project-local `.debuffer_skills/tools` symlink exists, pointing
+# to the canonical skill-repo `tools/` dir. Pure-additive: existing users who
 # don't rerun the installer never see this. The symlink is currently inert
 # (no SKILL.md references it); it sets up future #177 path-rewrites.
 #
-# Idempotent. If `.aris/tools` already exists with a different target (or as
+# Idempotent. If `.debuffer_skills/tools` already exists with a different target (or as
 # a real file/dir), warn and leave it alone — never replace user content.
 # Membership in the "managed" set is determined by exact target match against
 # `$ARIS_REPO/tools`, not via the manifest, so we don't need to bump the
@@ -550,12 +578,12 @@ ensure_tools_symlink() {
         if [[ "$cur" == "$expected_target" ]]; then
             return 0
         fi
-        warn ".aris/tools already exists with different target ($cur); leaving alone (#174)"
+        warn "$ARIS_DIR_NAME/tools already exists with different target ($cur); leaving alone"
         return 0
     fi
 
     if [[ -e "$link_path" ]]; then
-        warn ".aris/tools already exists as a non-symlink path; leaving alone (#174)"
+        warn "$ARIS_DIR_NAME/tools already exists as a non-symlink path; leaving alone"
         return 0
     fi
 
@@ -563,11 +591,11 @@ ensure_tools_symlink() {
         log "  (dry-run) ln -s $expected_target $link_path"
     else
         ln -s "$expected_target" "$link_path"
-        log "  + .aris/tools -> tools/ (Phase 0, #174)"
+        log "  + $ARIS_DIR_NAME/tools -> tools/"
     fi
 }
 
-# Counterpart for uninstall: only remove `.aris/tools` if it is exactly the
+# Counterpart for uninstall: only remove `.debuffer_skills/tools` if it is exactly the
 # managed symlink (target == $ARIS_REPO/tools). User-created directories /
 # files / different symlinks are untouched.
 remove_tools_symlink() {
@@ -585,7 +613,7 @@ remove_tools_symlink() {
         log "  (dry-run) rm $link_path"
     else
         rm -f "$link_path"
-        log "  - .aris/tools (managed symlink)"
+        log "  - $ARIS_DIR_NAME/tools (managed symlink)"
     fi
 }
 
@@ -612,25 +640,31 @@ update_claude_doc() {
     # Build new block
     local count; count="$(wc -l < "$installed_names_file" | tr -d ' ')"
     new_block="$BLOCK_BEGIN
-## ARIS Skill Scope
-ARIS skills installed in this project: $count entries.
-Manifest: \`$ARIS_DIR_NAME/$MANIFEST_NAME\` (lists every skill ARIS installed and its upstream target).
-For ARIS workflows, prefer the project-local skills under \`$SKILLS_REL/\` over global skills.
-Do not modify or delete files inside any skill that is a symlink (symlinks point into \`$ARIS_REPO\`).
-Update with: \`bash $ARIS_REPO/tools/install_aris.sh\`  (re-runnable; reconciles new/removed skills).
+## debuffer Skill Scope
+debuffer skills installed in this project: $count entries.
+Manifest: \`$ARIS_DIR_NAME/$MANIFEST_NAME\` (lists every managed skill and its upstream target).
+For debuffer workflows, prefer the project-local skills under \`$SKILLS_REL/\` over global skills.
+Keep symlinked skills managed from the skill repo: \`$ARIS_REPO\`.
+Update with: \`bash $ARIS_REPO/tools/install_aris.sh\`  (re-runnable; reconciles managed skills).
 $BLOCK_END"
 
     # Compute new content
     local new_content
-    if printf '%s' "$original" | grep -qF "$BLOCK_BEGIN"; then
-        new_content="$(python3 - "$DOC_FILE" "$BLOCK_BEGIN" "$BLOCK_END" "$new_block" <<'PYEOF'
+    local active_begin="$BLOCK_BEGIN"
+    local active_end="$BLOCK_END"
+    if ! printf '%s' "$original" | grep -qF "$active_begin" && printf '%s' "$original" | grep -qF "$LEGACY_BLOCK_BEGIN"; then
+        active_begin="$LEGACY_BLOCK_BEGIN"
+        active_end="$LEGACY_BLOCK_END"
+    fi
+    if printf '%s' "$original" | grep -qF "$active_begin"; then
+        new_content="$(python3 - "$DOC_FILE" "$active_begin" "$active_end" "$new_block" <<'PYEOF'
 import re, sys, pathlib
 path, begin, end, body = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]
 text = pathlib.Path(path).read_text()
 pattern = re.compile(re.escape(begin) + r".*?" + re.escape(end), re.DOTALL)
 matches = pattern.findall(text)
 if len(matches) > 1:
-    sys.stderr.write("ARIS:WARN multiple ARIS blocks found in CLAUDE.md; skipping update\n")
+    sys.stderr.write("DEBUFFER:WARN multiple managed blocks found in CLAUDE.md; skipping update\n")
     sys.stdout.write(text)
 else:
     sys.stdout.write(pattern.sub(body, text))
@@ -643,8 +677,8 @@ PYEOF
     fi
 
     # Compare-and-swap: re-read file, only commit if unchanged from snapshot
-    if $DRY_RUN; then log "  (dry-run) would update CLAUDE.md ARIS block"; return 0; fi
-    tmp="$DOC_FILE.aris-tmp.$$"
+    if $DRY_RUN; then log "  (dry-run) would update CLAUDE.md managed block"; return 0; fi
+    tmp="$DOC_FILE.debuffer-tmp.$$"
     printf '%s' "$new_content" > "$tmp"
     local current; current="$(cat "$DOC_FILE")"
     if [[ "$current" != "$original" ]]; then
@@ -653,13 +687,13 @@ PYEOF
         return 0
     fi
     mv -f "$tmp" "$DOC_FILE"
-    log "  ✓ updated CLAUDE.md (ARIS managed block)"
+    log "  ✓ updated CLAUDE.md (managed block)"
 }
 
 # ─── Uninstall ────────────────────────────────────────────────────────────────
 do_uninstall() {
     [[ -f "$MANIFEST_PATH" ]] || die "no manifest at $MANIFEST_PATH; nothing to uninstall"
-    local manifest_data; manifest_data="$(mktemp -t aris-manifest.XXXX)"
+    local manifest_data; manifest_data="$(mktemp -t debuffer-manifest.XXXX)"
     load_manifest "$MANIFEST_PATH" "$manifest_data"
     log ""
     log "Uninstall plan:"
@@ -688,7 +722,7 @@ do_uninstall() {
         fi
     done < "$manifest_data"
     rm -f "$manifest_data"
-    # #174 Phase 0: best-effort cleanup of `.aris/tools` symlink, only if it
+    # Best-effort cleanup of the state-dir tools symlink, only if it
     # is exactly the managed symlink. Anything else (user-created dir, custom
     # symlink target) is left alone.
     remove_tools_symlink
@@ -701,12 +735,13 @@ do_uninstall() {
 
 # ─── Main flow ────────────────────────────────────────────────────────────────
 log ""
-log "ARIS Project Install"
+log "debuffer Project Install"
 log "  Project:    $PROJECT_PATH"
-log "  ARIS repo:  $ARIS_REPO"
+log "  Skill repo: $ARIS_REPO"
 log "  Action:     $ACTION$($DRY_RUN && echo ' (dry-run)')"
 log ""
 
+migrate_legacy_state_dir
 check_no_symlinked_parents
 acquire_lock
 
@@ -733,14 +768,14 @@ if [[ "$ACTION" == "reconcile" && ! -f "$MANIFEST_PATH" ]]; then
 fi
 
 # Build inventories
-UPSTREAM_FILE="$(mktemp -t aris-upstream.XXXX)"
+UPSTREAM_FILE="$(mktemp -t debuffer-upstream.XXXX)"
 build_upstream_inventory "$ARIS_REPO" > "$UPSTREAM_FILE"
-[[ -s "$UPSTREAM_FILE" ]] || die "upstream inventory empty (broken aris-repo?)"
+[[ -s "$UPSTREAM_FILE" ]] || die "upstream inventory empty (broken skill repo?)"
 
-MANIFEST_DATA="$(mktemp -t aris-manifest.XXXX)"
+MANIFEST_DATA="$(mktemp -t debuffer-manifest.XXXX)"
 load_manifest "$MANIFEST_PATH" "$MANIFEST_DATA"
 
-PLAN_FILE="$(mktemp -t aris-plan.XXXX)"
+PLAN_FILE="$(mktemp -t debuffer-plan.XXXX)"
 compute_plan "$UPSTREAM_FILE" "$MANIFEST_DATA" "$PLAN_FILE"
 print_plan "$PLAN_FILE"
 
@@ -768,7 +803,7 @@ if (( N_CONFLICT > 0 )); then
 fi
 
 if $DRY_RUN; then
-    # #174 preview: print the planned `.aris/tools` symlink action (function
+    # Preview the planned state-dir tools symlink action (function
     # is idempotent + DRY_RUN-aware, so it just logs in this mode)
     ensure_tools_symlink
     log ""
@@ -791,7 +826,7 @@ log "Applying:"
 apply_plan "$PLAN_FILE" "$MANIFEST_TMP"
 commit_manifest "$MANIFEST_TMP"
 
-# #174 Phase 0: ensure project-local .aris/tools symlink (purely additive).
+# Ensure project-local state-dir tools symlink (purely additive).
 # Runs after manifest commit so a failure here doesn't roll back skill links.
 ensure_tools_symlink
 
@@ -801,7 +836,7 @@ if [[ "$LEGACY_KIND" == "real_dir" && "$MIGRATE_COPY" == "prefer-upstream" ]]; t
 fi
 
 # CLAUDE.md best-effort
-INSTALLED_NAMES="$(mktemp -t aris-names.XXXX)"
+INSTALLED_NAMES="$(mktemp -t debuffer-names.XXXX)"
 awk -F'|' '$1=="REUSE"||$1=="ADOPT"||$1=="CREATE"||$1=="UPDATE_TARGET"{print $3}' "$PLAN_FILE" > "$INSTALLED_NAMES"
 update_claude_doc "$INSTALLED_NAMES"
 rm -f "$INSTALLED_NAMES"

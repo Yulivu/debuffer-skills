@@ -1,18 +1,21 @@
 #!/usr/bin/env bash
-# ARIS Meta-Optimize: Event Logger
+# debuffer Meta-Optimize: Event Logger
 # Reads Claude Code hook JSON from stdin, extracts key fields,
 # appends structured event to BOTH project-level and global logs.
 #
 # Called automatically by Claude Code hooks (PostToolUse, UserPromptSubmit, etc.)
 # Input: JSON via stdin (Claude Code hook payload)
 # Output:
-#   Project: $CLAUDE_PROJECT_DIR/.aris/meta/events.jsonl  (project-specific details)
-#   Global:  ~/.aris/meta/events.jsonl                    (cross-project trends)
+#   Project: $CLAUDE_PROJECT_DIR/.debuffer_skills/meta/events.jsonl  (project-specific details)
+#   Global:  ~/.debuffer_skills/meta/events.jsonl                    (cross-project trends)
 
 set -euo pipefail
 
-PROJECT_META="${CLAUDE_PROJECT_DIR:-.}/.aris/meta"
-GLOBAL_META="$HOME/.aris/meta"
+PROJECT_META="${CLAUDE_PROJECT_DIR:-.}/.debuffer_skills/meta"
+if [[ ! -d "${CLAUDE_PROJECT_DIR:-.}/.debuffer_skills" && -d "${CLAUDE_PROJECT_DIR:-.}/.aris" ]]; then
+    PROJECT_META="${CLAUDE_PROJECT_DIR:-.}/.aris/meta"
+fi
+GLOBAL_META="$HOME/.debuffer_skills/meta"
 mkdir -p "$PROJECT_META" "$GLOBAL_META"
 
 # Read stdin payload into env var (cannot use heredoc + herestring simultaneously)

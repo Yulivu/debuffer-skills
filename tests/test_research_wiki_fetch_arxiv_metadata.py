@@ -199,7 +199,7 @@ def test_sends_descriptive_user_agent(monkeypatch):
 
     req = seen["requests"][0]
     ua = req.get_header("User-agent")  # urllib normalizes header key casing
-    assert ua and ua.startswith("ARIS-research-wiki/")
+    assert ua and ua.startswith("debuffer-research-wiki/")
     assert "Python-urllib" not in (ua or "")
 
 

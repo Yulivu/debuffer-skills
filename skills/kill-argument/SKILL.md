@@ -299,7 +299,7 @@ writing-level, queue for next /auto-paper-improvement-loop round.
 ```
 
 Compose the machine-readable `<paper-dir>/KILL_ARGUMENT.json` per the
-ARIS Audit Artifact Schema (`shared-references/assurance-contract.md`):
+debuffer Audit Artifact Schema (`shared-references/assurance-contract.md`):
 
 ```json
 {
@@ -314,7 +314,7 @@ ARIS Audit Artifact Schema (`shared-references/assurance-contract.md`):
     "references.bib":                    "sha256:<...>",
     "main.pdf":                          "sha256:<...>"
   },
-  "trace_path": ".aris/traces/kill-argument/<date>_run<NN>/",
+  "trace_path": ".debuffer_skills/traces/kill-argument/<date>_run<NN>/",
   "thread_id": "<defense threadId — primary; attack threadId in details>",
   "reviewer_model": "gpt-5.5",
   "reviewer_reasoning": "xhigh",
@@ -404,7 +404,7 @@ To the user:
 
 - `<paper-dir>/KILL_ARGUMENT.md` — human-readable report
 - `<paper-dir>/KILL_ARGUMENT.json` — machine-readable ledger
-- `.aris/traces/kill-argument/<date>_runNN/` — per-thread codex traces (Attack memo + Adjudication memo)
+- `.debuffer_skills/traces/kill-argument/<date>_runNN/` — per-thread codex traces (Attack memo + Adjudication memo)
 - Optional: applied fixes if user explicitly requests; default is **detect-only, do not auto-modify**.
 - `<paper-dir>/KILL_ARGUMENT.html` (when `RENDER_HTML = true`, default) — single-file HTML view auto-rendered via `/render-html "<paper-dir>/KILL_ARGUMENT.md" --json "<paper-dir>/KILL_ARGUMENT.json"`. Full review gate applies. The `.review.json` sidecar carries the render-fidelity verdict. **Non-blocking**: if `/render-html` fails (helper missing, Codex MCP unavailable, file write error), log the failure and treat the skill as complete — the HTML view is a convenience, not a prerequisite for the kill-argument verdict.
 
@@ -427,7 +427,7 @@ To the user:
 
 ## Review Tracing
 
-After each `mcp__codex__codex` reviewer call, save the trace following `shared-references/review-tracing.md` (Policy C — forensic; never silently skip).  Use `save_trace.sh` (resolved per the chain in `shared-references/integration-contract.md` §2) or write files directly to `.aris/traces/kill-argument/<date>_run<NN>/`.  Both threads' raw responses should be preserved.
+After each `mcp__codex__codex` reviewer call, save the trace following `shared-references/review-tracing.md` (Policy C — forensic; never silently skip).  Use `save_trace.sh` (resolved per the chain in `shared-references/integration-contract.md` §2) or write files directly to `.debuffer_skills/traces/kill-argument/<date>_run<NN>/`.  Both threads' raw responses should be preserved.
 
 ## Notes
 

@@ -1,11 +1,11 @@
 ---
 name: research-repo-architect
-description: Organize research code and ARIS skill repositories into lightweight reproducible architecture. Use when Codex needs to scaffold or migrate a research repo for different startup stages, separate reusable code from scripts, standardize data/config/results/run directories, add Python src-layout packaging, create AutoDL/HPC-ready entrypoints with smoke/formal gates, keep local work light, or integrate ARIS skills/tools/shared-references with mainline and Codex mirrors.
+description: Organize research code and skill repositories into lightweight reproducible architecture. Use when Codex needs to scaffold or migrate a research repo for different startup stages, separate reusable code from scripts, standardize data/config/results/run directories, add Python src-layout packaging, create AutoDL/HPC-ready entrypoints with smoke/formal gates, keep local work light, or integrate skills/tools/shared-references with mainline and Codex mirrors.
 ---
 
 # Research Repo Architect
 
-Use this skill to turn research code or an ARIS skill bundle into a maintainable, reproducible repository. The base style is inspired by SpectralStore: reusable library code lives under `src/`, scripts are thin entrypoints, configs and suites describe experiments, raw runs are kept separate from curated results, and large artifacts stay out of Git.
+Use this skill to turn research code or a skill bundle into a maintainable, reproducible repository. The base style is inspired by SpectralStore: reusable library code lives under `src/`, scripts are thin entrypoints, configs and suites describe experiments, raw runs are kept separate from curated results, and large artifacts stay out of Git.
 
 ## Customized Pack Defaults
 
@@ -15,8 +15,8 @@ when available. Default to a lightweight, AutoDL-first shape:
 - Classify startup mode: `venue-only`, `reference-paper`,
   `reference-codebase`, `idea-doc`, `existing-repo`, or `partial-results`.
 - Local repo work should prepare structure, code, configs, tests, tiny smoke
-  checks, prompts, and audit scripts. Do not design the scaffold around heavy
-  local execution.
+  checks, prompts, and audit scripts. Design the scaffold around lightweight
+  local verification plus remote-ready handoff.
 - Add AutoDL/HPC hooks when experiments may need GPU time, but keep execution
   gated and manual by default: runbook, preflight, smoke suite, data manifest,
   and formal-run approval.
@@ -33,15 +33,15 @@ Start by deciding which path applies:
 
 - **New repo scaffold**: Create the architecture first, then add code and experiments into the right layer.
 - **Existing repo migration**: Audit first, produce a migration map, then move code in small validated phases.
-- **ARIS framework or skill repo**: Preserve the `skills/`, `skills/skills-codex/`, `skills/shared-references/`, `tools/`, `templates/`, `docs/`, `tests/`, and `mcp-servers/` contracts instead of forcing everything into `src/` and `scripts/`.
-- **ARIS-managed research project**: Combine the SpectralStore experiment layout with ARIS runtime artifacts such as `research-wiki/`, `idea-stage/`, `refine-logs/`, `review-stage/`, `paper/`, and `.aris/`.
+- **skill framework or skill repo**: Preserve the `skills/`, `skills/skills-codex/`, `skills/shared-references/`, `tools/`, `templates/`, `docs/`, `tests/`, and `mcp-servers/` contracts instead of forcing everything into `src/` and `scripts/`.
+- **skill-managed research project**: Combine the SpectralStore experiment layout with skill runtime artifacts such as `research-wiki/`, `idea-stage/`, `refine-logs/`, `review-stage/`, `paper/`, and `.debuffer_skills/`.
 - **AutoDL/HPC-ready research project**: Add target-machine setup, preflight, smoke, result-transfer, and formal-run approval boundaries without weakening source/config/run/result separation.
 - **Lightweight project start**: When materials are sparse, create only the
   minimal brief, plan, architecture, and next-action files needed for the current
   startup mode. Avoid generating a full research wiki or large Markdown bundle
   until the project has evidence worth preserving.
 
-For detailed directory rules, read `references/architecture.md`. For ARIS-specific work, read `references/aris-architecture.md`. For AutoDL/HPC work, read `references/autodl-hpc.md`. For migration work, also read `references/migration-playbook.md`.
+For detailed directory rules, read `references/architecture.md`. For skill-pack-specific work, read `references/skill-pack-architecture.md`. For AutoDL/HPC work, read `references/autodl-hpc.md`. For migration work, also read `references/migration-playbook.md`.
 
 ## New Repo Scaffold
 
@@ -59,7 +59,7 @@ For detailed directory rules, read `references/architecture.md`. For ARIS-specif
 5. Put hand-written configs under `experiments/configs/` and suite definitions under `experiments/suites/`. New run outputs must go under `experiments/runs/`, not `experiments/results/`.
 6. Add a short root `README.md` for installation, smoke checks, data, and reproduction commands. Use `docs/` for internal runbooks and maintenance notes.
 7. Add a conservative `.gitignore` so raw data, generated runs, caches, model checkpoints, and large binary artifacts are not tracked.
-8. If the repo will be run through ARIS, keep ARIS runtime state out of Git by default: `.aris/traces/`, `.aris/cache/`, `.aris/runs/`, `.aris/meta/events.jsonl`, and project-local `.agents/skills/` symlinks.
+8. If the repo uses project-local skills, keep skill runtime state out of Git by default: `.debuffer_skills/traces/`, `.debuffer_skills/cache/`, `.debuffer_skills/runs/`, `.debuffer_skills/meta/events.jsonl`, and project-local `.agents/skills/` symlinks.
 
 ## Startup Mode Scaffolds
 
@@ -99,36 +99,36 @@ phase map from `project-guide-protocol.md`.
 5. Update imports, CLI commands, README instructions, tests, and `.gitignore` after each phase.
 6. Never overwrite existing `data/raw/`, `experiments/results/`, or user-created run outputs unless the user explicitly asked for that exact replacement.
 
-## ARIS Skill Repo Integration
+## Skill Repo Integration
 
-Use this path when the repository looks like ARIS: it has `skills/<name>/SKILL.md`, `skills/skills-codex/`, `skills/shared-references/`, `tools/`, `AGENT_GUIDE.md`, or installer scripts such as `install_aris.sh`.
+Use this path when the repository is a debuffer-style skill pack: it has `skills/<name>/SKILL.md`, `skills/skills-codex/`, `skills/shared-references/`, `tools/`, `AGENT_GUIDE.md`, or installer scripts.
 
-1. Read `references/aris-architecture.md` before editing.
+1. Read `references/skill-pack-architecture.md` before editing.
 2. Treat `skills/<name>/SKILL.md` as the mainline source of behavior. Treat `skills/skills-codex/<name>/SKILL.md` as the Codex mirror that must preserve semantics while changing reviewer/tool routing only.
-3. Put reusable cross-skill contracts under `skills/shared-references/`. Put shared executable helpers under `tools/`. Put single-owner helpers under `skills/<owner>/scripts/` and keep legacy `tools/` shims only when existing skills or installs depend on them.
-4. Any helper invocation in a skill must use the canonical ARIS resolver chain from `integration-contract.md`: owner layer 0 when applicable, then `.aris/tools/<helper>`, `tools/<helper>`, and `$ARIS_REPO/tools/<helper>`.
-5. When adding or renaming a skill in an ARIS repo, update all required surfaces in the same pass:
+3. Put reusable cross-skill contracts under `skills/shared-references/`. Put shared executable helpers under `tools/`. Put single-owner helpers under `skills/<owner>/scripts/` and keep compatibility `tools/` shims when existing skills or installs depend on them.
+4. Any helper invocation in a skill must use the canonical resolver chain from `integration-contract.md`: owner layer 0 when applicable, then `.debuffer_skills/tools/<helper>`, `tools/<helper>`, and the repo root recorded in the install manifest.
+5. When adding or renaming a skill in a skill repo, update all required surfaces in the same pass:
    - `skills/<name>/SKILL.md`
    - `skills/skills-codex/<name>/SKILL.md`
    - overlays only if reviewer routing differs
    - `docs/SKILLS_CATALOG.md`
    - count-bearing docs/tests such as `AGENT_GUIDE.md`, the single root `README.md`, and inventory tests
-6. Run the repository's inventory and targeted tests after integration. For ARIS, prefer:
+6. Run the repository's inventory and targeted tests after integration. For this pack, prefer:
 
 ```powershell
 python tools/check_skills_inventory.py
-python -m pytest tests/test_codex_skill_mirror.py tests/test_codex_install_update.py tests/test_install_aris_tools_symlink.py
+python -m pytest tests/test_codex_skill_mirror.py tests/test_codex_install_update.py tests/test_install_*_tools_symlink.py
 ```
 
-7. Do not flatten ARIS skill packages into `src/`. `src/` is for reusable project/library code, not for declarative `SKILL.md` bundles.
+7. Keep skill packages under `skills/`. `src/` is for reusable project/library code, not for declarative `SKILL.md` bundles.
 
-## ARIS-Managed Research Projects
+## Skill-Managed Research Projects
 
-Use this path when a normal research project is being operated by ARIS workflows.
+Use this path when a normal research project is being operated by skill workflows.
 
 - Keep reusable implementation in `src/<package_name>/` and experiment runners in `scripts/` as usual.
-- Keep ARIS handoff artifacts where downstream skills expect them unless the user asks for a breaking migration: `RESEARCH_BRIEF.md`, `EXPERIMENT_PLAN.md`, `NARRATIVE_REPORT.md`, `idea-stage/`, `refine-logs/`, `review-stage/`, `paper/`, and `research-wiki/`.
-- Treat `.aris/` as runtime state. Do not commit traces, caches, wakeup state, or local skill symlinks unless the project explicitly wants reproducible agent provenance.
+- Keep skill handoff artifacts where downstream skills expect them unless the user asks for a breaking migration: `RESEARCH_BRIEF.md`, `EXPERIMENT_PLAN.md`, `NARRATIVE_REPORT.md`, `idea-stage/`, `refine-logs/`, `review-stage/`, `paper/`, and `research-wiki/`.
+- Treat `.debuffer_skills/` as runtime state. Keep traces, caches, wakeup state, and local skill symlinks out of Git unless the project explicitly wants reproducible agent provenance.
 - If `research-wiki/` exists, preserve it as persistent project memory. Do not move it under `docs/` or `experiments/`.
 - Experiment outputs still go under `experiments/runs/`; curated tables and figures still go under `experiments/results/` and `experiments/visualizations/`.
 
@@ -154,7 +154,7 @@ Use this path when the repo will run on AutoDL or another SSH GPU/HPC machine.
 - Use `--config`, `--out-dir`, and optional `--set key=value` CLI conventions for experiment scripts.
 - Keep data directories present with `.gitkeep`, but ignore large files under `data/raw/`, `data/interim/`, and `data/processed/`.
 - Add `.gitattributes` with LF line endings for shell scripts when HPC/Linux execution matters.
-- In ARIS repos, keep generated runtime traces under `.aris/traces/` and keep reviewer trace references in audit artifacts instead of pasting reviewer summaries into main artifacts.
+- In skill repos, keep generated runtime traces under `.debuffer_skills/traces/` and keep reviewer trace references in audit artifacts instead of pasting reviewer summaries into main artifacts.
 - For AutoDL/HPC repos, keep deploy-key bootstrap, FileZilla/SFTP data exceptions, smoke pass criteria, and formal-run approval gates in a runbook instead of burying them in terminal history.
 
 ## Validation
@@ -174,7 +174,7 @@ For experiment structure, validate one dry run or tiny smoke task that writes on
 
 - Use `assets/repo-template/` for a new repo baseline or as a target shape during migration.
 - Read `references/architecture.md` when deciding where files belong.
-- Read `references/aris-architecture.md` when the repo contains ARIS skills, shared references, installer scripts, Codex mirrors, or ARIS workflow artifacts.
+- Read `references/skill-pack-architecture.md` when the repo contains skills, shared references, installer scripts, Codex mirrors, or skill workflow artifacts.
 - Read `references/autodl-hpc.md` when the repo mentions AutoDL, `/root/autodl-tmp`, FileZilla/SFTP, `scripts/autodl_setup.sh`, `scripts/hpc/preflight_autodl.py`, `run_autodl_smoke.sh`, or formal-suite gating.
 - Read `references/migration-playbook.md` before reorganizing an existing repo.
 - Do not copy SpectralStore's graph-compression domain code; copy only the repository architecture and reproducibility conventions.

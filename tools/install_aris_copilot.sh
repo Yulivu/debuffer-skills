@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
-# install_aris_copilot.sh -- Project-local ARIS skill installation for GitHub Copilot CLI.
+# install_aris_copilot.sh -- Project-local debuffer skill installation for GitHub Copilot CLI.
 #
 # This installer manages a flat layout using mainline skills:
-#   <project>/.github/skills/<skill-name> -> <aris-repo>/skills/<skill-name>
+#   <project>/.github/skills/<skill-name> -> <skill-repo>/skills/<skill-name>
 #
 # Unlike the Codex installer, Copilot CLI natively supports SKILL.md with
 # allowed-tools and MCP tool calls, so mainline skills work directly --
 # no separate skill mirror is needed.
 #
 # Managed entries are tracked in:
-#   <project>/.aris/installed-skills-copilot.txt
+#   <project>/.debuffer_skills/installed-skills-copilot.txt
 #
 # Usage:
 #   bash tools/install_aris_copilot.sh [project_path] [options]
@@ -20,7 +20,7 @@
 #   --uninstall      remove only entries in manifest; delete manifest
 #
 # Options:
-#   --aris-repo PATH       override aris-repo discovery
+#   --aris-repo PATH       override skill repo discovery
 #   --dry-run              show plan, no writes
 #   --quiet                no prompts; abort on any condition that would prompt
 #   --no-doc               skip AGENTS.md managed block update
@@ -29,15 +29,15 @@
 #
 # Safety rules enforced:
 #   S1  Never delete a path that is not a symlink.
-#   S2  Never delete a symlink whose target is outside the configured aris-repo.
+#   S2  Never delete a symlink whose target is outside the configured skill repo.
 #   S3  Never delete a symlink not listed in the manifest.
 #   S4  Never overwrite an existing path during CREATE -- abort by default.
 #   S5  Manifest write is atomic (temp + rename in same dir).
 #   S6  Concurrent runs in same project serialize via mkdir lockdir.
 #   S7  Crash mid-apply leaves the previous manifest intact; rerun adopts.
 #   S8  Uninstall revalidates each managed symlink's target before removing.
-#   S9  If .aris/, .github/, or .github/skills/ is itself a symlink, abort.
-#   S10 Reject upstream entries that are symlinks to outside aris-repo.
+#   S9  If .debuffer_skills/, .github/, or .github/skills/ is itself a symlink, abort.
+#   S10 Reject upstream entries that are symlinks to outside the skill repo.
 #   S11 Revalidate exact target match (lstat + readlink) before every mutation.
 #   S12 Temp files live in the same directory as the destination.
 #   S13 Skill names must match ^[A-Za-z0-9][A-Za-z0-9._-]*$ (slug regex).
@@ -48,12 +48,15 @@ set -euo pipefail
 MANIFEST_VERSION="1"
 MANIFEST_NAME="installed-skills-copilot.txt"
 MANIFEST_PREV_NAME="installed-skills-copilot.txt.prev"
-ARIS_DIR_NAME=".aris"
+ARIS_DIR_NAME=".debuffer_skills"
+LEGACY_ARIS_DIR_NAME=".aris"
 LOCK_DIR_NAME=".install-copilot.lock.d"
 SKILLS_REL=".github/skills"
 DOC_FILE_NAME="AGENTS.md"
-BLOCK_BEGIN="<!-- ARIS-COPILOT:BEGIN -->"
-BLOCK_END="<!-- ARIS-COPILOT:END -->"
+BLOCK_BEGIN="<!-- DEBUFFER-COPILOT:BEGIN -->"
+BLOCK_END="<!-- DEBUFFER-COPILOT:END -->"
+LEGACY_BLOCK_BEGIN="<!-- debuffer-COPILOT:BEGIN -->"
+LEGACY_BLOCK_END="<!-- debuffer-COPILOT:END -->"
 SAFE_NAME_REGEX='^[A-Za-z0-9][A-Za-z0-9._-]*$'
 
 # Directories to skip when scanning upstream skills/ as installable skills.
@@ -76,7 +79,7 @@ while [[ $# -gt 0 ]]; do
     case "$1" in
         --reconcile) ACTION="reconcile"; shift ;;
         --uninstall) ACTION="uninstall"; shift ;;
-        --aris-repo) ARIS_REPO_OVERRIDE="${2:?--aris-repo requires path}"; shift 2 ;;
+        --repo|--aris-repo) ARIS_REPO_OVERRIDE="${2:?--repo requires path}"; shift 2 ;;
         --dry-run) DRY_RUN=true; shift ;;
         --quiet) QUIET=true; shift ;;
         --no-doc) NO_DOC=true; shift ;;
@@ -147,10 +150,10 @@ resolve_aris_repo() {
         else
             local guess
             for guess in \
-                "$HOME/Desktop/Auto-claude-code-research-in-sleep" \
-                "$HOME/Auto-claude-code-research-in-sleep" \
+                "$HOME/Desktop/debuffer-skills" \
+                "$HOME/debuffer-skills" \
                 "$HOME/aris_repo" \
-                "$HOME/.copilot/Auto-claude-code-research-in-sleep"; do
+                "$HOME/.copilot/debuffer-skills"; do
                 if [[ -d "$guess/skills" && -f "$guess/AGENT_GUIDE.md" ]]; then
                     p="$(abs_path "$guess")"
                     break
@@ -158,7 +161,7 @@ resolve_aris_repo() {
             done
         fi
     fi
-    [[ -n "${p:-}" ]] || die "cannot find ARIS repo with skills/. Use --aris-repo PATH."
+    [[ -n "${p:-}" ]] || die "cannot find debuffer repo with skills/. Use --aris-repo PATH."
     [[ -d "$p/skills" ]] || die "repo missing skills/ directory: $p"
     echo "$p"
 }
@@ -215,11 +218,36 @@ PROJECT_PATH="$(abs_path "$PROJECT_PATH")"
 ARIS_REPO="$(resolve_aris_repo)"
 PROJECT_SKILLS_DIR="$PROJECT_PATH/$SKILLS_REL"
 PROJECT_ARIS_DIR="$PROJECT_PATH/$ARIS_DIR_NAME"
+LEGACY_PROJECT_ARIS_DIR="$PROJECT_PATH/$LEGACY_ARIS_DIR_NAME"
 MANIFEST_PATH="$PROJECT_ARIS_DIR/$MANIFEST_NAME"
 MANIFEST_PREV="$PROJECT_ARIS_DIR/$MANIFEST_PREV_NAME"
 LOCK_DIR="$PROJECT_ARIS_DIR/$LOCK_DIR_NAME"
 DOC_FILE="$PROJECT_PATH/$DOC_FILE_NAME"
 LEGACY_NESTED="$PROJECT_PATH/.github/skills/aris"
+
+migrate_legacy_state_dir() {
+    if [[ "$ARIS_DIR_NAME" == "$LEGACY_ARIS_DIR_NAME" ]]; then
+        return 0
+    fi
+    if [[ -e "$PROJECT_ARIS_DIR" || -L "$PROJECT_ARIS_DIR" ]]; then
+        if [[ -e "$LEGACY_PROJECT_ARIS_DIR" || -L "$LEGACY_PROJECT_ARIS_DIR" ]]; then
+            warn "legacy state directory still exists at $LEGACY_PROJECT_ARIS_DIR; using $PROJECT_ARIS_DIR"
+        fi
+        return 0
+    fi
+    if [[ ! -e "$LEGACY_PROJECT_ARIS_DIR" && ! -L "$LEGACY_PROJECT_ARIS_DIR" ]]; then
+        return 0
+    fi
+    if is_symlink "$LEGACY_PROJECT_ARIS_DIR"; then
+        die "$LEGACY_PROJECT_ARIS_DIR is a symlink; refusing to migrate state directory"
+    fi
+    if $DRY_RUN; then
+        log "  (dry-run) migrate $LEGACY_ARIS_DIR_NAME -> $ARIS_DIR_NAME"
+        return 0
+    fi
+    mv "$LEGACY_PROJECT_ARIS_DIR" "$PROJECT_ARIS_DIR"
+    log "  migrated legacy state: $LEGACY_ARIS_DIR_NAME -> $ARIS_DIR_NAME"
+}
 
 check_no_symlinked_parents() {
     local p
@@ -447,25 +475,31 @@ update_agents_doc() {
     local count new_block new_content tmp current
     count="$(wc -l < "$installed_names_file" | tr -d ' ')"
     local repo_lookup_cmd
-    repo_lookup_cmd="ARIS_REPO=\$(awk -F'\\t' '\$1==\"repo_root\"{print \$2; exit}' \"$PROJECT_PATH/$ARIS_DIR_NAME/$MANIFEST_NAME\")"
+    repo_lookup_cmd="SKILL_REPO=\$(awk -F'\\t' '\$1==\"repo_root\"{print \$2; exit}' \"$PROJECT_PATH/$ARIS_DIR_NAME/$MANIFEST_NAME\")"
     new_block="$BLOCK_BEGIN
-## ARIS Copilot CLI Skill Scope
-ARIS mainline skills installed in this project for GitHub Copilot CLI.
+## debuffer Copilot CLI Skill Scope
+debuffer mainline skills installed in this project for GitHub Copilot CLI.
 Managed entries: $count
 Manifest: \`$ARIS_DIR_NAME/$MANIFEST_NAME\`
-ARIS repo root: \`$ARIS_REPO\`
+Skill repo root: \`$ARIS_REPO\`
 Project skill path: \`$SKILLS_REL/<skill-name>\`
-For ARIS workflows, prefer the project-local skills under \`$SKILLS_REL/\`.
-When a skill needs ARIS helper scripts, resolve the repo root from the manifest or set it explicitly:
+For debuffer workflows, prefer the project-local skills under \`$SKILLS_REL/\`.
+When a skill needs helper scripts, resolve the repo root from the manifest:
 \`$repo_lookup_cmd\`
-Do not edit or delete symlinked skills in place; update upstream or rerun:
+Keep symlinked skills managed from the skill repo; update upstream or rerun:
 \`bash $ARIS_REPO/tools/install_aris_copilot.sh \"$PROJECT_PATH\" --reconcile\`
 For copied installs, use:
 \`bash $ARIS_REPO/tools/smart_update_copilot.sh --project \"$PROJECT_PATH\"\`
 $BLOCK_END"
 
-    if printf '%s' "$original" | grep -qF "$BLOCK_BEGIN"; then
-        new_content="$(python3 - "$DOC_FILE" "$BLOCK_BEGIN" "$BLOCK_END" "$new_block" <<'PYEOF'
+    local active_begin="$BLOCK_BEGIN"
+    local active_end="$BLOCK_END"
+    if ! printf '%s' "$original" | grep -qF "$active_begin" && printf '%s' "$original" | grep -qF "$LEGACY_BLOCK_BEGIN"; then
+        active_begin="$LEGACY_BLOCK_BEGIN"
+        active_end="$LEGACY_BLOCK_END"
+    fi
+    if printf '%s' "$original" | grep -qF "$active_begin"; then
+        new_content="$(python3 - "$DOC_FILE" "$active_begin" "$active_end" "$new_block" <<'PYEOF'
 import pathlib
 import re
 import sys
@@ -475,7 +509,7 @@ text = pathlib.Path(path).read_text() if pathlib.Path(path).exists() else ""
 pattern = re.compile(re.escape(begin) + r".*?" + re.escape(end), re.DOTALL)
 matches = pattern.findall(text)
 if len(matches) > 1:
-    sys.stderr.write("ARIS-COPILOT:WARN multiple managed blocks found; skipping update\n")
+    sys.stderr.write("DEBUFFER-COPILOT:WARN multiple managed blocks found; skipping update\n")
     sys.stdout.write(text)
 else:
     sys.stdout.write(pattern.sub(body, text))
@@ -492,7 +526,7 @@ PYEOF
         return 0
     fi
 
-    tmp="$DOC_FILE.aris-copilot-tmp.$$"
+    tmp="$DOC_FILE.debuffer-copilot-tmp.$$"
     printf '%s' "$new_content" > "$tmp"
     current=""
     [[ -f "$DOC_FILE" ]] && current="$(cat "$DOC_FILE")"
@@ -511,11 +545,17 @@ remove_agents_doc_block() {
 
     local original new_content tmp current
     original="$(cat "$DOC_FILE")"
-    if ! printf '%s' "$original" | grep -qF "$BLOCK_BEGIN"; then
+    local active_begin="$BLOCK_BEGIN"
+    local active_end="$BLOCK_END"
+    if ! printf '%s' "$original" | grep -qF "$active_begin" && printf '%s' "$original" | grep -qF "$LEGACY_BLOCK_BEGIN"; then
+        active_begin="$LEGACY_BLOCK_BEGIN"
+        active_end="$LEGACY_BLOCK_END"
+    fi
+    if ! printf '%s' "$original" | grep -qF "$active_begin"; then
         return 0
     fi
 
-    new_content="$(python3 - "$DOC_FILE" "$BLOCK_BEGIN" "$BLOCK_END" <<'PYEOF'
+    new_content="$(python3 - "$DOC_FILE" "$active_begin" "$active_end" <<'PYEOF'
 import pathlib
 import re
 import sys
@@ -525,7 +565,7 @@ text = pathlib.Path(path).read_text()
 pattern = re.compile(r"\n?" + re.escape(begin) + r".*?" + re.escape(end) + r"\n?", re.DOTALL)
 matches = pattern.findall(text)
 if len(matches) > 1:
-    sys.stderr.write("ARIS-COPILOT:WARN multiple managed blocks found; skipping removal\n")
+    sys.stderr.write("DEBUFFER-COPILOT:WARN multiple managed blocks found; skipping removal\n")
     sys.stdout.write(text)
 else:
     updated = pattern.sub("\n", text)
@@ -538,7 +578,7 @@ PYEOF
         return 0
     fi
 
-    tmp="$DOC_FILE.aris-copilot-tmp.$$"
+    tmp="$DOC_FILE.debuffer-copilot-tmp.$$"
     printf '%s' "$new_content" > "$tmp"
     current="$(cat "$DOC_FILE")"
     if [[ "$current" != "$original" ]]; then
@@ -599,13 +639,14 @@ do_uninstall() {
 
 # --- Main ---
 log ""
-log "ARIS Copilot CLI Project Install"
+log "debuffer Copilot CLI Project Install"
 log "  Project:   $PROJECT_PATH"
 log "  Repo:      $ARIS_REPO"
 log "  Target:    $SKILLS_REL/"
 log "  Action:    $ACTION$($DRY_RUN && echo ' (dry-run)')"
 log ""
 
+migrate_legacy_state_dir
 check_no_symlinked_parents
 check_legacy_nested_install
 if ! $DRY_RUN; then

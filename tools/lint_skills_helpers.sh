@@ -3,7 +3,7 @@
 #
 # Per shared-references/integration-contract.md §2, SKILL.md files must
 # resolve helpers via the canonical strict-safe chain
-#   .aris/tools/<helper>  →  tools/<helper>  →  $ARIS_REPO/tools/<helper>
+#   .debuffer_skills/tools/<helper>  →  tools/<helper>  →  $DEBUFFER_SKILLS_REPO/tools/<helper>
 # (Codex mirror uses the mirror-side chain), NOT hardcode `python3 tools/foo.py`
 # or `bash tools/foo.sh` directly.
 #
@@ -11,7 +11,7 @@
 # A future enforcement layer (issue #178) may fail CI on new violations,
 # but Phase 2 keeps the contract gentle so the maintainer is not blocked.
 #
-# Run from the ARIS repo root:
+# Run from the skill repo root:
 #     bash tools/lint_skills_helpers.sh
 
 set -u
@@ -59,7 +59,7 @@ ${sh_hits}"
   fi
 done < <(find skills -name '*.md' -type f 2>/dev/null)
 
-echo "ARIS helper-resolution lint (advisory)"
+echo "debuffer helper-resolution lint (advisory)"
 echo "======================================="
 echo "Files with hardcoded \`tools/<helper>\` references: $violation_count"
 

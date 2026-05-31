@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Thin ARIS adapter around the installed deepxiv CLI."""
+"""Thin debuffer adapter around the installed deepxiv CLI."""
 
 from __future__ import annotations
 
@@ -62,7 +62,7 @@ def run_cli_text(args: Sequence[str]) -> str:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="ARIS wrapper around the installed deepxiv CLI."
+        description="debuffer wrapper around the installed deepxiv CLI."
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
 

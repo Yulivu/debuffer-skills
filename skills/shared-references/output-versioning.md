@@ -10,7 +10,7 @@ When writing any output file that would overwrite an existing file, use timestam
 
 ## Directory Structure
 
-All ARIS output files are organized by workflow stage:
+All debuffer output files are organized by workflow stage:
 
 ```
 project/
