@@ -1,11 +1,30 @@
 ---
 name: research-repo-architect
-description: Organize research code and ARIS skill repositories into reproducible architecture. Use when Codex needs to scaffold or migrate a research repo, separate reusable source code from experiment scripts, standardize data/config/results/run directories, add Python src-layout packaging, create or repair experiment, analysis, data, AutoDL/HPC entrypoints, smoke/formal suite gates, or integrate an ARIS-style skills/tools/shared-references repository with mainline and Codex skill mirrors.
+description: Organize research code and ARIS skill repositories into lightweight reproducible architecture. Use when Codex needs to scaffold or migrate a research repo for different startup stages, separate reusable code from scripts, standardize data/config/results/run directories, add Python src-layout packaging, create AutoDL/HPC-ready entrypoints with smoke/formal gates, keep local work light, or integrate ARIS skills/tools/shared-references with mainline and Codex mirrors.
 ---
 
 # Research Repo Architect
 
 Use this skill to turn research code or an ARIS skill bundle into a maintainable, reproducible repository. The base style is inspired by SpectralStore: reusable library code lives under `src/`, scripts are thin entrypoints, configs and suites describe experiments, raw runs are kept separate from curated results, and large artifacts stay out of Git.
+
+## Customized Pack Defaults
+
+For research projects, read `../shared-references/lightweight-research-pack.md`
+when available. Default to a lightweight, AutoDL-first shape:
+
+- Classify startup mode: `venue-only`, `reference-paper`,
+  `reference-codebase`, `idea-doc`, `existing-repo`, or `partial-results`.
+- Local repo work should prepare structure, code, configs, tests, tiny smoke
+  checks, prompts, and audit scripts. Do not design the scaffold around heavy
+  local execution.
+- Add AutoDL/HPC hooks when experiments may need GPU time, but keep execution
+  gated and manual by default: runbook, preflight, smoke suite, data manifest,
+  and formal-run approval.
+- Keep project memory compact: prefer `PROJECT_BRIEF.md`, `NEXT_ACTIONS.md`,
+  `findings.md`, and `EXPERIMENT_LOG.md`; create long stage documents only when
+  a downstream workflow requires them.
+- For external review, create `review-prompts/` rather than wiring direct API,
+  MCP, or SSH automation into the repository.
 
 ## Workflow
 
@@ -16,6 +35,10 @@ Start by deciding which path applies:
 - **ARIS framework or skill repo**: Preserve the `skills/`, `skills/skills-codex/`, `skills/shared-references/`, `tools/`, `templates/`, `docs/`, `tests/`, and `mcp-servers/` contracts instead of forcing everything into `src/` and `scripts/`.
 - **ARIS-managed research project**: Combine the SpectralStore experiment layout with ARIS runtime artifacts such as `research-wiki/`, `idea-stage/`, `refine-logs/`, `review-stage/`, `paper/`, and `.aris/`.
 - **AutoDL/HPC-ready research project**: Add target-machine setup, preflight, smoke, result-transfer, and formal-run approval boundaries without weakening source/config/run/result separation.
+- **Lightweight project start**: When materials are sparse, create only the
+  minimal brief, plan, architecture, and next-action files needed for the current
+  startup mode. Avoid generating a full research wiki or large Markdown bundle
+  until the project has evidence worth preserving.
 
 For detailed directory rules, read `references/architecture.md`. For ARIS-specific work, read `references/aris-architecture.md`. For AutoDL/HPC work, read `references/autodl-hpc.md`. For migration work, also read `references/migration-playbook.md`.
 
@@ -36,6 +59,23 @@ For detailed directory rules, read `references/architecture.md`. For ARIS-specif
 6. Add a short root `README.md` for installation, smoke checks, data, and reproduction commands. Use `docs/` for internal runbooks and maintenance notes.
 7. Add a conservative `.gitignore` so raw data, generated runs, caches, model checkpoints, and large binary artifacts are not tracked.
 8. If the repo will be run through ARIS, keep ARIS runtime state out of Git by default: `.aris/traces/`, `.aris/cache/`, `.aris/runs/`, `.aris/meta/events.jsonl`, and project-local `.agents/skills/` symlinks.
+
+## Startup Mode Scaffolds
+
+- `venue-only`: create `PROJECT_BRIEF.md`, `NEXT_ACTIONS.md`, a concise
+  venue-risk checklist, and optional `review-prompts/venue_direction_review_prompt.md`.
+- `reference-paper`: add `references/` or `docs/literature/` notes, a claim map,
+  and a reproduction/extension plan before writing experiment code.
+- `reference-codebase`: first audit the upstream repo, license, entrypoints,
+  environment, and tests; add wrapper scripts instead of modifying upstream code
+  blindly.
+- `idea-doc`: preserve the original idea doc, extract assumptions into
+  `PROJECT_BRIEF.md`, and write the smallest falsifiable validation plan.
+- `existing-repo`: run the migration workflow; avoid overwriting existing data,
+  results, notebooks, or user notes.
+- `partial-results`: inventory logs/figures/tables first, write
+  `findings.md` and `EXPERIMENT_LOG.md`, then backfill missing configs or audit
+  scripts.
 
 ## Existing Repo Migration
 

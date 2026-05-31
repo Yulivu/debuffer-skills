@@ -9,6 +9,26 @@ allowed-tools: Bash(*), Read, Write, Edit, Grep, Glob, Skill, mcp__codex__codex,
 
 Orchestrate a complete paper writing workflow for: **$ARGUMENTS**
 
+## Customized Pack Defaults
+
+Read `../shared-references/lightweight-research-pack.md` and
+`../shared-references/venue-profiles.md` before starting. Defaults:
+
+- **AUTO_PROCEED = false**, **HUMAN_CHECKPOINT = true**,
+  **MAX_IMPROVEMENT_ROUNDS = 1**, **REVIEW_MODE = prompt-only**.
+- **VENUE** supports `ICLR`, `AAAI`, `JMLR`, `TPAMI`, `NeurIPS`, `ICML`, and
+  existing legacy venue labels. Apply the venue profile before outline and audit
+  prompts.
+- Prefer compact project memory (`PROJECT_BRIEF.md`, `findings.md`,
+  `EXPERIMENT_LOG.md`, `CLAIMS_FROM_RESULTS.md`) and existing `PAPER_PLAN.md`
+  before generating or reading a large `NARRATIVE_REPORT.md`.
+- Do not call reviewer MCP/API backends by default. Generate prompts under
+  `review-prompts/` for paper-plan, claim, citation, and improvement review, then
+  wait for pasted feedback from a separate conversation.
+- The final pipeline report should be concise. Keep detailed audit outputs in
+  their existing files and summarize only blockers, accepted changes, and next
+  actions.
+
 ## Overview
 
 This skill chains five sub-skills into a single automated pipeline:
@@ -24,7 +44,7 @@ In this hybrid pack, the pipeline itself is unchanged, but `paper-plan` and `pap
 
 ## Constants
 
-- **VENUE = `ICLR`** — Target venue. Options: `ICLR`, `NeurIPS`, `ICML`, `CVPR`, `ACL`, `AAAI`, `ACM`, `IEEE_JOURNAL` (IEEE Transactions / Letters), `IEEE_CONF` (IEEE conferences). Affects style file, page limit, citation format.
+- **VENUE = `ICLR`** — Target venue. Options: `ICLR`, `NeurIPS`, `ICML`, `CVPR`, `ACL`, `AAAI`, `JMLR`, `TPAMI`, `ACM`, `IEEE_JOURNAL` (IEEE Transactions / Letters), `IEEE_CONF` (IEEE conferences). Affects style file, page limit, citation format.
 - **MAX_IMPROVEMENT_ROUNDS = 2** — Number of review→fix→recompile rounds in the improvement loop.
 - **REVIEWER_MODEL = `gpt-5.5`** — Model used via Codex MCP for plan review, figure review, writing review, and improvement loop.
 - **AUTO_PROCEED = true** — Auto-continue between phases. Set `false` to pause and wait for user approval after each phase.

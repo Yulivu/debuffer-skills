@@ -1,6 +1,6 @@
 ---
 name: research-pipeline
-description: "Full research pipeline: Workflow 1 (idea discovery) → Workflow 1.5 (experiment bridge) → Workflow 2 (auto review loop) → Workflow 3 (paper writing, optional). Goes from a broad research direction all the way to a polished PDF. Use when user says \"全流程\", \"full pipeline\", \"从找idea到投稿\", \"end-to-end research\", or wants the complete autonomous research lifecycle."
+description: "Lightweight AutoDL-first research pipeline: idea discovery → experiment bridge → prompt-only review loop → optional paper writing. Adapts to venue-only, reference-paper/codebase, idea-doc, existing-repo, or partial-results starts; avoids heavy local compute, defaults to concise artifacts, and prepares AutoDL/HPC gated runs. Use when user says \"全流程\", \"full pipeline\", \"从找idea到投稿\", \"end-to-end research\", or wants a complete but user-gated research lifecycle."
 argument-hint: [research-direction] [— resume <run_id>]
 allowed-tools: Bash(*), Read, Write, Edit, Grep, Glob, WebSearch, WebFetch, Skill, mcp__codex__codex, mcp__codex__codex-reply
 ---
@@ -18,6 +18,33 @@ allowed-tools: Bash(*), Read, Write, Edit, Grep, Glob, WebSearch, WebFetch, Skil
 > (overnight-pipeline rule).
 
 End-to-end autonomous research workflow for: **$ARGUMENTS**
+
+## Customized Pack Defaults
+
+Read `../shared-references/lightweight-research-pack.md` before running the
+pipeline. In this customized pack, the following defaults override older
+autonomous settings below unless the user explicitly asks for legacy automation:
+
+- **STARTUP_MODE = auto**: classify the project as `venue-only`,
+  `reference-paper`, `reference-codebase`, `idea-doc`, `existing-repo`, or
+  `partial-results` before choosing the first stage.
+- **AUTO_PROCEED = false**, **HUMAN_CHECKPOINT = true**, **COMPACT = true**,
+  **RENDER_HTML = false**.
+- **REVIEW_MODE = prompt-only**: generate `review-prompts/*_review_prompt.md`
+  and wait for pasted feedback from a separate review conversation. Do not call
+  reviewer MCP/API backends unless the user explicitly opts into legacy review.
+- **CODE_REVIEW = prompt-only**: for implementation review, write a code-review
+  prompt file instead of calling a reviewer backend directly.
+- **LOCAL_HEAVY_COMPUTE = false**, **DEPLOY_TARGET = autodl**: local work is
+  limited to edits, lint/tests, dry runs, and tiny smoke checks. Heavy training
+  or sweeps must be prepared through `/autodl-hpc` with approval gates.
+- **AUTO_WRITE = false** remains the default. Produce compact `PROJECT_BRIEF.md`,
+  `findings.md`, `EXPERIMENT_LOG.md`, and `NEXT_ACTIONS.md`; create
+  `NARRATIVE_REPORT.md` only when paper writing needs it or the user asks.
+
+For venue-specific review and writing, read
+`../shared-references/venue-profiles.md` and apply the target venue profile
+(ICLR, AAAI, JMLR, TPAMI, NeurIPS/ICML, or IEEE).
 
 ## Constants
 

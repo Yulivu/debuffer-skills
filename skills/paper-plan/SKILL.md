@@ -9,10 +9,29 @@ allowed-tools: Bash(*), Read, Write, Edit, Grep, Glob, WebSearch, WebFetch, mcp_
 
 Generate a structured, section-by-section paper outline from: **$ARGUMENTS**
 
+## Customized Pack Defaults
+
+Read `../shared-references/lightweight-research-pack.md` and
+`../shared-references/venue-profiles.md` before planning. Defaults:
+
+- **TARGET_VENUE** supports `ICLR`, `AAAI`, `JMLR`, `TPAMI`, `NeurIPS`, `ICML`,
+  and existing legacy venue labels. Apply the target venue profile before
+  freezing claims, evidence, and section order.
+- Prefer compact inputs (`PROJECT_BRIEF.md`, `findings.md`, `EXPERIMENT_LOG.md`,
+  `CLAIMS_FROM_RESULTS.md`, `idea-stage/IDEA_CANDIDATES.md`) before reading long
+  reports.
+- Generate a concise `PAPER_PLAN.md` by default: title candidates, abstract
+  skeleton, claims-evidence matrix, section outline, figure/table inventory,
+  missing-evidence list, and venue risks.
+- For outline review, write `review-prompts/paper_plan_review_prompt.md` and
+  wait for pasted feedback. Do not call reviewer MCP/API backends by default.
+- Emit `GAP_REPORT.md` only when style reference or evidence gaps make it useful;
+  avoid extra Markdown side reports otherwise.
+
 ## Constants
 
 - **REVIEWER_MODEL = `gpt-5.5`** — Model used via Codex MCP for outline review. Must be an OpenAI model.
-- **TARGET_VENUE = `ICLR`** — Default venue. User can override (e.g., `/paper-plan "topic" — venue: NeurIPS`). Supported: `ICLR`, `NeurIPS`, `ICML`, `CVPR`, `ACL`, `AAAI`, `ACM`, `IEEE_JOURNAL` (IEEE Transactions / Letters), `IEEE_CONF` (IEEE conferences).
+- **TARGET_VENUE = `ICLR`** — Default venue. User can override (e.g., `/paper-plan "topic" — venue: NeurIPS`). Supported: `ICLR`, `NeurIPS`, `ICML`, `CVPR`, `ACL`, `AAAI`, `JMLR`, `TPAMI`, `ACM`, `IEEE_JOURNAL` (IEEE Transactions / Letters), `IEEE_CONF` (IEEE conferences).
 - **MAX_PAGES** — Page limit. For ML conferences: main body to Conclusion end (excluding references, appendix). ICLR=9, NeurIPS=9, ICML=8. **For IEEE venues: references ARE included in page count.** IEEE journal Transactions ≈ 12-14 pages total, Letters ≈ 4-5 pages total; IEEE conference ≈ 5-8 pages total (including references).
 
 ## Inputs

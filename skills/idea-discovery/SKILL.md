@@ -20,6 +20,25 @@ This skill chains sub-skills into a single automated pipeline:
 
 Each phase builds on the previous one's output. The final deliverables are a validated `idea-stage/IDEA_REPORT.md` with ranked ideas, plus a refined proposal (`refine-logs/FINAL_PROPOSAL.md`) and experiment plan (`refine-logs/EXPERIMENT_PLAN.md`) for the top idea.
 
+## Customized Pack Defaults
+
+Read `../shared-references/lightweight-research-pack.md` first. Default to
+lightweight idea discovery unless the user requests a full report:
+
+- Classify startup mode (`venue-only`, `reference-paper`, `reference-codebase`,
+  `idea-doc`, `existing-repo`, or `partial-results`) and tailor the first
+  deliverable to the available material.
+- **AUTO_PROCEED = false**, **COMPACT = true**, **RENDER_HTML = false**.
+- For `venue-only`, create a concise `PROJECT_BRIEF.md`,
+  `idea-stage/IDEA_CANDIDATES.md`, and `NEXT_ACTIONS.md` before any long report.
+- For paper/code/reference starts, extract assumptions, reusable assets, and the
+  smallest validation plan instead of generating a large `IDEA_REPORT.md` by
+  default.
+- Do not run heavy pilots locally. If a pilot needs GPU time, prepare an
+  AutoDL-ready smoke/formal plan and ask for approval.
+- External critique is prompt-only by default: write
+  `review-prompts/idea_review_prompt.md` and wait for pasted feedback.
+
 ## Constants
 
 - **PILOT_MAX_HOURS = 2** — Skip any pilot experiment estimated to take > 2 hours per GPU. Flag as "needs manual pilot" in the report.

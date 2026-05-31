@@ -1,11 +1,30 @@
 ---
 name: "auto-review-loop"
-description: "Autonomous multi-round research review loop. Repeatedly reviews using a secondary Codex agent, implements fixes, and re-reviews until positive assessment or max rounds reached. Use when user says \"auto review loop\", \"review until it passes\", or wants autonomous iterative improvement."
+description: "Guided prompt-only multi-round research review loop. Generates external-review prompts for a separate conversation, waits for pasted feedback, implements user-approved fixes, and keeps compact review logs; legacy reviewer agents are opt-in. Use when user says \"auto review loop\", \"review until it passes\", or wants iterative research improvement without direct reviewer API calls."
 ---
 
 # Auto Review Loop: Autonomous Research Improvement
 
 Autonomously iterate: review → implement fixes → re-review, until the external reviewer gives a positive assessment or MAX_ROUNDS is reached.
+
+## Customized Pack Defaults
+
+Read `../shared-references/lightweight-research-pack.md` before starting. In
+this customized pack the loop is guided, not fully autonomous, unless the user
+explicitly requests legacy automation:
+
+- **REVIEWER_BACKEND = prompt-only**, **HUMAN_CHECKPOINT = true**,
+  **COMPACT = true**, **RENDER_HTML = false**, **MAX_ROUNDS = 2**.
+- For each round, write `review-prompts/auto_review_round<N>_prompt.md` and ask
+  the user to paste the output from a separate review conversation. Do not call
+  reviewer agents by default.
+- Implement only user-approved fixes after the pasted review. If a fix requires
+  heavy compute, prepare an AutoDL/HPC plan and wait for approval.
+- Keep `review-stage/AUTO_REVIEW.md` concise. Periodically merge stable findings
+  into `findings.md` and `NEXT_ACTIONS.md` instead of appending large transcripts.
+- Reviewer Memory, Debate Protocol, nightmare mode, Review Tracing, oracle-pro,
+  Phase B.5, Phase B.6, and Debate Transcript remain legacy/advanced modes, but
+  they do not override the prompt-only default.
 
 ## Context: $ARGUMENTS
 

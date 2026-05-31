@@ -1,9 +1,24 @@
 ---
 name: grant-proposal
-description: "Draft a structured grant proposal from research ideas and literature. Supports KAKENHI (Japan), NSF (US), NSFC (China, including 面上/青年/优青/杰青/海外优青/重点), ERC (EU), DFG (Germany), SNSF (Switzerland), ARC (Australia), NWO (Netherlands), and generic formats. Use when user says \"write grant\", \"grant proposal\", \"申請書\", \"write KAKENHI\", \"科研費\", \"基金申请\", \"写基金\", \"NSF proposal\", or wants to turn research ideas into a funding application."
+description: "Prompt-only by default in the lightweight pack; Claude/Gemini reviewer transport is explicit opt-in. Draft a structured grant proposal from research ideas and literature. Supports KAKENHI (Japan), NSF (US), NSFC (China, including 面上/青年/优青/杰青/海外优青/重点), ERC (EU), DFG (Germany), SNSF (Switzerland), ARC (Australia), NWO (Netherlands), and generic formats. Use when user says \"write grant\", \"grant proposal\", \"申請書\", \"write KAKENHI\", \"科研費\", \"基金申请\", \"写基金\", \"NSF proposal\", or wants to turn research ideas into a funding application."
 ---
 
 > Override for Codex users who want **Gemini**, not a second Codex agent, to act as the reviewer. Install this package **after** `skills/skills-codex/*`.
+
+## Customized Pack Defaults
+
+This reviewer overlay is opt-in transport only. In the customized lightweight
+pack, default to prompt-only review unless the user explicitly asks to use this
+overlay reviewer backend:
+
+- Write the review prompt under `review-prompts/` and ask the user to run it in
+  a separate conversation with the relevant skills enabled.
+- Do not call Claude/Gemini reviewer MCP bridges, APIs, or follow-up status
+  tools by default.
+- Use pasted review text as the external verdict, then write compact summaries
+  such as `REVIEW_SUMMARY.md`, `NEXT_ACTIONS.md`, or the skill-specific log.
+- Keep heavy experiments AutoDL/HPC-gated and user-approved; local work stays at
+  edits, tests, lint, dry-runs, and tiny smoke checks.
 
 # Grant Proposal: From Research Ideas to Fundable Application
 

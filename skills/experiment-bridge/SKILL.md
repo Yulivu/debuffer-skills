@@ -1,6 +1,6 @@
 ---
 name: experiment-bridge
-description: "Workflow 1.5: Bridge between idea discovery and auto review. Reads EXPERIMENT_PLAN.md, implements experiment code, deploys to GPU, collects initial results. Use when user says \"实现实验\", \"implement experiments\", \"bridge\", \"从计划到跑实验\", \"deploy the plan\", or has an experiment plan ready to execute."
+description: "Lightweight experiment bridge between idea planning and review. Reads EXPERIMENT_PLAN.md, implements experiment code, runs local validation only, prepares AutoDL/HPC gated execution, and writes prompt-only code-review handoffs. Use when user says \"实现实验\", \"implement experiments\", \"bridge\", \"从计划到跑实验\", \"deploy the plan\", or has an experiment plan ready to execute."
 argument-hint: [experiment-plan-path-or-topic]
 allowed-tools: Bash(*), Read, Write, Edit, Grep, Glob, Skill, mcp__codex__codex, mcp__codex__codex-reply
 ---
@@ -8,6 +8,26 @@ allowed-tools: Bash(*), Read, Write, Edit, Grep, Glob, Skill, mcp__codex__codex,
 # Workflow 1.5: Experiment Bridge
 
 Implement and deploy experiments from plan: **$ARGUMENTS**
+
+## Customized Pack Defaults
+
+Read `../shared-references/lightweight-research-pack.md` before implementation.
+These defaults override older deployment behavior unless the user explicitly
+requests legacy automation:
+
+- **AUTO_DEPLOY = false**, **DEPLOY_TARGET = autodl**, **COMPACT = true**.
+- **CODE_REVIEW = prompt-only**: after implementing or modifying experiment
+  code, write `review-prompts/experiment_code_review_prompt.md` and stop for
+  pasted feedback from a separate review conversation. Do not call reviewer
+  MCP/API backends by default.
+- Run only cheap local checks: imports, unit tests, lint, config validation, and
+  tiny dry-run/smoke commands. Do not run heavy local training.
+- For GPU work, prepare an AutoDL/HPC handoff: suite YAML, preflight command,
+  smoke command, expected outputs, data manifest, and formal-run approval gate.
+- If SSH is required, output exact commands for the user to run or approve; do
+  not open fully autonomous SSH/screen sessions by default.
+- Summarize implementation in `EXPERIMENT_LOG.md` and `NEXT_ACTIONS.md`; avoid
+  generating another large Markdown report unless requested.
 
 ## Overview
 

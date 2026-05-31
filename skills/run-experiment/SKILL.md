@@ -1,6 +1,6 @@
 ---
 name: run-experiment
-description: Deploy and run ML experiments on local, remote, Vast.ai, or Modal serverless GPU. Use when user says "run experiment", "deploy to server", "跑实验", or needs to launch training jobs.
+description: Prepare and gate ML experiment execution with AutoDL/HPC preferred for heavy compute. Runs only local validation/tiny smoke checks by default, prints SSH/remote command blocks for approval, and keeps Vast.ai/Modal as opt-in alternatives. Use when user says "run experiment", "deploy to server", "跑实验", or needs to launch training jobs.
 argument-hint: [experiment-description]
 allowed-tools: Bash(*), Read, Grep, Glob, Edit, Write, Skill(serverless-modal)
 ---
@@ -8,6 +8,23 @@ allowed-tools: Bash(*), Read, Grep, Glob, Edit, Write, Skill(serverless-modal)
 # Run Experiment
 
 Deploy and run ML experiment: $ARGUMENTS
+
+## Customized Pack Defaults
+
+Read `../shared-references/lightweight-research-pack.md` before selecting a
+backend. In this customized pack:
+
+- Local execution is for validation only: imports, lint/tests, config checks,
+  dry-runs, and tiny smoke runs. Do not launch heavy local training or sweeps.
+- Prefer `/autodl-hpc` for GPU/HPC runs. Prepare preflight, smoke, suite, data
+  manifest, and result-transfer commands, then ask for user approval.
+- Do not perform fully autonomous SSH execution by default. For remote, Vast.ai,
+  or other SSH-backed machines, print the exact command block and wait for the
+  user to run or approve it.
+- Keep cost visibility for Vast.ai and Modal, including hourly cost and cleanup
+  expectations, but treat them as opt-in legacy/alternate backends.
+- Raw outputs must land in `experiments/runs/`; paper-facing curation happens
+  later through audit/analysis scripts.
 
 ## Workflow
 

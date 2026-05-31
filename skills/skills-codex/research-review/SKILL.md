@@ -1,11 +1,30 @@
 ---
 name: "research-review"
-description: "Get a deep critical review of research from GPT using a secondary Codex agent. Use when user says \"review my research\", \"help me review\", \"get external review\", or wants critical feedback on research ideas, papers, or experimental results."
+description: "Prepare a prompt-only deep critical review package for research ideas, papers, or results. Generates concise reviewer prompts for a separate conversation, supports venue profiles such as ICLR, AAAI, JMLR, and TPAMI, and consumes pasted feedback; reviewer agents are opt-in. Use when user says \"review my research\", \"help me review\", or \"get external review\"."
 ---
 
 # Research Review via a secondary Codex agent (xhigh reasoning)
 
 Get a multi-round critical review of research work from an external LLM with maximum reasoning depth.
+
+## Customized Pack Defaults
+
+Read `../shared-references/lightweight-research-pack.md` and
+`../shared-references/venue-profiles.md` before preparing the review. Default to
+prompt-only review:
+
+- **REVIEWER_BACKEND = prompt-only**. Do not call secondary agents, Oracle, or
+  other reviewer backends unless the user explicitly requests legacy delegation.
+- Write `review-prompts/research_review_prompt.md` with concise context, target
+  venue profile, artifact paths, claims, evidence, known weaknesses, and exact
+  reviewer questions.
+- Ask the user to open a separate conversation with this skill package enabled
+  and paste the review back. Treat the pasted review as the external verdict.
+- Preserve Review Tracing by saving the prompt, pasted review, and response
+  summary under `review-stage/`, but avoid copying long reviewer text into main
+  project docs.
+- Write compact `review-stage/REVIEW_SUMMARY.md` and `NEXT_ACTIONS.md`; only
+  create long review reports when requested.
 
 ## Constants
 

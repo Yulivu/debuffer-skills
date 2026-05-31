@@ -1,6 +1,6 @@
 ---
 name: autodl-hpc
-description: Prepare, validate, and run AutoDL/HPC research experiments with GitHub deploy-key bootstrap, offline data policy, preflight and smoke gates, FileZilla/SFTP result transfer, and formal-run approval boundaries. Use when Codex needs AutoDL, /root/autodl-tmp, remote GPU/HPC smoke tests, preflight_autodl.py, run_autodl_smoke.sh, deploy keys, formal suite gating, or safe download/audit workflows.
+description: Prepare, validate, and gate AutoDL/HPC research experiments with GitHub deploy-key bootstrap, offline data policy, preflight and smoke gates, FileZilla/SFTP result transfer, and formal-run approval boundaries. Defaults to command preparation over autonomous SSH execution. Use when Codex needs AutoDL, /root/autodl-tmp, remote GPU/HPC smoke tests, preflight_autodl.py, run_autodl_smoke.sh, deploy keys, formal suite gating, or safe download/audit workflows.
 ---
 
 # AutoDL HPC
@@ -8,6 +8,19 @@ description: Prepare, validate, and run AutoDL/HPC research experiments with Git
 Use this skill for AutoDL or similar SSH GPU/HPC machines where a research repo is cloned to a target machine, validated with preflight/smoke commands, and only then allowed to run formal experiment suites.
 
 Read `references/autodl-hpc.md` before issuing commands, writing a runbook, or changing a repo's AutoDL/HPC workflow.
+
+## Customized Pack Defaults
+
+- Prefer command preparation over direct SSH execution. If the user has not
+  explicitly approved remote execution, output the exact AutoDL command block and
+  wait for pasted results.
+- Keep local work lightweight: repo edits, tests, lint, config validation,
+  manifest updates, and result audit. Heavy training belongs on AutoDL/HPC.
+- Do not implement fully autonomous SSH workflows. SSH is a manual or explicitly
+  approved boundary.
+- Keep runbooks concise. Merge repeated operational notes into
+  `docs/runbooks/AUTODL_HPC_RUNBOOK.md` instead of generating new long Markdown
+  files for every attempt.
 
 ## Workflow
 

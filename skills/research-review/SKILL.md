@@ -1,6 +1,6 @@
 ---
 name: research-review
-description: Get a deep critical review of research from an external reviewer backend (Codex or manual). Use when user says "review my research", "help me review", "get external review", or wants critical feedback on research ideas, papers, or experimental results.
+description: Prepare a prompt-only deep critical review package for research ideas, papers, or results. Generates concise reviewer prompts for a separate conversation, supports venue profiles such as ICLR, AAAI, JMLR, and TPAMI, and consumes pasted feedback; direct reviewer backends are opt-in. Use when user says "review my research", "help me review", or "get external review".
 argument-hint: [topic-or-scope]
 allowed-tools: Bash(*), Read, Grep, Glob, Write, Edit, mcp__codex__codex, mcp__codex__codex-reply, mcp__manual_review__review, mcp__manual_review__review_reply
 ---
@@ -16,6 +16,26 @@ allowed-tools: Bash(*), Read, Grep, Glob, Write, Edit, mcp__codex__codex, mcp__c
 > [`shared-references/external-cadence.md`](../shared-references/external-cadence.md).
 
 Get a multi-round critical review of research work from the selected external reviewer backend with maximum reasoning depth.
+
+## Customized Pack Defaults
+
+Read `../shared-references/lightweight-research-pack.md` and
+`../shared-references/venue-profiles.md` before preparing the review. Default to
+prompt-only review:
+
+- **REVIEWER_BACKEND = prompt-only**. Do not call Codex MCP, Manual Review MCP,
+  Oracle, or other reviewer APIs unless the user explicitly requests a legacy
+  backend such as `codex`, `manual`, or `oracle-pro`.
+- Write `review-prompts/research_review_prompt.md` with concise context, target
+  venue profile, artifact paths, claims, evidence, known weaknesses, and exact
+  reviewer questions.
+- Ask the user to open a separate conversation with this skill package enabled
+  and paste the review back. Treat the pasted review as the external verdict.
+- Preserve Review Tracing by saving the prompt, pasted review, and response
+  summary under `review-stage/`, but avoid copying long reviewer text into main
+  project docs.
+- Write compact `review-stage/REVIEW_SUMMARY.md` and `NEXT_ACTIONS.md`; only
+  create long review reports when requested.
 
 ## Constants
 
