@@ -1,0 +1,13 @@
+name: current_repro
+output_root: experiments/runs/current_repro
+python: python
+
+# Suite definitions describe reproducible tasks. Ordinary runs should write to
+# experiments/runs, not experiments/results.
+tasks:
+  - id: exp1_example_smoke
+    script: scripts/exp1/run_example.py
+    config: experiments/configs/exp1/example.yaml
+    output_subdir: exp1/example_smoke
+    tags: [exp1, smoke, synthetic, cpu, machine:cpu]
+    enabled: true

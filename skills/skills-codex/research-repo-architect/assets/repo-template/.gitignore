@@ -1,0 +1,57 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+.venv/
+venv/
+env/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+*.egg-info/
+build/
+dist/
+
+# Data and generated artifacts
+data/raw/*
+data/interim/*
+data/processed/*
+!data/raw/.gitkeep
+!data/interim/.gitkeep
+!data/processed/.gitkeep
+experiments/runs/*
+!experiments/runs/.gitkeep
+experiments/results/*
+!experiments/results/.gitkeep
+experiments/visualizations/**/*
+!experiments/visualizations/.gitkeep
+!experiments/visualizations/**/*.md
+!experiments/visualizations/**/*.csv
+!experiments/visualizations/**/*.pdf
+outputs/
+checkpoints/
+mlruns/
+wandb/
+*.npy
+*.npz
+*.pkl
+*.parquet
+*.csv
+*.csv.gz
+
+# ARIS / agent runtime state
+.aris/traces/
+.aris/cache/
+.aris/runs/
+.aris/meta/events.jsonl
+.aris/*.lock.d/
+.agents/skills/
+
+# Editors and OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+*.lnk

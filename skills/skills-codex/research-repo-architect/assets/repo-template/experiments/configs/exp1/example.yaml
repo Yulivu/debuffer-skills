@@ -1,0 +1,13 @@
+output_dir: experiments/runs/local_checks/exp1_example
+random_seed: 2026
+
+dataset:
+  name: synthetic_tiny
+  num_samples: 32
+  noise: 0.05
+
+model:
+  baseline: mean
+
+metrics:
+  primary: rmse
