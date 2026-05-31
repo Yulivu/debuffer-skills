@@ -399,7 +399,9 @@ After parsing the score, check if `~/.claude/feishu.json` exists and mode is not
 For each action item (highest priority first):
 
 1. **Code changes**: Write/modify experiment scripts, model code, analysis scripts
-2. **Run experiments**: Deploy to GPU server via SSH + screen/tmux
+2. **Run experiments**: for heavy compute, prepare an AutoDL/HPC handoff or
+   invoke `/experiment-bridge`; do not deploy via SSH/screen/tmux unless the
+   user explicitly approves that legacy path.
 3. **Analysis**: Run evaluation, collect results, update figures/tables
 4. **Documentation**: Update project notes and review document
 

@@ -25,6 +25,11 @@ for a legacy backend.
 - Compact periodically instead of appending forever: merge stable state into
   `PROJECT_BRIEF.md`, `findings.md`, and `EXPERIMENT_LOG.md`; archive or leave
   old stage logs unchanged rather than generating another large Markdown file.
+- Follow `project-guide-protocol.md` for macro project navigation. Maintain
+  `PROJECT_STATUS.md` so the agent can always tell which project phase is
+  current; generate larger guides such as `PROJECT_GUIDE.md`,
+  `EXPERIMENT_PROTOCOL.md`, `EVIDENCE_LEDGER.md`, or `PAPER_GUIDE.md` only at
+  stage gates.
 
 ## Startup Modes
 

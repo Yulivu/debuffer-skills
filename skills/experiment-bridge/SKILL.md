@@ -11,9 +11,10 @@ Implement and deploy experiments from plan: **$ARGUMENTS**
 
 ## Customized Pack Defaults
 
-Read `../shared-references/lightweight-research-pack.md` before implementation.
-These defaults override older deployment behavior unless the user explicitly
-requests legacy automation:
+Read `../shared-references/lightweight-research-pack.md` and
+`../shared-references/project-guide-protocol.md` before implementation. These
+defaults override older deployment behavior unless the user explicitly requests
+legacy automation:
 
 - **AUTO_DEPLOY = false**, **DEPLOY_TARGET = autodl**, **COMPACT = true**.
 - **CODE_REVIEW = prompt-only**: after implementing or modifying experiment
@@ -26,6 +27,11 @@ requests legacy automation:
   smoke command, expected outputs, data manifest, and formal-run approval gate.
 - If SSH is required, output exact commands for the user to run or approve; do
   not open fully autonomous SSH/screen sessions by default.
+- Keep `PROJECT_STATUS.md` current: use `local smoke` while local validation is
+  running, `AutoDL smoke` when preparing remote smoke execution, and `formal
+  runs` only after smoke output is accepted.
+- Keep root `EXPERIMENT_PROTOCOL.md` aligned with implemented configs, suites,
+  command templates, output directories, and required run-bundle files.
 - Summarize implementation in `EXPERIMENT_LOG.md` and `NEXT_ACTIONS.md`; avoid
   generating another large Markdown report unless requested.
 
@@ -72,13 +78,20 @@ Read `EXPERIMENT_PLAN.md` and extract:
 1. **Run order and milestones** — which experiments run first (sanity → baseline → main → ablation → polish)
 2. **For each experiment block:**
    - Dataset / split / task
+   - Design / factors varied / fixed settings
    - Compared systems and variants
    - Metrics to compute
    - Setup details (backbone, hyperparameters, seeds)
-   - Success criterion
+   - Expected result / decision rule
+   - Reproducibility entrypoint
    - Priority (MUST-RUN vs NICE-TO-HAVE)
 3. **Compute budget** — total estimated GPU-hours
 4. **Method details** from `FINAL_PROPOSAL.md` — what exactly to implement
+
+Also extract the reproducibility contract: config paths, suite names, command
+templates, output directories, seeds, hardware target, data manifest entries,
+and required run bundle files (`metrics.json`, `summary.md`,
+`run_metadata.json`, logs).
 
 Present a brief summary:
 

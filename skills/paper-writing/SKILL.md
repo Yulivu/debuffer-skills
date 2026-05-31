@@ -11,7 +11,8 @@ Orchestrate a complete paper writing workflow for: **$ARGUMENTS**
 
 ## Customized Pack Defaults
 
-Read `../shared-references/lightweight-research-pack.md` and
+Read `../shared-references/lightweight-research-pack.md`,
+`../shared-references/project-guide-protocol.md`, and
 `../shared-references/venue-profiles.md` before starting. Defaults:
 
 - **AUTO_PROCEED = false**, **HUMAN_CHECKPOINT = true**,
@@ -19,9 +20,15 @@ Read `../shared-references/lightweight-research-pack.md` and
 - **VENUE** supports `ICLR`, `AAAI`, `JMLR`, `TPAMI`, `NeurIPS`, `ICML`, and
   existing legacy venue labels. Apply the venue profile before outline and audit
   prompts.
-- Prefer compact project memory (`PROJECT_BRIEF.md`, `findings.md`,
-  `EXPERIMENT_LOG.md`, `CLAIMS_FROM_RESULTS.md`) and existing `PAPER_PLAN.md`
-  before generating or reading a large `NARRATIVE_REPORT.md`.
+- Prefer compact project memory (`PROJECT_STATUS.md`, `PROJECT_BRIEF.md`,
+  `PAPER_GUIDE.md`, `EVIDENCE_LEDGER.md`, `EXPERIMENT_PROTOCOL.md`,
+  `findings.md`, `EXPERIMENT_LOG.md`, `CLAIMS_FROM_RESULTS.md`) and existing
+  `PAPER_PLAN.md` before generating or reading a large `NARRATIVE_REPORT.md`.
+- Update `PROJECT_STATUS.md` to `manuscript` when paper drafting starts and to
+  `submission` only after venue formatting and required audits/checks pass.
+- Create or refresh `PAPER_GUIDE.md` at the manuscript gate by compacting the
+  project guide, experiment protocol, evidence ledger, and accepted paper plan.
+  Do not duplicate full audit reports inside the guide.
 - Do not call reviewer MCP/API backends by default. Generate prompts under
   `review-prompts/` for paper-plan, claim, citation, and improvement review, then
   wait for pasted feedback from a separate conversation.
@@ -113,6 +120,12 @@ Sources accepted: local TeX dir / file, local PDF, arXiv id, http(s) URL. Overle
 ## Pipeline
 
 ### Phase 0: Assurance Setup
+
+Before assurance setup, read `PROJECT_STATUS.md` and `PAPER_GUIDE.md` when
+present. If `PAPER_GUIDE.md` is missing but the project has stable
+`PROJECT_GUIDE.md`, `EXPERIMENT_PROTOCOL.md`, `EVIDENCE_LEDGER.md`, or an
+accepted `PAPER_PLAN.md`, compact those into `PAPER_GUIDE.md` instead of
+creating another long narrative report.
 
 Resolve the active `assurance` level and persist it so Phase 6's external
 verifier reads the same value. **Run once at pipeline start, before Phase 1.**

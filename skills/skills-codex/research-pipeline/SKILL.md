@@ -34,6 +34,12 @@ For venue-specific review and writing, read
 `../shared-references/venue-profiles.md` and apply the target venue profile
 (ICLR, AAAI, JMLR, TPAMI, NeurIPS/ICML, or IEEE).
 
+Read `../shared-references/project-guide-protocol.md` when the user wants a
+project-wide guide or when crossing a stage gate. Keep `PROJECT_STATUS.md`
+updated after each accepted stage. Generate `PROJECT_GUIDE.md`,
+`EXPERIMENT_PROTOCOL.md`, `EVIDENCE_LEDGER.md`, or `PAPER_GUIDE.md` only when
+their gate conditions are met; otherwise update compact memory files.
+
 ## Constants
 
 - **AUTO_PROCEED = true** — When `true`, Gate 1 auto-selects the top-ranked idea (highest pilot signal + novelty confirmed) and continues to implementation. When `false`, always waits for explicit user confirmation before proceeding.

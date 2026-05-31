@@ -1,6 +1,6 @@
 ---
 name: experiment-queue
-description: SSH job queue for multi-seed/multi-config ML experiments with OOM-aware retry, stale-screen cleanup, and wave-transition race prevention. Use when user says "batch experiments", "队列实验", "run grid", "multi-seed sweep", "auto-chain experiments", or when /run-experiment is insufficient for 10+ jobs that need orchestration.
+description: Opt-in SSH job queue for multi-seed/multi-config ML experiments with OOM-aware retry, stale-screen cleanup, and wave-transition race prevention. In the lightweight AutoDL-first pack, use only when the user explicitly asks for SSH queue orchestration or approves a prepared command block.
 argument-hint: [manifest-or-grid-spec]
 allowed-tools: Bash(*), Read, Grep, Glob, Edit, Write, Skill(run-experiment), Skill(monitor-experiment)
 ---
@@ -18,9 +18,25 @@ allowed-tools: Bash(*), Read, Grep, Glob, Edit, Write, Skill(run-experiment), Sk
 
 Orchestrate large batches of ML experiments on SSH remote GPU servers with proper state tracking, OOM retry, stale cleanup, and wave transitions.
 
+## Customized Pack Safety
+
+This is a legacy/opt-in SSH orchestration skill in the lightweight AutoDL-first
+pack. Prefer `autodl-hpc`, `run-experiment`, and `experiment-bridge` handoffs
+that prepare commands, smoke suites, and result-transfer instructions without
+opening autonomous SSH sessions.
+
+- Do not invoke this skill automatically from review, planning, or bridge
+  workflows.
+- Default action: prepare the queue manifest, preflight checklist, and exact
+  command block; wait for explicit user approval before any `ssh`, `scp`,
+  `screen`, `tmux`, or `nohup` launch.
+- Keep `EXPERIMENT_PROTOCOL.md` and `PROJECT_STATUS.md` aligned if this queue
+  is used for formal runs.
+
 ## When to Use This Skill
 
-Use when `/run-experiment` is insufficient:
+Use only when the user explicitly requests SSH queue orchestration or approves
+it after seeing the command block, and `/run-experiment` is insufficient:
 - **≥10 jobs** that need batching across GPUs
 - **Multi-seed sweeps** (e.g., 21 seeds × 12 cells)
 - **Wave transitions** (run wave 1, wait, run wave 2, wait, run wave 3...)

@@ -20,9 +20,10 @@ when available. Default to a lightweight, AutoDL-first shape:
 - Add AutoDL/HPC hooks when experiments may need GPU time, but keep execution
   gated and manual by default: runbook, preflight, smoke suite, data manifest,
   and formal-run approval.
-- Keep project memory compact: prefer `PROJECT_BRIEF.md`, `NEXT_ACTIONS.md`,
-  `findings.md`, and `EXPERIMENT_LOG.md`; create long stage documents only when
-  a downstream workflow requires them.
+- Read `../shared-references/project-guide-protocol.md` when creating project
+  memory. Keep `PROJECT_STATUS.md` current so future sessions know the macro
+  phase; prefer `PROJECT_BRIEF.md`, `NEXT_ACTIONS.md`, `findings.md`, and
+  `EXPERIMENT_LOG.md`; create or refresh `PROJECT_GUIDE.md` only at stage gates.
 - For external review, create `review-prompts/` rather than wiring direct API,
   MCP, or SSH automation into the repository.
 
@@ -76,6 +77,10 @@ For detailed directory rules, read `references/architecture.md`. For ARIS-specif
 - `partial-results`: inventory logs/figures/tables first, write
   `findings.md` and `EXPERIMENT_LOG.md`, then backfill missing configs or audit
   scripts.
+
+For every startup mode, create or update `PROJECT_STATUS.md` with the current
+macro phase, target venue, last accepted artifact, next gate, blockers, and the
+phase map from `project-guide-protocol.md`.
 
 ## Existing Repo Migration
 

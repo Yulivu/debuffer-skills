@@ -19,6 +19,21 @@ The goal is not to generate a giant benchmark wishlist. The goal is to turn a pr
 3. the method is elegant enough that extra complexity is unnecessary
 4. any frontier-model-era component is genuinely useful, not decorative
 
+## Project Guide Integration
+
+Read `../shared-references/project-guide-protocol.md` before writing outputs.
+Use it to keep experiment planning connected to the project's macro phase
+without generating redundant long documents:
+
+- Update `PROJECT_STATUS.md` to the `experiment protocol` phase when the
+  experiment story becomes stable enough for implementation planning.
+- Keep `refine-logs/EXPERIMENT_PLAN.md` as the operational roadmap. Create or
+  refresh root `EXPERIMENT_PROTOCOL.md` only when the plan is ready for
+  implementation, AutoDL smoke preparation, or formal-run freezing.
+- If the idea is still exploratory, update only compact state such as
+  `PROJECT_BRIEF.md` and `NEXT_ACTIONS.md`; do not emit `PROJECT_GUIDE.md`,
+  `EVIDENCE_LEDGER.md`, or `PAPER_GUIDE.md` unless their gates are reached.
+
 ## Constants
 
 - **OUTPUT_DIR = `refine-logs/`** — Default destination for experiment planning artifacts.
@@ -83,15 +98,17 @@ Prefer one strong baseline family over many weak baselines. If a stronger modern
 
 For every kept block, fully specify:
 
-- **Claim tested**
+- **Goal / claim tested**
 - **Why this block exists**
 - **Dataset / split / task**
+- **Design**: factors varied, fixed settings, number of seeds, run order
 - **Compared systems**: strongest baselines, ablations, and variants only
 - **Metrics**: decisive metrics first, secondary metrics second
 - **Setup details**: backbone, frozen vs trainable parts, key hyperparameters, training budget, seeds
-- **Success criterion**: what outcome would count as convincing evidence?
+- **Expected result / decision rule**: what outcome would support, weaken, or falsify the claim?
 - **Failure interpretation**: if the result is negative, what does it mean?
 - **Table / figure target**: where this result should appear in the paper
+- **Reproducibility entrypoint**: config path, suite path, command, output directory
 
 Special rules:
 
@@ -146,15 +163,17 @@ Use this structure:
 ## Experiment Blocks
 
 ### Block 1: [Name]
-- Claim tested:
+- Goal / claim tested:
 - Why this block exists:
 - Dataset / split / task:
+- Design:
 - Compared systems:
 - Metrics:
 - Setup details:
-- Success criterion:
+- Expected result / decision rule:
 - Failure interpretation:
 - Table / figure target:
+- Reproducibility entrypoint:
 - Priority: MUST-RUN / NICE-TO-HAVE
 
 ### Block 2: [Name]
@@ -197,7 +216,19 @@ Use this structure:
 
 Keep the tracker compact and execution-oriented.
 
-#### Step 5.3: Present a Brief Summary to the User
+#### Step 5.3: Refresh `EXPERIMENT_PROTOCOL.md` When Stable
+
+If the plan is ready for implementation, AutoDL smoke preparation, or formal
+run freezing, create or refresh root `EXPERIMENT_PROTOCOL.md` using the shared
+schema from `project-guide-protocol.md`. Keep it compact: link to
+`refine-logs/EXPERIMENT_PLAN.md`, list the finalized experiment blocks, and
+record the reproducibility entrypoints. Freeze it before formal AutoDL/HPC
+runs.
+
+If the plan is not stable yet, skip this file and update only
+`PROJECT_STATUS.md` plus `NEXT_ACTIONS.md`.
+
+#### Step 5.4: Present a Brief Summary to the User
 
 ```
 Experiment plan ready.
