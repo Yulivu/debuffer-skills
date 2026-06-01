@@ -7,6 +7,12 @@ This reference covers ordinary research code repositories. If the repo contains 
 ```text
 data/                    Dataset staging area; large artifacts ignored.
 docs/                    Internal runbooks, analysis notes, and maintenance docs.
+  project/               Briefs, status companions, blueprints, project guides.
+  experiments/           Experiment protocols, logs, trackers, audit notes.
+  evidence/              Findings, evidence ledgers, claim maps.
+  paper/                 Paper guides, narrative reports, outline notes.
+  theory/                Proof, theorem, and derivation packages.
+  runbooks/              AutoDL/HPC and operational runbooks.
 experiments/
   configs/               Hand-written logical experiment configs.
   suites/                Reproducible task collections.
@@ -22,7 +28,33 @@ scripts/
 src/<package_name>/      Reusable implementation.
 ```
 
-Skill workflow artifacts may coexist at the repo root and should remain in their workflow paths: `RESEARCH_BRIEF.md`, `EXPERIMENT_PLAN.md`, `NARRATIVE_REPORT.md`, `idea-stage/`, `refine-logs/`, `review-stage/`, `paper/`, and `research-wiki/`.
+Root Markdown is intentionally sparse. Ordinary research repos should keep only
+`README.md`, `PROJECT_STATUS.md`, and tool-managed `AGENTS.md` / `CLAUDE.md` in
+the root. Skill workflow directories may coexist at the repo root and should
+remain in their workflow paths: `idea-stage/`, `refine-logs/`, `review-stage/`,
+`paper/`, and `research-wiki/`.
+
+When creating or refreshing Markdown project artifacts, prefer these paths:
+
+```text
+docs/project/PROJECT_BRIEF.md
+docs/project/NEXT_ACTIONS.md
+docs/project/RESEARCH_BLUEPRINT.md
+docs/project/BLUEPRINT_GATE.md
+docs/project/PROJECT_GUIDE.md
+docs/experiments/EXPERIMENT_PLAN.md
+docs/experiments/EXPERIMENT_PROTOCOL.md
+docs/experiments/EXPERIMENT_LOG.md
+docs/evidence/findings.md
+docs/evidence/EVIDENCE_LEDGER.md
+docs/paper/NARRATIVE_REPORT.md
+docs/paper/PAPER_GUIDE.md
+docs/theory/DERIVATION_PACKAGE.md
+docs/theory/PROOF_PACKAGE.md
+```
+
+Read legacy root-level files as fallback in older projects, but do not write new
+or refreshed Markdown to the root unless it is on the allowlist.
 
 ## Source Code Rules
 
@@ -91,3 +123,19 @@ The root `README.md` should be reviewer-facing and concise:
 - Repository layout.
 
 Put internal operational detail in `docs/`, not in the root README.
+
+## Root Markdown Cleanup
+
+During migration, inventory root `*.md` files. Keep only the allowlist in root,
+then move the rest into the nearest `docs/` category:
+
+- project framing and status companions -> `docs/project/`
+- experiment plans, logs, trackers, run notes -> `docs/experiments/`
+- findings, claim maps, evidence ledgers -> `docs/evidence/`
+- paper outlines, narrative reports, writing plans -> `docs/paper/`
+- theory notes, proof packages, derivation packages -> `docs/theory/`
+- setup notes, AutoDL/HPC instructions, maintenance notes -> `docs/runbooks/`
+- obsolete notes -> `docs/archive/`
+
+Preserve backlinks or add a short index in `docs/README.md` only if the project
+already uses docs indexing. Otherwise keep categories discoverable by path.

@@ -10,13 +10,15 @@
 - 多起步阶段适配：`venue-only`、`reference-paper`、`reference-codebase`、`idea-doc`、`existing-repo`、`partial-results`。
 - AutoSci-lite 启发式：A-E idea 生成路径、轻量失败记忆、pilot gate 和明确项目宏观状态机。
 - 论文与审计链路：实验计划、结果审计、claim/citation/proof 检查、LaTeX 写作、rebuttal 和 resubmit。
-- 紧凑项目记忆：`PROJECT_STATUS.md`、`PROJECT_BRIEF.md`、`NEXT_ACTIONS.md`、`findings.md`、`EXPERIMENT_LOG.md`，以及阶段性 `RESEARCH_BLUEPRINT.md` / `BLUEPRINT_GATE.md` / `PROJECT_GUIDE.md`。
+- 紧凑项目记忆：根目录保留 `PROJECT_STATUS.md`，其他项目记忆进入 `docs/project/`、`docs/experiments/`、`docs/evidence/`、`docs/paper/`、`docs/theory/` 等分类目录。
 
 ## 最近更新
 
-- 新增 `research-blueprint`：在正式实验、AutoDL 正式运行或论文写作前生成 `RESEARCH_BLUEPRINT.md` 和 `BLUEPRINT_GATE.md`。
-- `RESEARCH_BLUEPRINT.md` 开头固定包含“总体进度表”，按数据获取、预处理、协议冻结、理论/方法、local smoke、AutoDL smoke、pilot、正式实验、证据审计、论文计划、初稿和投稿材料逐步打勾。
+- 新增 `research-blueprint`：在正式实验、AutoDL 正式运行或论文写作前生成 `docs/project/RESEARCH_BLUEPRINT.md` 和 `docs/project/BLUEPRINT_GATE.md`。
+- `docs/project/RESEARCH_BLUEPRINT.md` 开头固定包含“总体进度表”，按数据获取、预处理、协议冻结、理论/方法、local smoke、AutoDL smoke、pilot、正式实验、证据审计、论文计划、初稿和投稿材料逐步打勾。
 - `experiment-plan`、`paper-plan`、`research-pipeline`、`research-repo-architect` 已接入 blueprint gate。
+- `research-repo-architect` 增加根目录 Markdown 约束：普通科研 repo 根目录只保留 `README.md`、`PROJECT_STATUS.md` 和工具托管的 `AGENTS.md` / `CLAUDE.md`，其他 Markdown 进入 `docs/` 分类目录。
+- 共享输出记录从根目录 `MANIFEST.md` 调整为 `docs/project/OUTPUT_MANIFEST.md`；证明和公式推导默认进入 `docs/theory/`。
 - 安装 profile 已包含 `research-blueprint`，当前主线与 Codex mirror 均为 78 个 skill。
 
 <a id="quick-start"></a>
@@ -174,9 +176,11 @@ AAAI/ICLR 侧重 novelty、实验说服力和叙事；JMLR 侧重完整性、严
 
 仓库文档入口为根中文 `README.md` 和 `docs/SKILLS_CATALOG.md`。项目运行文档采用少量、阶段化、可融合的结构：
 
-- 起步阶段产出 `PROJECT_BRIEF.md`、`PROJECT_STATUS.md`、`NEXT_ACTIONS.md`。
-- 形成实验证据后维护 `findings.md`、`EXPERIMENT_LOG.md`、`EVIDENCE_LEDGER.md`。
-- 实验计划、AutoDL 正式运行或论文写作前刷新 `RESEARCH_BLUEPRINT.md` 和 `BLUEPRINT_GATE.md`；较轻交接可只刷新 `PROJECT_GUIDE.md`。
+- 根目录只保留必要入口和状态 Markdown：`README.md`、`PROJECT_STATUS.md`，以及工具托管的 `AGENTS.md` / `CLAUDE.md`。
+- 起步阶段产出 `docs/project/PROJECT_BRIEF.md`、`PROJECT_STATUS.md`、`docs/project/NEXT_ACTIONS.md`。
+- 形成实验证据后维护 `docs/evidence/findings.md`、`docs/experiments/EXPERIMENT_LOG.md`、`docs/evidence/EVIDENCE_LEDGER.md`。
+- 实验计划、AutoDL 正式运行或论文写作前刷新 `docs/project/RESEARCH_BLUEPRINT.md` 和 `docs/project/BLUEPRINT_GATE.md`；较轻交接可只刷新 `docs/project/PROJECT_GUIDE.md`。
+- 输出清单写入 `docs/project/OUTPUT_MANIFEST.md`；理论证明、公式推导等写入 `docs/theory/`。
 
 ## 仓库结构
 

@@ -220,7 +220,7 @@ Apply feedback before finalizing.
 
 ### Step 7: Output
 
-Save the final outline to `PAPER_PLAN.md` in the project root:
+Save the final outline to `docs/paper/PAPER_PLAN.md`:
 
 ```markdown
 # Paper Plan
@@ -257,7 +257,7 @@ Save the final outline to `PAPER_PLAN.md` in the project root:
 
 > Follow these shared protocols for all output files:
 > - **[Output Versioning Protocol](../../shared-references/output-versioning.md)** — write timestamped file first, then copy to fixed name
-> - **[Output Manifest Protocol](../../shared-references/output-manifest.md)** — log every output to MANIFEST.md
+> - **[Output Manifest Protocol](../../shared-references/output-manifest.md)** — log every output to docs/project/OUTPUT_MANIFEST.md
 > - **[Output Language Protocol](../../shared-references/output-language.md)** — respect the project's language setting
 
 ## Key Rules

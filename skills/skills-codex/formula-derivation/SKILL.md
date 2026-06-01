@@ -11,7 +11,7 @@ Build an honest derivation package, not a fake polished theorem story.
 
 ## Constants
 
-- DEFAULT_DERIVATION_DOC = `DERIVATION_PACKAGE.md` in project root
+- DEFAULT_DERIVATION_DOC = `docs/theory/DERIVATION_PACKAGE.md`
 - STATUS = `COHERENT AS STATED | COHERENT AFTER REFRAMING / EXTRA ASSUMPTION | NOT YET COHERENT`
 
 ## Context: $ARGUMENTS
@@ -49,7 +49,7 @@ If the target, object, notation, or assumptions are ambiguous, state the exact i
 Determine the target derivation file with this priority:
 1. a file path explicitly specified by the user
 2. a derivation draft already referenced in local notes
-3. `DERIVATION_PACKAGE.md` in project root as the default target
+3. `docs/theory/DERIVATION_PACKAGE.md` as the default target
 
 Read the relevant local context:
 - the chosen target derivation file, if it already exists
@@ -144,7 +144,7 @@ If the target derivation file already exists:
 - update the relevant section
 - do not blindly duplicate prior content
 
-If the user does not specify a target, default to `DERIVATION_PACKAGE.md` in project root.
+If the user does not specify a target, default to `docs/theory/DERIVATION_PACKAGE.md`.
 
 Do NOT write directly into paper sections or appendix `.tex` files unless the user explicitly asks for that target.
 

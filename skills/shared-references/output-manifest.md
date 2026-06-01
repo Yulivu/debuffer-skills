@@ -1,10 +1,12 @@
 # Output Manifest Protocol
 
-After writing any output file, append an entry to `MANIFEST.md` in the project root.
+After writing any output file, append an entry to
+`docs/project/OUTPUT_MANIFEST.md`.
 
 ## Format
 
-If `MANIFEST.md` does not exist, create it with this header:
+If `docs/project/OUTPUT_MANIFEST.md` does not exist, create it with this
+header:
 
 ```markdown
 # Research Output Manifest
@@ -38,3 +40,9 @@ Before writing output, if the skill depends on a prerequisite file from a previo
 2. If not found at the stage-scoped path, check the legacy root-level path (e.g., `./IDEA_REPORT.md`, `./AUTO_REVIEW.md`) — see [Path Fallback Rule](output-versioning.md#path-fallback-rule-backward-compatibility)
 3. If not found at either path, warn: "⚠️ Expected {file} (from {skill}) but not found. Run {skill} first?"
 4. Do not block — the user may have the file elsewhere or want to proceed anyway
+
+## Root Markdown Policy
+
+Do not create `MANIFEST.md` in the project root for new or refreshed projects.
+If a legacy root `MANIFEST.md` exists, read it as historical context and offer
+to migrate or compact it into `docs/project/OUTPUT_MANIFEST.md`.

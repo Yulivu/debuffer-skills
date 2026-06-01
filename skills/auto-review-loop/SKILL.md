@@ -108,7 +108,7 @@ Long-running loops may hit the context window limit, triggering automatic compac
 
 > Follow these shared protocols for all output files:
 > - **[Output Versioning Protocol](../shared-references/output-versioning.md)** — write timestamped file first, then copy to fixed name
-> - **[Output Manifest Protocol](../shared-references/output-manifest.md)** — log every output to MANIFEST.md
+> - **[Output Manifest Protocol](../shared-references/output-manifest.md)** — log every output to docs/project/OUTPUT_MANIFEST.md
 > - **[Output Language Protocol](../shared-references/output-language.md)** — respect the project's language setting
 
 ## Workflow
@@ -253,7 +253,7 @@ Then extract structured fields:
 
 **Skip entirely if `REVIEWER_DIFFICULTY = medium`.**
 
-After parsing the assessment, update `REVIEWER_MEMORY.md` in the project root:
+After parsing the assessment, update `review-stage/REVIEWER_MEMORY.md`:
 
 ```markdown
 # Reviewer Memory

@@ -15,8 +15,12 @@ All debuffer output files are organized by workflow stage:
 ```
 project/
 ├── AGENTS.md                              # Dashboard / agent instructions (root — read by all stages)
-├── findings.md                            # Cross-stage discovery log (root — append-only)
-├── MANIFEST.md                            # Output tracking manifest (root)
+├── PROJECT_STATUS.md                      # Macro phase status (root)
+├── docs/
+│   ├── project/
+│   │   └── OUTPUT_MANIFEST.md             # Output tracking manifest
+│   └── evidence/
+│       └── findings.md                    # Cross-stage discovery log
 │
 ├── idea-stage/                            # W1: Idea Discovery
 │   ├── IDEA_REPORT.md                     # Latest copy
@@ -60,10 +64,10 @@ Files that get overwritten on re-runs:
 
 ## What NOT to Timestamp
 
-- **Append-only files**: `findings.md`, `research-wiki/log.md` — these accumulate entries, not overwrite
+- **Append-only files**: `docs/evidence/findings.md`, `research-wiki/log.md` — these accumulate entries, not overwrite
 - **Per-round files**: `refine-logs/round_N_*.md` — already versioned by round number
 - **Dashboard**: `AGENTS.md` — single source of truth, always latest
-- **MANIFEST.md** — append-only tracking file
+- **docs/project/OUTPUT_MANIFEST.md** — append-only tracking file
 
 Never delete timestamped files. They are the permanent history.
 
@@ -87,7 +91,7 @@ Read from review-stage/REVIEW_STATE.json
 If not found → fall back to ./REVIEW_STATE.json
 ```
 
-Skills that **write** always use the stage-scoped path (never write to root). This ensures new runs migrate output forward while old projects continue to work.
+Skills that **write** always use the stage-scoped or `docs/` category path (never write extra Markdown to root). This ensures new runs migrate output forward while old projects continue to work.
 
 ## Migration for Existing Projects
 

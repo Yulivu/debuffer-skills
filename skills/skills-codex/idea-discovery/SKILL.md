@@ -65,7 +65,7 @@ lightweight idea discovery unless the user requests a full report:
 
 Before starting any other phase, check for a detailed research brief in the project:
 
-1. Look for `RESEARCH_BRIEF.md` in the project root or a path passed in `$ARGUMENTS`.
+1. Look for `docs/project/RESEARCH_BRIEF.md` or a path passed in `$ARGUMENTS`. Fall back to legacy root `RESEARCH_BRIEF.md` only for older projects.
 2. If found, read it and extract:
    - problem statement and context
    - constraints: compute, data, timeline, venue
@@ -73,7 +73,7 @@ Before starting any other phase, check for a detailed research brief in the proj
    - domain knowledge and non-goals
    - existing results, if any
 3. Use this as the primary context for all subsequent phases; it replaces the one-line prompt when more specific.
-4. If both `RESEARCH_BRIEF.md` and one-line `$ARGUMENTS` exist, merge them: the brief has priority for details, and the argument sets the direction.
+4. If both `docs/project/RESEARCH_BRIEF.md` and one-line `$ARGUMENTS` exist, merge them: the brief has priority for details, and the argument sets the direction.
 
 If no brief exists, proceed normally with `$ARGUMENTS` as the research direction.
 
@@ -340,7 +340,7 @@ sessions know what not to repeat.
 
 > Follow these shared protocols for all output files:
 > - **[Output Versioning Protocol](../../shared-references/output-versioning.md)** — write timestamped file first, then copy to fixed name
-> - **[Output Manifest Protocol](../../shared-references/output-manifest.md)** — log every output to MANIFEST.md
+> - **[Output Manifest Protocol](../../shared-references/output-manifest.md)** — log every output to docs/project/OUTPUT_MANIFEST.md
 > - **[Output Language Protocol](../../shared-references/output-language.md)** — respect the project's language setting
 
 ## Render HTML view (auto, when `RENDER_HTML = true`)

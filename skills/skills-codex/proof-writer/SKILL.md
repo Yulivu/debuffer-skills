@@ -9,7 +9,7 @@ Write a mathematically honest proof package, not a polished fake proof.
 
 ## Constants
 
-- DEFAULT_PROOF_DOC = `PROOF_PACKAGE.md` in project root
+- DEFAULT_PROOF_DOC = `docs/theory/PROOF_PACKAGE.md`
 - STATUS = `PROVABLE AS STATED | PROVABLE AFTER WEAKENING / EXTRA ASSUMPTION | NOT CURRENTLY JUSTIFIED`
 
 ## Context: $ARGUMENTS
@@ -39,7 +39,7 @@ If notation or assumptions are ambiguous, state the exact interpretation you are
 Determine the target proof file with this priority:
 1. a file path explicitly specified by the user
 2. a proof draft already referenced in local notes or theorem files
-3. `PROOF_PACKAGE.md` in project root as the default target
+3. `docs/theory/PROOF_PACKAGE.md` as the default target
 
 Read the relevant local context:
 - the chosen target proof file, if it already exists
@@ -109,7 +109,7 @@ If the target proof file already exists:
 - update the relevant claim section
 - do not blindly duplicate prior content
 
-If the user does not specify a target, default to `PROOF_PACKAGE.md` in project root.
+If the user does not specify a target, default to `docs/theory/PROOF_PACKAGE.md`.
 
 Do NOT write directly into paper sections or appendix `.tex` files unless the user explicitly asks for that target.
 

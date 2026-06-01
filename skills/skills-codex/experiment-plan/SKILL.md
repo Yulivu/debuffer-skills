@@ -27,16 +27,18 @@ without generating redundant long documents:
 - Update `PROJECT_STATUS.md` to the `experiment protocol` phase when the
   experiment story becomes stable enough for implementation planning.
 - Keep `refine-logs/EXPERIMENT_PLAN.md` as the operational roadmap. Create or
-  refresh root `EXPERIMENT_PROTOCOL.md` only when the plan is ready for
-  implementation, AutoDL smoke preparation, or formal-run freezing.
+  refresh `docs/experiments/EXPERIMENT_PROTOCOL.md` only when the plan is ready
+  for implementation, AutoDL smoke preparation, or formal-run freezing.
 - Before a formal experiment protocol or AutoDL formal-run plan, read
-  `RESEARCH_BLUEPRINT.md` and `BLUEPRINT_GATE.md` when present. If they are
-  absent and the method is stable enough for formal runs, run or request
-  `research-blueprint` first. Do not block exploratory experiment planning on a
-  missing blueprint.
+  `docs/project/RESEARCH_BLUEPRINT.md` and
+  `docs/project/BLUEPRINT_GATE.md` when present, falling back to legacy root
+  files only for old projects. If they are absent and the method is stable
+  enough for formal runs, run or request `research-blueprint` first. Do not
+  block exploratory experiment planning on a missing blueprint.
 - If the idea is still exploratory, update only compact state such as
-  `PROJECT_BRIEF.md` and `NEXT_ACTIONS.md`; do not emit `PROJECT_GUIDE.md`,
-  `EVIDENCE_LEDGER.md`, or `PAPER_GUIDE.md` unless their gates are reached.
+  `docs/project/PROJECT_BRIEF.md` and `docs/project/NEXT_ACTIONS.md`; do not
+  emit `docs/project/PROJECT_GUIDE.md`, `docs/evidence/EVIDENCE_LEDGER.md`, or
+  `docs/paper/PAPER_GUIDE.md` unless their gates are reached.
 - Also read `../shared-references/autosci-lite-patterns.md`. Before writing a
   formal run plan, scan `idea-stage/IDEA_MEMORY.md` and
   `experiments/NEGATIVE_RESULTS.md`, then add a pilot gate unless equivalent
@@ -56,8 +58,8 @@ without generating redundant long documents:
 
 Read the most relevant existing files first if they exist:
 
-- `RESEARCH_BLUEPRINT.md`
-- `BLUEPRINT_GATE.md`
+- `docs/project/RESEARCH_BLUEPRINT.md` (fall back to legacy `RESEARCH_BLUEPRINT.md`)
+- `docs/project/BLUEPRINT_GATE.md` (fall back to legacy `BLUEPRINT_GATE.md`)
 - `PROJECT_STATUS.md`
 - `refine-logs/FINAL_PROPOSAL.md`
 - `refine-logs/REVIEW_SUMMARY.md`
@@ -246,17 +248,17 @@ Use this structure:
 
 Keep the tracker compact and execution-oriented.
 
-#### Step 5.3: Refresh `EXPERIMENT_PROTOCOL.md` When Stable
+#### Step 5.3: Refresh `docs/experiments/EXPERIMENT_PROTOCOL.md` When Stable
 
 If the plan is ready for implementation, AutoDL smoke preparation, or formal
-run freezing, create or refresh root `EXPERIMENT_PROTOCOL.md` using the shared
-schema from `project-guide-protocol.md`. Keep it compact: link to
+run freezing, create or refresh `docs/experiments/EXPERIMENT_PROTOCOL.md` using
+the shared schema from `project-guide-protocol.md`. Keep it compact: link to
 `refine-logs/EXPERIMENT_PLAN.md`, list the finalized experiment blocks, and
 record the reproducibility entrypoints. Freeze it before formal AutoDL/HPC
 runs.
 
 If the plan is not stable yet, skip this file and update only
-`PROJECT_STATUS.md` plus `NEXT_ACTIONS.md`.
+`PROJECT_STATUS.md` plus `docs/project/NEXT_ACTIONS.md`.
 
 #### Step 5.4: Present a Brief Summary to the User
 
@@ -283,7 +285,7 @@ Tracker file: refine-logs/EXPERIMENT_TRACKER.md
 
 > Follow these shared protocols for all output files:
 > - **[Output Versioning Protocol](../../shared-references/output-versioning.md)** — write timestamped file first, then copy to fixed name
-> - **[Output Manifest Protocol](../../shared-references/output-manifest.md)** — log every output to MANIFEST.md
+> - **[Output Manifest Protocol](../../shared-references/output-manifest.md)** — log every output to docs/project/OUTPUT_MANIFEST.md
 > - **[Output Language Protocol](../../shared-references/output-language.md)** — respect the project's language setting
 
 ## Key Rules

@@ -14,8 +14,11 @@ This file defines the default behavior for the customized research skills.
 - External review uses prompt-only handoff by default. The skill writes a
   reviewer prompt under `review-prompts/`, the user runs a separate review
   conversation, and the current project consumes the pasted review.
-- Compact artifacts are preferred: `PROJECT_BRIEF.md`, `PROJECT_STATUS.md`,
-  `NEXT_ACTIONS.md`, `findings.md`, `EXPERIMENT_LOG.md`, and concise
+- Compact artifacts are preferred, but root Markdown stays sparse. Keep
+  `PROJECT_STATUS.md` in the root; write other project memory under `docs/`,
+  for example `docs/project/PROJECT_BRIEF.md`,
+  `docs/project/NEXT_ACTIONS.md`, `docs/evidence/findings.md`,
+  `docs/experiments/EXPERIMENT_LOG.md`, and concise category-local
   `*_SUMMARY.md` files.
 - AutoSci-lite patterns are available for idea paths, failure memory, pilot
   gates, and macro state. Read `autosci-lite-patterns.md` when a project starts
@@ -137,5 +140,8 @@ For this customized skill bundle:
 - Long generated tutorials, demo media, PDFs, and rendered artifacts belong to
   target projects with explicit user request.
 - Long project reports include a compaction plan and a stage-gate refresh path.
-  `RESEARCH_BLUEPRINT.md` is patched at major gates, not regenerated on every
-  session.
+  `docs/project/RESEARCH_BLUEPRINT.md` is patched at major gates, not
+  regenerated on every session.
+- Ordinary research repos should keep only `README.md`, `PROJECT_STATUS.md`,
+  and tool-managed `AGENTS.md` / `CLAUDE.md` in the root. Put all other
+  Markdown under categorized `docs/` folders.

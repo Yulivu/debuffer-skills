@@ -53,6 +53,12 @@ paper/                           LaTeX submission workspace and audits.
 
 Keep `research-wiki/`, `idea-stage/`, `refine-logs/`, and `paper/` in their workflow paths. Downstream skills expect these locations.
 
+Root Markdown policy for skill-managed research projects follows the ordinary
+research repo rule: keep only `README.md`, `PROJECT_STATUS.md`, and
+tool-managed `AGENTS.md` / `CLAUDE.md` in the root. Put refreshed project
+Markdown under `docs/project/`, `docs/experiments/`, `docs/evidence/`,
+`docs/paper/`, or `docs/runbooks/`. Read legacy root-level files as fallback.
+
 ## Adding A Skill
 
 When adding a new skill to a debuffer-style skill pack:
@@ -138,7 +144,9 @@ mlruns/
 checkpoints/
 ```
 
-Keep `research-wiki/`, `EXPERIMENT_PLAN.md`, `NARRATIVE_REPORT.md`, and curated paper/audit artifacts visible for explicit review before adding ignore rules; these are often intentional project memory and handoff files.
+Keep `research-wiki/`, docs-hosted experiment plans, narrative reports, and
+curated paper/audit artifacts visible for explicit review before adding ignore
+rules; these are often intentional project memory and handoff files.
 
 ## Validation Checklist
 

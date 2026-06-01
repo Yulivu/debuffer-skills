@@ -25,7 +25,7 @@
 - **AutoDL 优先**：GPU/HPC 工作准备 preflight、smoke suite、数据清单、结果回传和正式运行审批。
 - **远程命令 gate**：`ssh`、`scp`、`rsync`、`screen`、`tmux`、`nohup` 形成命令块、风险说明和审批点。
 - **评审 prompt-only**：审查类 skill 产出 `review-prompts/<scope>_review_prompt.md`，独立对话评审，当前对话整理反馈和行动项。
-- **文档紧凑**：维护 `PROJECT_STATUS.md`、`PROJECT_BRIEF.md`、`NEXT_ACTIONS.md`、`findings.md`、`EXPERIMENT_LOG.md`；关键阶段门刷新 `RESEARCH_BLUEPRINT.md`、`BLUEPRINT_GATE.md` 或 `PROJECT_GUIDE.md`。
+- **文档紧凑**：普通科研 repo 根目录只保留 `README.md`、`PROJECT_STATUS.md` 和工具托管的 `AGENTS.md` / `CLAUDE.md`；其他 Markdown 写入 `docs/project/`、`docs/experiments/`、`docs/evidence/`、`docs/paper/`、`docs/theory/` 等分类目录，输出清单写入 `docs/project/OUTPUT_MANIFEST.md`。
 - **AutoSci-lite**：使用 A-E idea 路径、`idea-stage/IDEA_MEMORY.md`、`experiments/NEGATIVE_RESULTS.md`、pilot gate 和明确宏观状态机。
 - **证据边界**：smoke 表示工程可跑；论文证据来自 `experiments/runs/` 经审计后的 `experiments/results/`。
 
@@ -46,7 +46,7 @@
 Current phase: experiment protocol
 Startup mode: reference-codebase
 Target venue: JMLR
-Last accepted artifact: PROJECT_BRIEF.md
+Last accepted artifact: docs/project/PROJECT_BRIEF.md
 Next gate: AutoDL smoke readiness
 Map: direction -> idea -> method -> repo scaffold -> [experiment protocol] -> local smoke -> AutoDL smoke -> formal runs -> evidence audit -> paper plan -> manuscript -> submission
 Blockers: ...

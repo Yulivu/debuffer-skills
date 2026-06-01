@@ -88,14 +88,16 @@ Stop iterating when:
 - The narrative structure is settled
 
 ### Step 5: Document Everything
-Save the full interaction and conclusions to a review document in the project root:
+Save the full interaction and conclusions to a review document under
+`review-stage/`:
 - Round-by-round summary of criticisms and responses
 - Final consensus on claims, narrative, and experiments
 - Claims matrix (what claims are allowed under each possible outcome)
 - Prioritized TODO list with estimated compute costs
 - Paper outline if discussed
 
-Update project memory/notes with key review conclusions.
+Update project memory/notes with key review conclusions, using
+`docs/project/NEXT_ACTIONS.md` for follow-up work when needed.
 
 ## Key Rules
 

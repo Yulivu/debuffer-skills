@@ -22,9 +22,17 @@ when available. Default to a lightweight, AutoDL-first shape:
   and formal-run approval.
 - Read `../shared-references/project-guide-protocol.md` when creating project
   memory. Keep `PROJECT_STATUS.md` current so future sessions know the macro
-  phase; prefer `PROJECT_BRIEF.md`, `NEXT_ACTIONS.md`, `findings.md`, and
-  `EXPERIMENT_LOG.md`; create or refresh `RESEARCH_BLUEPRINT.md`,
-  `BLUEPRINT_GATE.md`, or `PROJECT_GUIDE.md` only at stage gates.
+  phase; keep other Markdown project memory under `docs/` category
+  directories, such as `docs/project/PROJECT_BRIEF.md`,
+  `docs/project/NEXT_ACTIONS.md`, `docs/evidence/findings.md`, and
+  `docs/experiments/EXPERIMENT_LOG.md`; create or refresh
+  `docs/project/RESEARCH_BLUEPRINT.md`, `docs/project/BLUEPRINT_GATE.md`, or
+  `docs/project/PROJECT_GUIDE.md` only at stage gates.
+- Enforce root Markdown hygiene for ordinary research repos: root `.md` files
+  are limited to `README.md`, `PROJECT_STATUS.md`, and tool-managed
+  `AGENTS.md` / `CLAUDE.md` when present. Put all other Markdown under `docs/`
+  with a category directory. Read legacy root files when they already exist,
+  but write new or refreshed artifacts to `docs/`.
 - Read `../shared-references/autosci-lite-patterns.md` when scaffolding idea
   discovery, failure memory, pilot gates, or the macro state machine.
 - For external review, create `review-prompts/` rather than wiring direct API,
@@ -39,9 +47,9 @@ Start by deciding which path applies:
 - **skill framework or skill repo**: Preserve the `skills/`, `skills/skills-codex/`, `skills/shared-references/`, `tools/`, `templates/`, `docs/`, `tests/`, and `mcp-servers/` contracts instead of forcing everything into `src/` and `scripts/`.
 - **skill-managed research project**: Combine the SpectralStore experiment layout with skill runtime artifacts such as `research-wiki/`, `idea-stage/`, `refine-logs/`, `review-stage/`, `paper/`, and `.debuffer_skills/`.
 - **research blueprint handoff**: When a stable method is about to become a
-  formal experiment protocol or paper plan, preserve `RESEARCH_BLUEPRINT.md`
-  and `BLUEPRINT_GATE.md` as tracked project memory instead of burying the
-  decisions in terminal logs.
+  formal experiment protocol or paper plan, preserve
+  `docs/project/RESEARCH_BLUEPRINT.md` and `docs/project/BLUEPRINT_GATE.md` as
+  tracked project memory instead of burying the decisions in terminal logs.
 - **AutoDL/HPC-ready research project**: Add target-machine setup, preflight, smoke, result-transfer, and formal-run approval boundaries without weakening source/config/run/result separation.
 - **Lightweight project start**: When materials are sparse, create only the
   minimal brief, plan, architecture, and next-action files needed for the current
@@ -68,26 +76,31 @@ For detailed directory rules, read `references/architecture.md`. For skill-pack-
    - `scripts/hpc/` for preflight, cluster wrappers, and machine-specific helpers.
 5. Put hand-written configs under `experiments/configs/` and suite definitions under `experiments/suites/`. New run outputs must go under `experiments/runs/`, not `experiments/results/`.
 6. Add a short root `README.md` for installation, smoke checks, data, and reproduction commands. Use `docs/` for internal runbooks and maintenance notes.
-7. Add a conservative `.gitignore` so raw data, generated runs, caches, model checkpoints, and large binary artifacts are not tracked.
-8. If the repo uses project-local skills, keep skill runtime state out of Git by default: `.debuffer_skills/traces/`, `.debuffer_skills/cache/`, `.debuffer_skills/runs/`, `.debuffer_skills/meta/events.jsonl`, and project-local `.agents/skills/` symlinks.
-9. Keep compact project memory tracked when it exists: `idea-stage/IDEA_MEMORY.md` and `experiments/NEGATIVE_RESULTS.md` are decision memory, not runtime traces.
+7. Create `docs/project/`, `docs/experiments/`, `docs/evidence/`,
+   `docs/paper/`, `docs/theory/`, and `docs/runbooks/` as needed. Do not scatter Markdown
+   files in the repo root beyond the allowlist.
+8. Add a conservative `.gitignore` so raw data, generated runs, caches, model checkpoints, and large binary artifacts are not tracked.
+9. If the repo uses project-local skills, keep skill runtime state out of Git by default: `.debuffer_skills/traces/`, `.debuffer_skills/cache/`, `.debuffer_skills/runs/`, `.debuffer_skills/meta/events.jsonl`, and project-local `.agents/skills/` symlinks.
+10. Keep compact project memory tracked when it exists: `idea-stage/IDEA_MEMORY.md` and `experiments/NEGATIVE_RESULTS.md` are decision memory, not runtime traces.
 
 ## Startup Mode Scaffolds
 
-- `venue-only`: create `PROJECT_BRIEF.md`, `NEXT_ACTIONS.md`, a concise
+- `venue-only`: create `docs/project/PROJECT_BRIEF.md`,
+  `docs/project/NEXT_ACTIONS.md`, a concise
   venue-risk checklist, and optional `review-prompts/venue_direction_review_prompt.md`.
 - `reference-paper`: add `references/` or `docs/literature/` notes, a claim map,
   and a reproduction/extension plan before writing experiment code.
 - `reference-codebase`: first audit the upstream repo, license, entrypoints,
   environment, and tests; add wrapper scripts instead of modifying upstream code
   blindly.
-- `idea-doc`: preserve the original idea doc, extract assumptions into
-  `PROJECT_BRIEF.md`, and write the smallest falsifiable validation plan.
+- `idea-doc`: preserve the original idea doc under `docs/project/` or
+  `docs/ideas/`, extract assumptions into `docs/project/PROJECT_BRIEF.md`, and
+  write the smallest falsifiable validation plan.
 - `existing-repo`: run the migration workflow; avoid overwriting existing data,
   results, notebooks, or user notes.
 - `partial-results`: inventory logs/figures/tables first, write
-  `findings.md` and `EXPERIMENT_LOG.md`, then backfill missing configs or audit
-  scripts.
+  `docs/evidence/findings.md` and `docs/experiments/EXPERIMENT_LOG.md`, then
+  backfill missing configs or audit scripts.
 
 For every startup mode, create or update `PROJECT_STATUS.md` with the current
 macro phase, target venue, last accepted artifact, next gate, blockers, and the
@@ -109,7 +122,7 @@ long-lived knowledge base.
    - Use `rg --files` to inventory code, notebooks, scripts, configs, data, and outputs.
    - Read package/build files and the main run scripts.
 2. Classify every important file into one of these destinations: `src/`, `scripts/`, `experiments/configs/`, `experiments/suites/`, `experiments/runs/`, `experiments/results/`, `experiments/visualizations/`, `data/`, `docs/`, or archive.
-3. Present or record a migration map before moving files when the repo is large or risky. Preserve user changes and do not delete old locations until imports, commands, and tests pass.
+3. Present or record a migration map before moving files when the repo is large or risky. Include root Markdown cleanup: keep only the allowlist in root, move other Markdown into `docs/project/`, `docs/experiments/`, `docs/evidence/`, `docs/paper/`, `docs/theory/`, `docs/runbooks/`, or `docs/archive/`. Preserve user changes and do not delete old locations until imports, commands, and tests pass.
 4. Move in phases:
    - Package reusable code into `src/<package_name>/`.
    - Convert ad hoc scripts into thin CLI entrypoints.
@@ -150,9 +163,15 @@ Pop-Location
 Use this path when a normal research project is being operated by skill workflows.
 
 - Keep reusable implementation in `src/<package_name>/` and experiment runners in `scripts/` as usual.
-- Keep skill handoff artifacts where downstream skills expect them unless the user asks for a breaking migration: `RESEARCH_BRIEF.md`, `EXPERIMENT_PLAN.md`, `NARRATIVE_REPORT.md`, `idea-stage/`, `refine-logs/`, `review-stage/`, `paper/`, and `research-wiki/`.
-- Keep blueprint artifacts at the project root when present:
-  `RESEARCH_BLUEPRINT.md` and `BLUEPRINT_GATE.md`.
+- Keep skill handoff directories where downstream skills expect them unless the
+  user asks for a breaking migration: `idea-stage/`, `refine-logs/`,
+  `review-stage/`, `paper/`, and `research-wiki/`.
+- Place Markdown handoff artifacts under `docs/` when creating or refreshing
+  them: `docs/project/RESEARCH_BRIEF.md`,
+  `docs/experiments/EXPERIMENT_PLAN.md`, `docs/paper/NARRATIVE_REPORT.md`,
+  `docs/project/RESEARCH_BLUEPRINT.md`, and
+  `docs/project/BLUEPRINT_GATE.md`. Read legacy root-level versions as
+  fallback only.
 - Treat `.debuffer_skills/` as runtime state. Keep traces, caches, wakeup state, and local skill symlinks out of Git unless the project explicitly wants reproducible agent provenance.
 - If `research-wiki/` exists, preserve it as persistent project memory. Do not move it under `docs/` or `experiments/`.
 - Experiment outputs still go under `experiments/runs/`; curated tables and figures still go under `experiments/results/` and `experiments/visualizations/`.

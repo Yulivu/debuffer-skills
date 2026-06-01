@@ -26,12 +26,15 @@ autonomous settings below unless the user explicitly asks for legacy automation:
 - **LOCAL_HEAVY_COMPUTE = false**, **DEPLOY_TARGET = autodl**: local work is
   limited to edits, lint/tests, dry runs, and tiny smoke checks. Heavy training
   or sweeps must be prepared through `/autodl-hpc` with approval gates.
-- **AUTO_WRITE = false** remains the default. Produce compact `PROJECT_BRIEF.md`,
-  `findings.md`, `EXPERIMENT_LOG.md`, and `NEXT_ACTIONS.md`; create
-  `NARRATIVE_REPORT.md` only when paper writing needs it or the user asks.
+- **AUTO_WRITE = false** remains the default. Produce compact
+  `docs/project/PROJECT_BRIEF.md`, `docs/evidence/findings.md`,
+  `docs/experiments/EXPERIMENT_LOG.md`, and
+  `docs/project/NEXT_ACTIONS.md`; create `docs/paper/NARRATIVE_REPORT.md` only
+  when paper writing needs it or the user asks.
 - **BLUEPRINT_GATE = required at handoffs**: before formal experiment planning,
   AutoDL formal runs, or paper planning, create or refresh
-  `RESEARCH_BLUEPRINT.md` and `BLUEPRINT_GATE.md` via `/research-blueprint`.
+  `docs/project/RESEARCH_BLUEPRINT.md` and
+  `docs/project/BLUEPRINT_GATE.md` via `/research-blueprint`.
   Keep routine updates compact.
 
 For venue-specific review and writing, read
@@ -40,10 +43,11 @@ For venue-specific review and writing, read
 
 Read `../shared-references/project-guide-protocol.md` when the user wants a
 project-wide guide or when crossing a stage gate. Keep `PROJECT_STATUS.md`
-updated after each accepted stage. Generate `PROJECT_GUIDE.md`,
-`RESEARCH_BLUEPRINT.md`, `BLUEPRINT_GATE.md`, `EXPERIMENT_PROTOCOL.md`,
-`EVIDENCE_LEDGER.md`, or `PAPER_GUIDE.md` only when their gate conditions are
-met; otherwise update compact memory files.
+updated after each accepted stage. Generate `docs/project/PROJECT_GUIDE.md`,
+`docs/project/RESEARCH_BLUEPRINT.md`, `docs/project/BLUEPRINT_GATE.md`,
+`docs/experiments/EXPERIMENT_PROTOCOL.md`,
+`docs/evidence/EVIDENCE_LEDGER.md`, or `docs/paper/PAPER_GUIDE.md` only when
+their gate conditions are met; otherwise update compact memory files.
 
 ## Constants
 
@@ -54,9 +58,9 @@ met; otherwise update compact memory files.
 - **CODE_REVIEW = true** — GPT-5.4 xhigh reviews experiment code before deployment. Catches logic bugs before wasting GPU hours. Set `false` to skip. Passed through to `/experiment-bridge`.
 - **BASE_REPO = false** — GitHub repo URL to use as base codebase. When set, `/experiment-bridge` clones the repo first and implements experiments on top of it. When `false` (default), writes code from scratch or reuses existing project files. Passed through to `/experiment-bridge`.
 - **COMPACT = false** — When `true`, generates compact summary files for short-context models and session recovery. Passed through to `/idea-discovery` and `/experiment-bridge`.
-- **AUTO_WRITE = false** — When `true`, automatically invoke Workflow 3 (`/paper-writing`) after Stage 4. Requires `VENUE` to be set. When `false` (default), Stage 4 generates `NARRATIVE_REPORT.md` and stops — user invokes `/paper-writing` manually.
+- **AUTO_WRITE = false** — When `true`, automatically invoke Workflow 3 (`/paper-writing`) after Stage 4. Requires `VENUE` to be set. When `false` (default), Stage 4 generates `docs/paper/NARRATIVE_REPORT.md` and stops — user invokes `/paper-writing` manually.
 - **VENUE = ICLR** — Target venue for paper writing (Stage 5). Only used when `AUTO_WRITE=true`. Options: `ICLR`, `NeurIPS`, `ICML`, `CVPR`, `ACL`, `AAAI`, `ACM`, `IEEE_CONF`, `IEEE_JOURNAL`.
-- **RENDER_HTML = true** — When `true` (default), auto-render `NARRATIVE_REPORT.md` to HTML at Stage 4 completion via `/render-html`. Uses `--no-review` (this is an internal handoff doc to `/paper-writing`, not a reviewer-facing final artifact — the upstream Stage 3 auto-review loop already cross-model-reviewed the claims). Set `false` to skip, or pass `— render html: false`. **Non-blocking**: if `/render-html` fails or Codex MCP is unavailable, log the failure and continue — the HTML view is a nice-to-have, not a Stage 4 prerequisite.
+- **RENDER_HTML = true** — When `true` (default), auto-render `docs/paper/NARRATIVE_REPORT.md` to HTML at Stage 4 completion via `/render-html`. Uses `--no-review` (this is an internal handoff doc to `/paper-writing`, not a reviewer-facing final artifact — the upstream Stage 3 auto-review loop already cross-model-reviewed the claims). Set `false` to skip, or pass `— render html: false`. **Non-blocking**: if `/render-html` fails or Codex MCP is unavailable, log the failure and continue — the HTML view is a nice-to-have, not a Stage 4 prerequisite.
 
 > 💡 Override via argument, e.g., `/research-pipeline "topic" — AUTO_PROCEED: false, human checkpoint: true, difficulty: nightmare, code review: false, base repo: https://github.com/org/project, auto_write: true, venue: NeurIPS`.
 
@@ -76,7 +80,7 @@ It orchestrates four major workflows plus a blueprint stage gate. Workflow 3
 
 ### Stage 1: Idea Discovery (Workflow 1)
 
-If `RESEARCH_BRIEF.md` exists in the project root, it will be automatically loaded as detailed context (replaces one-line prompt). See `templates/RESEARCH_BRIEF_TEMPLATE.md`.
+If `docs/project/RESEARCH_BRIEF.md` exists, load it as detailed context (replaces one-line prompt). Fall back to legacy root `RESEARCH_BRIEF.md` only for older projects. See `templates/RESEARCH_BRIEF_TEMPLATE.md`.
 
 Invoke the idea discovery pipeline:
 
@@ -118,10 +122,11 @@ Recommended: Idea 1. Shall I proceed with implementation?
 
 When the user commits to an idea or stable method, run `/research-blueprint`
 before implementation or formal experiment planning. It writes
-`RESEARCH_BLUEPRINT.md` with the sequential overall progress table and
-`BLUEPRINT_GATE.md` with PASS / CONDITIONAL / BLOCKED. Continue only to the
+`docs/project/RESEARCH_BLUEPRINT.md` with the sequential overall progress table and
+`docs/project/BLUEPRINT_GATE.md` with PASS / CONDITIONAL / BLOCKED. Continue only to the
 allowed next step recorded in the gate. If the idea is still exploratory, keep
-using `PROJECT_BRIEF.md`, `PROJECT_STATUS.md`, and `NEXT_ACTIONS.md` instead of
+using `docs/project/PROJECT_BRIEF.md`, `PROJECT_STATUS.md`, and
+`docs/project/NEXT_ACTIONS.md` instead of
 creating the large blueprint.
 
 ### Stage 2: Experiment Bridge (Workflow 1.5)
@@ -146,7 +151,7 @@ Once the user confirms which idea to pursue, delegate implementation and deploym
 **Output:**
 - `refine-logs/EXPERIMENT_RESULTS.md` — structured results by milestone
 - `refine-logs/EXPERIMENT_TRACKER.md` — updated run-by-run status
-- `EXPERIMENT_LOG.md` (when `COMPACT=true`) — session-recovery-friendly log
+- `docs/experiments/EXPERIMENT_LOG.md` (when `COMPACT=true`) — session-recovery-friendly log
 
 **Monitor progress** (while experiments run):
 
@@ -178,7 +183,7 @@ After the auto-review loop completes, prepare the handoff for paper writing.
 
 **Step 1:** Write a final research status report (same as before).
 
-**Step 2:** Generate `NARRATIVE_REPORT.md` from:
+**Step 2:** Generate `docs/paper/NARRATIVE_REPORT.md` from:
 - `IDEA_REPORT.md` (chosen idea, hypothesis, novelty justification)
 - Implementation details from the repo
 - Experiment configs and final results
@@ -191,7 +196,7 @@ The narrative report must contain:
 - Figure/table inventory (which exist, which need manual creation)
 - Limitations and remaining follow-up items
 
-**Output:** `NARRATIVE_REPORT.md` + research pipeline report.
+**Output:** `docs/paper/NARRATIVE_REPORT.md` + research pipeline report.
 
 ```markdown
 # Research Pipeline Report
@@ -208,7 +213,7 @@ The narrative report must contain:
 - Review rounds: N/4, final score: X/10
 
 ## Writing Handoff
-- NARRATIVE_REPORT.md: ✅ generated
+- docs/paper/NARRATIVE_REPORT.md: generated
 - Venue: [VENUE or "not set — run /paper-writing manually"]
 - Manual figures needed: [list or "none"]
 
@@ -224,7 +229,7 @@ This is the **Stage 6: Paper Writing** handoff in the broader research lifecycle
 
 ```
 📝 Research complete. To write the paper:
-/paper-writing "NARRATIVE_REPORT.md" — venue: ICLR
+/paper-writing "docs/paper/NARRATIVE_REPORT.md" — venue: ICLR
 ```
 
 **If `AUTO_WRITE=true`:**
@@ -235,9 +240,9 @@ This is the **Stage 6: Paper Writing** handoff in the broader research lifecycle
 📝 Research pipeline complete. Ready for Workflow 3.
 
 - Venue: [VENUE]
-- Input: NARRATIVE_REPORT.md
+- Input: docs/paper/NARRATIVE_REPORT.md
 - Manual figures required: [list or none]
-- Next step: /paper-writing "NARRATIVE_REPORT.md — venue: [VENUE]"
+- Next step: /paper-writing "docs/paper/NARRATIVE_REPORT.md — venue: [VENUE]"
 
 Proceeding with paper writing...
 ```
@@ -249,7 +254,7 @@ Checks before proceeding:
 Then invoke:
 
 ```
-/paper-writing "NARRATIVE_REPORT.md" — venue: $VENUE
+/paper-writing "docs/paper/NARRATIVE_REPORT.md" — venue: $VENUE
 ```
 
 This delegates to Workflow 3 which handles its own phases:
@@ -265,10 +270,10 @@ When Workflow 3 finishes, update the pipeline report with:
 
 ## Render HTML view (auto, when `RENDER_HTML = true`)
 
-After Stage 4 finalizes `NARRATIVE_REPORT.md` (before paper writing branches), invoke `/render-html` on the narrative report:
+After Stage 4 finalizes `docs/paper/NARRATIVE_REPORT.md` (before paper writing branches), invoke `/render-html` on the narrative report:
 
 ```
-/render-html "NARRATIVE_REPORT.md" --no-review
+/render-html "docs/paper/NARRATIVE_REPORT.md" --no-review
 ```
 
 `--no-review` is intentional: this is an internal handoff doc, not reviewer-facing — the claims it summarizes were already cross-model-reviewed in Stage 3's `/auto-review-loop`. Output: `NARRATIVE_REPORT.html` next to the MD, with embedded source SHA256.
@@ -281,7 +286,7 @@ Skip this step if `RENDER_HTML = false`.
 
 > Follow these shared protocols for all output files:
 > - **[Output Versioning Protocol](../shared-references/output-versioning.md)** — write timestamped file first, then copy to fixed name
-> - **[Output Manifest Protocol](../shared-references/output-manifest.md)** — log every output to MANIFEST.md
+> - **[Output Manifest Protocol](../shared-references/output-manifest.md)** — log every output to docs/project/OUTPUT_MANIFEST.md
 > - **[Output Language Protocol](../shared-references/output-language.md)** — respect the project's language setting
 
 ## Key Rules

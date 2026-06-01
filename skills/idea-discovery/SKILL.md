@@ -67,7 +67,7 @@ lightweight idea discovery unless the user requests a full report:
 
 Before starting any other phase, check for a detailed research brief in the project:
 
-1. Look for `RESEARCH_BRIEF.md` in the project root (or path passed as `$ARGUMENTS`)
+1. Look for `docs/project/RESEARCH_BRIEF.md` (or a path passed as `$ARGUMENTS`). Fall back to legacy root `RESEARCH_BRIEF.md` only for older projects.
 2. If found, read it and extract:
    - Problem statement and context
    - Constraints (compute, data, timeline, venue)
@@ -75,11 +75,11 @@ Before starting any other phase, check for a detailed research brief in the proj
    - Domain knowledge and non-goals
    - Existing results (if any)
 3. Use this as the primary context for all subsequent phases — it replaces the one-line prompt
-4. If both `RESEARCH_BRIEF.md` and a one-line `$ARGUMENTS` exist, merge them (brief takes priority for details, argument sets the direction)
+4. If both `docs/project/RESEARCH_BRIEF.md` and a one-line `$ARGUMENTS` exist, merge them (brief takes priority for details, argument sets the direction)
 
 If no brief exists, proceed normally with `$ARGUMENTS` as the research direction.
 
-> 💡 Create a brief from the template: `cp templates/RESEARCH_BRIEF_TEMPLATE.md RESEARCH_BRIEF.md`
+> 💡 Create a brief from the template at `docs/project/RESEARCH_BRIEF.md`.
 
 ### Phase 0.5: Reference Paper Summary (when REF_PAPER is set)
 
@@ -352,7 +352,7 @@ sessions know what not to repeat.
 
 > Follow these shared protocols for all output files:
 > - **[Output Versioning Protocol](../shared-references/output-versioning.md)** — write timestamped file first, then copy to fixed name
-> - **[Output Manifest Protocol](../shared-references/output-manifest.md)** — log every output to MANIFEST.md
+> - **[Output Manifest Protocol](../shared-references/output-manifest.md)** — log every output to docs/project/OUTPUT_MANIFEST.md
 > - **[Output Language Protocol](../shared-references/output-language.md)** — respect the project's language setting
 
 ## Render HTML view (auto, when `RENDER_HTML = true`)

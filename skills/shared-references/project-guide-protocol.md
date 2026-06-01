@@ -12,29 +12,40 @@ Maintain these compact files whenever the project is active:
 - `PROJECT_STATUS.md`: current macro phase, startup mode, target venue, last
   accepted artifact, next gate, blockers, and a one-line phase map with a
   current-position marker.
-- `PROJECT_BRIEF.md`: stable problem framing, assumptions, method sketch, and
-  venue constraints.
-- `NEXT_ACTIONS.md`: the next 3-7 concrete actions, with owner/context and the
-  gate they unblock.
+- `docs/project/PROJECT_BRIEF.md`: stable problem framing, assumptions, method
+  sketch, and venue constraints.
+- `docs/project/NEXT_ACTIONS.md`: the next 3-7 concrete actions, with
+  owner/context and the gate they unblock.
+
+Root Markdown policy for research projects:
+
+- Keep root `.md` files to the allowlist: `README.md`, `PROJECT_STATUS.md`, and
+  tool-managed `AGENTS.md` / `CLAUDE.md` when required.
+- Skill-pack repos may also keep their required root agent guide if their
+  inventory contract requires it.
+- Put every other Markdown artifact under `docs/` with a category directory.
+- When reading old projects, fall back to legacy root paths; when writing new
+  or refreshed artifacts, use the `docs/` path.
 
 Create larger guide documents only at stage gates:
 
-- `RESEARCH_BLUEPRINT.md`: create or substantially refresh when the project is
-  ready to move into formal experiment planning, AutoDL/HPC formal runs, or
-  paper planning and needs a rigorous whole-project design.
-- `BLUEPRINT_GATE.md`: create with `RESEARCH_BLUEPRINT.md`; record
+- `docs/project/RESEARCH_BLUEPRINT.md`: create or substantially refresh when
+  the project is ready to move into formal experiment planning, AutoDL/HPC
+  formal runs, or paper planning and needs a rigorous whole-project design.
+- `docs/project/BLUEPRINT_GATE.md`: create with `RESEARCH_BLUEPRINT.md`; record
   PASS / CONDITIONAL / BLOCKED for the next allowed stage.
-- `PROJECT_GUIDE.md`: create or substantially refresh when the project has a
-  stable idea/method and needs a lighter coherent project guide. If
-  `RESEARCH_BLUEPRINT.md` exists, treat it as the stricter source and avoid
+- `docs/project/PROJECT_GUIDE.md`: create or substantially refresh when the
+  project has a stable idea/method and needs a lighter coherent project guide.
+  If `RESEARCH_BLUEPRINT.md` exists, treat it as the stricter source and avoid
   duplicating a second long whole-project guide.
-- `EXPERIMENT_PROTOCOL.md`: create before implementation or formal runs, and
-  freeze before AutoDL/HPC formal execution.
-- `EVIDENCE_LEDGER.md`: create after results exist, mapping claims to raw run
-  folders, metrics, figures, tables, and unresolved evidence gaps.
-- `PAPER_GUIDE.md`: create before manuscript writing, usually by compacting
-  `RESEARCH_BLUEPRINT.md` or `PROJECT_GUIDE.md`, `EXPERIMENT_PROTOCOL.md`,
-  and `EVIDENCE_LEDGER.md`.
+- `docs/experiments/EXPERIMENT_PROTOCOL.md`: create before implementation or
+  formal runs, and freeze before AutoDL/HPC formal execution.
+- `docs/evidence/EVIDENCE_LEDGER.md`: create after results exist, mapping
+  claims to raw run folders, metrics, figures, tables, and unresolved evidence
+  gaps.
+- `docs/paper/PAPER_GUIDE.md`: create before manuscript writing, usually by
+  compacting `RESEARCH_BLUEPRINT.md` or `PROJECT_GUIDE.md`,
+  `EXPERIMENT_PROTOCOL.md`, and `EVIDENCE_LEDGER.md`.
 
 ## Macro Phases
 
@@ -60,7 +71,8 @@ artifact, next gate, blockers, and the phase map with the current phase marked.
 
 ## RESEARCH_BLUEPRINT.md Gate
 
-Generate or refresh `RESEARCH_BLUEPRINT.md` only at important handoffs:
+Generate or refresh `docs/project/RESEARCH_BLUEPRINT.md` only at important
+handoffs:
 
 - before a stable method becomes a formal experiment protocol;
 - before AutoDL/HPC formal suites are prepared or approved;
@@ -68,9 +80,10 @@ Generate or refresh `RESEARCH_BLUEPRINT.md` only at important handoffs:
 - when the user explicitly asks for a detailed research blueprint.
 
 Do not use this artifact for routine status updates. Patch and compact an
-existing `RESEARCH_BLUEPRINT.md` instead of creating another long report.
+existing `docs/project/RESEARCH_BLUEPRINT.md` instead of creating another long
+report.
 
-`RESEARCH_BLUEPRINT.md` must start with:
+`docs/project/RESEARCH_BLUEPRINT.md` must start with:
 
 ```markdown
 ## 0. 总体进度表
@@ -90,13 +103,13 @@ claim-to-evidence-to-experiment mapping, detailed experiments, AutoDL/HPC
 execution, implementation/repo structure, reproducibility, paper prerequisites,
 risks, and the next gate.
 
-`BLUEPRINT_GATE.md` is the compact decision companion. It should say whether
-the next allowed step is `research-refine`, `experiment-plan`, `autodl-hpc`,
-`paper-plan`, or stop.
+`docs/project/BLUEPRINT_GATE.md` is the compact decision companion. It should
+say whether the next allowed step is `research-refine`, `experiment-plan`,
+`autodl-hpc`, `paper-plan`, or stop.
 
 ## PROJECT_GUIDE.md Gate
 
-Generate or refresh `PROJECT_GUIDE.md` when at least one is true:
+Generate or refresh `docs/project/PROJECT_GUIDE.md` when at least one is true:
 
 - the idea/method is stable enough that implementation choices matter;
 - the project is moving from exploration into experiment planning;
@@ -104,10 +117,12 @@ Generate or refresh `PROJECT_GUIDE.md` when at least one is true:
 - a future session needs enough context to resume without rereading long notes.
 
 Do not generate it for a vague `venue-only` start unless the user asks. In early
-stages, use `PROJECT_BRIEF.md` plus `NEXT_ACTIONS.md`.
+stages, use `docs/project/PROJECT_BRIEF.md` plus
+`docs/project/NEXT_ACTIONS.md`.
 
-If `RESEARCH_BLUEPRINT.md` is present, keep `PROJECT_GUIDE.md` short or skip it.
-The blueprint is the detailed source for formal experiment and paper gates.
+If `docs/project/RESEARCH_BLUEPRINT.md` is present, keep
+`docs/project/PROJECT_GUIDE.md` short or skip it. The blueprint is the detailed
+source for formal experiment and paper gates.
 
 Recommended `PROJECT_GUIDE.md` sections:
 
@@ -123,7 +138,7 @@ Recommended `PROJECT_GUIDE.md` sections:
 
 ## Experiment Protocol Schema
 
-Every experiment block in `EXPERIMENT_PROTOCOL.md` or
+Every experiment block in `docs/experiments/EXPERIMENT_PROTOCOL.md` or
 `refine-logs/EXPERIMENT_PLAN.md` should use this schema:
 
 - **Goal**: what claim or risk this experiment tests.
@@ -165,12 +180,14 @@ download, and local audit before claims are updated.
 When long notes accumulate, merge stable information into the smallest durable
 artifact:
 
-- stable framing -> `PROJECT_BRIEF.md`;
+- stable framing -> `docs/project/PROJECT_BRIEF.md`;
 - current phase and blockers -> `PROJECT_STATUS.md`;
-- detailed stage-gate design -> `RESEARCH_BLUEPRINT.md` plus
-  `BLUEPRINT_GATE.md`;
-- experiment facts -> `EXPERIMENT_PROTOCOL.md` or `EXPERIMENT_LOG.md`;
-- result-to-claim mapping -> `EVIDENCE_LEDGER.md` or `findings.md`;
-- manuscript decisions -> `PAPER_GUIDE.md`.
+- detailed stage-gate design -> `docs/project/RESEARCH_BLUEPRINT.md` plus
+  `docs/project/BLUEPRINT_GATE.md`;
+- experiment facts -> `docs/experiments/EXPERIMENT_PROTOCOL.md` or
+  `docs/experiments/EXPERIMENT_LOG.md`;
+- result-to-claim mapping -> `docs/evidence/EVIDENCE_LEDGER.md` or
+  `docs/evidence/findings.md`;
+- manuscript decisions -> `docs/paper/PAPER_GUIDE.md`.
 
 Do not append another long report when an existing guide can be updated.

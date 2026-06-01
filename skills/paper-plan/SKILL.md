@@ -18,24 +18,28 @@ Read `../shared-references/lightweight-research-pack.md`,
 - **TARGET_VENUE** supports `ICLR`, `AAAI`, `JMLR`, `TPAMI`, `NeurIPS`, `ICML`,
   and existing legacy venue labels. Apply the target venue profile before
   freezing claims, evidence, and section order.
-- Prefer compact inputs (`PROJECT_STATUS.md`, `PROJECT_BRIEF.md`,
-  `BLUEPRINT_GATE.md`, `PAPER_GUIDE.md`, `EVIDENCE_LEDGER.md`,
-  `EXPERIMENT_PROTOCOL.md`, `findings.md`, `EXPERIMENT_LOG.md`,
-  `CLAIMS_FROM_RESULTS.md`, `idea-stage/IDEA_CANDIDATES.md`) before reading
-  long reports. Read `RESEARCH_BLUEPRINT.md` before freezing the outline when
-  it exists.
-- Generate a concise `PAPER_PLAN.md` by default: title candidates, abstract
-  skeleton, claims-evidence matrix, section outline, figure/table inventory,
-  missing-evidence list, and venue risks.
+- Prefer compact inputs (`PROJECT_STATUS.md`, `docs/project/PROJECT_BRIEF.md`,
+  `docs/project/BLUEPRINT_GATE.md`, `docs/paper/PAPER_GUIDE.md`,
+  `docs/evidence/EVIDENCE_LEDGER.md`,
+  `docs/experiments/EXPERIMENT_PROTOCOL.md`, `docs/evidence/findings.md`,
+  `docs/experiments/EXPERIMENT_LOG.md`, `CLAIMS_FROM_RESULTS.md`,
+  `idea-stage/IDEA_CANDIDATES.md`) before reading long reports. Read
+  `docs/project/RESEARCH_BLUEPRINT.md` before freezing the outline when it
+  exists. Fall back to legacy root Markdown paths only when reading old
+  projects.
+- Generate a concise `docs/paper/PAPER_PLAN.md` by default: title candidates,
+  abstract skeleton, claims-evidence matrix, section outline, figure/table
+  inventory, missing-evidence list, and venue risks.
 - When moving from evidence audit to outline work, update `PROJECT_STATUS.md`
-  to `paper plan`. Create or refresh `PAPER_GUIDE.md` only when the manuscript
-  gate is reached, compacting `RESEARCH_BLUEPRINT.md` or `PROJECT_GUIDE.md`,
-  `EXPERIMENT_PROTOCOL.md`, and `EVIDENCE_LEDGER.md` instead of duplicating
-  them.
+  to `paper plan`. Create or refresh `docs/paper/PAPER_GUIDE.md` only when the
+  manuscript gate is reached, compacting
+  `docs/project/RESEARCH_BLUEPRINT.md` or `docs/project/PROJECT_GUIDE.md`,
+  `docs/experiments/EXPERIMENT_PROTOCOL.md`, and
+  `docs/evidence/EVIDENCE_LEDGER.md` instead of duplicating them.
 - For outline review, write `review-prompts/paper_plan_review_prompt.md` and
   wait for pasted feedback. Do not call reviewer MCP/API backends by default.
-- Emit `GAP_REPORT.md` only when style reference or evidence gaps make it useful;
-  avoid extra Markdown side reports otherwise.
+- Emit `docs/paper/GAP_REPORT.md` only when style reference or evidence gaps
+  make it useful; avoid extra Markdown side reports otherwise.
 
 ## Constants
 
@@ -51,8 +55,8 @@ The skill expects one or more of these in the project directory:
 2. **review-stage/AUTO_REVIEW.md** — auto-review loop conclusions *(fall back to `./AUTO_REVIEW.md` if not found)*
 3. **Experiment results** — JSON files in `figures/`, screen logs, tables
 4. **idea-stage/IDEA_REPORT.md** — from idea-discovery pipeline (if applicable) *(fall back to `./IDEA_REPORT.md` if not found)*
-5. **Blueprint / gate files** (if available): `RESEARCH_BLUEPRINT.md`, `BLUEPRINT_GATE.md` — preferred for paper-readiness assumptions, theory, claim map, experiment design, reproducibility, and known gaps.
-6. **Compact files** (if available): `idea-stage/IDEA_CANDIDATES.md` *(fall back to `./IDEA_CANDIDATES.md` if not found)*, `findings.md`, `EXPERIMENT_LOG.md` — preferred over full files when present, saves context window
+5. **Blueprint / gate files** (if available): `docs/project/RESEARCH_BLUEPRINT.md`, `docs/project/BLUEPRINT_GATE.md` *(fall back to legacy root files if needed)* — preferred for paper-readiness assumptions, theory, claim map, experiment design, reproducibility, and known gaps.
+6. **Compact files** (if available): `idea-stage/IDEA_CANDIDATES.md` *(fall back to `./IDEA_CANDIDATES.md` if not found)*, `docs/evidence/findings.md`, `docs/experiments/EXPERIMENT_LOG.md` *(fall back to legacy root files if needed)* — preferred over full files when present, saves context window
 
 If none exist, ask the user to describe the paper's contribution in 3-5 sentences.
 
@@ -105,7 +109,7 @@ Sources accepted: local TeX dir / file, local PDF, arXiv id (`2501.12345` or `ar
 - **Never copy prose, claims, examples, section names verbatim, or terminology** from anything reachable through the cache. The user's narrative is the only source of substance.
 - **Never pass `— style-ref` (or the cache contents) to reviewer / auditor sub-agents.** Cross-model review independence (`../shared-references/reviewer-independence.md`) requires reviewers see only the artifact and the user's prompt.
 
-### Gap Report (`GAP_REPORT.md`, auto-emitted when style-ref is on)
+### Gap Report (`docs/paper/GAP_REPORT.md`, auto-emitted when style-ref is on)
 
 When `— style-ref:` succeeded AND any of `figures/`, `results/`, `data/`, `tables/`, `sec/`, `NARRATIVE_REPORT.md`, `CLAIMS_FROM_RESULTS.md` exists in the project, **also** emit a gap report before drafting the outline. The gap report maps the exemplar's section topology + density requirements (from `style_profile.md`) against the user's actual assets, surfacing structural slots where the user has **no evidence to fill**. It is the contract by which `/paper-write` decides when to emit `<!-- DATA_NEEDED -->` markers instead of fabricating content.
 
@@ -114,7 +118,7 @@ Procedure:
 1. Read `$CACHE/style_profile.md` for exemplar's section list + per-section feature counts (figures, theorems, tables, citations, sentences per section).
 2. Inventory user assets: `figures/*` filenames, `results/*` evidence files, `sec/*.tex` existing prose, `NARRATIVE_REPORT.md`, `CLAIMS_FROM_RESULTS.md` (if `/result-to-claim` ran), `references.bib` for citation density.
 3. For each section slot the exemplar implies (ablation table, scaling experiment, failure-case analysis, proof block, …), classify as `covered` / `partial` / `missing`.
-4. Emit `<output-dir>/GAP_REPORT.md`:
+4. Emit `docs/paper/GAP_REPORT.md`:
 
 ```markdown
 # GAP_REPORT — exemplar vs user assets
@@ -159,12 +163,14 @@ Slot ID format: `GAP_<SECTION>_<FEATURE>`, all-caps, stable across regenerations
 ### Step 1: Extract Claims and Evidence
 
 Before extracting from long narrative reports, read `PROJECT_STATUS.md`,
-`BLUEPRINT_GATE.md`, `RESEARCH_BLUEPRINT.md`, `PAPER_GUIDE.md`,
-`EVIDENCE_LEDGER.md`, and `EXPERIMENT_PROTOCOL.md` when they exist. If they
-conflict with older logs, prefer the newer gate artifact and surface the
-conflict in the missing-evidence list. If no blueprint exists and the project is
-moving from experiments into paper writing, run or request `research-blueprint`
-unless the user explicitly wants only a lightweight outline.
+`docs/project/BLUEPRINT_GATE.md`, `docs/project/RESEARCH_BLUEPRINT.md`,
+`docs/paper/PAPER_GUIDE.md`, `docs/evidence/EVIDENCE_LEDGER.md`, and
+`docs/experiments/EXPERIMENT_PROTOCOL.md` when they exist, falling back to
+legacy root paths only for old projects. If they conflict with older logs,
+prefer the newer gate artifact and surface the conflict in the missing-evidence
+list. If no blueprint exists and the project is moving from experiments into
+paper writing, run or request `research-blueprint` unless the user explicitly
+wants only a lightweight outline.
 
 **First check for `CLAIMS_FROM_RESULTS.md`** — if it exists (generated by `/result-to-claim` at the end of Workflow 2), use it as the starting point for claims. This file contains validated claims already mapped to experiment evidence. Merge with any additional claims from the narrative documents below.
 
@@ -360,7 +366,7 @@ Apply feedback before finalizing.
 
 ### Step 7: Output
 
-Save the final outline to `PAPER_PLAN.md` in the project root:
+Save the final outline to `docs/paper/PAPER_PLAN.md`:
 
 ```markdown
 # Paper Plan
@@ -414,5 +420,5 @@ Outline methodology inspired by [Research-Paper-Writing-Skills](https://github.c
 
 > Follow these shared protocols for all output files:
 > - **[Output Versioning Protocol](../shared-references/output-versioning.md)** — write timestamped file first, then copy to fixed name
-> - **[Output Manifest Protocol](../shared-references/output-manifest.md)** — log every output to MANIFEST.md
+> - **[Output Manifest Protocol](../shared-references/output-manifest.md)** — log every output to docs/project/OUTPUT_MANIFEST.md
 > - **[Output Language Protocol](../shared-references/output-language.md)** — respect the project's language setting

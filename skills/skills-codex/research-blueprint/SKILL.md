@@ -16,19 +16,19 @@ notes, but it should not be regenerated on every turn.
 
 Write or refresh:
 
-- `RESEARCH_BLUEPRINT.md` — canonical whole-project research blueprint.
-- `BLUEPRINT_GATE.md` — concise pass/fail gate for moving into
+- `docs/project/RESEARCH_BLUEPRINT.md` — canonical whole-project research blueprint.
+- `docs/project/BLUEPRINT_GATE.md` — concise pass/fail gate for moving into
   `experiment-plan`, AutoDL formal runs, or `paper-plan`.
 - `PROJECT_STATUS.md` — update current phase, last accepted artifact, next
   gate, blockers, and phase map.
-- `NEXT_ACTIONS.md` — only the next 3-7 concrete actions.
+- `docs/project/NEXT_ACTIONS.md` — only the next 3-7 concrete actions.
 
-The canonical long blueprint path is `RESEARCH_BLUEPRINT.md`.
+The canonical long blueprint path is `docs/project/RESEARCH_BLUEPRINT.md`.
 
 ## When To Create Or Refresh
 
-Create or substantially refresh `RESEARCH_BLUEPRINT.md` when at least one is
-true:
+Create or substantially refresh `docs/project/RESEARCH_BLUEPRINT.md` when at
+least one is true:
 
 - the method is stable enough that experiment design choices now matter;
 - the project is moving from method refinement into experiment protocol;
@@ -36,20 +36,24 @@ true:
 - the project has completed experiments and is moving into paper planning;
 - the user explicitly asks for a complete guidance/blueprint document.
 
-Otherwise update only compact project memory (`PROJECT_BRIEF.md`,
-`PROJECT_STATUS.md`, `NEXT_ACTIONS.md`, `findings.md`,
-`EXPERIMENT_LOG.md`). If a prior `RESEARCH_BLUEPRINT.md` exists, patch and
-compact it instead of appending another long report.
+Otherwise update only compact project memory (`docs/project/PROJECT_BRIEF.md`,
+`PROJECT_STATUS.md`, `docs/project/NEXT_ACTIONS.md`,
+`docs/evidence/findings.md`, `docs/experiments/EXPERIMENT_LOG.md`). If a prior
+`docs/project/RESEARCH_BLUEPRINT.md` exists, patch and compact it instead of
+appending another long report.
 
 ## Inputs To Inspect
 
 Read the most relevant available files first:
 
-- `PROJECT_STATUS.md`, `PROJECT_BRIEF.md`, `NEXT_ACTIONS.md`
+- `PROJECT_STATUS.md`, `docs/project/PROJECT_BRIEF.md`,
+  `docs/project/NEXT_ACTIONS.md` (fall back to legacy root files if needed)
 - `refine-logs/FINAL_PROPOSAL.md`, `refine-logs/REFINEMENT_REPORT.md`,
   `refine-logs/EXPERIMENT_PLAN.md`
-- `EXPERIMENT_PROTOCOL.md`, `EVIDENCE_LEDGER.md`, `findings.md`,
-  `EXPERIMENT_LOG.md`, `CLAIMS_FROM_RESULTS.md`
+- `docs/experiments/EXPERIMENT_PROTOCOL.md`,
+  `docs/evidence/EVIDENCE_LEDGER.md`, `docs/evidence/findings.md`,
+  `docs/experiments/EXPERIMENT_LOG.md`, `CLAIMS_FROM_RESULTS.md`
+  (fall back to legacy root files if needed)
 - `idea-stage/IDEA_REPORT.md`, `idea-stage/IDEA_MEMORY.md`
 - `experiments/NEGATIVE_RESULTS.md`
 - `docs/runbooks/AUTODL_HPC_RUNBOOK.md`, `data/DATA_MANIFEST.md`
@@ -81,8 +85,8 @@ Prefer explicit tables, claim maps, and decision rules over broad prose.
 
 ## Required RESEARCH_BLUEPRINT.md Structure
 
-`RESEARCH_BLUEPRINT.md` must start with this section before any background
-text:
+`docs/project/RESEARCH_BLUEPRINT.md` must start with this section before any
+background text:
 
 ```markdown
 # Research Blueprint: <project title>
@@ -209,8 +213,9 @@ Update `PROJECT_STATUS.md` with:
 - startup mode;
 - target venue;
 - active idea or method;
-- last accepted artifact: `RESEARCH_BLUEPRINT.md` or prior artifact;
-- next gate from `BLUEPRINT_GATE.md`;
+- last accepted artifact: `docs/project/RESEARCH_BLUEPRINT.md` or prior
+  artifact;
+- next gate from `docs/project/BLUEPRINT_GATE.md`;
 - blockers;
 - phase map with current phase marked.
 
@@ -228,14 +233,16 @@ Use the macro map from `project-guide-protocol.md`:
 - Do not run heavy experiments locally. Prepare commands, configs, and gates.
 - Do not fabricate citations, theorem guarantees, dataset properties, or
   metrics.
-- Prefer updating an existing `RESEARCH_BLUEPRINT.md` over creating a new long
-  file.
+- Prefer updating an existing `docs/project/RESEARCH_BLUEPRINT.md` over
+  creating a new long file.
 
 ## Handoff
 
 If the gate decision allows experiments, the next skill is usually
-`experiment-plan`, which should read `RESEARCH_BLUEPRINT.md` first.
+`experiment-plan`, which should read `docs/project/RESEARCH_BLUEPRINT.md`
+first.
 
 If results already exist and the project is moving to writing, the next skill is
-usually `paper-plan`, which should read `RESEARCH_BLUEPRINT.md`,
-`EXPERIMENT_PROTOCOL.md`, and `EVIDENCE_LEDGER.md`.
+usually `paper-plan`, which should read `docs/project/RESEARCH_BLUEPRINT.md`,
+`docs/experiments/EXPERIMENT_PROTOCOL.md`, and
+`docs/evidence/EVIDENCE_LEDGER.md`.
