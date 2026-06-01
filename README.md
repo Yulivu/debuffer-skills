@@ -12,6 +12,13 @@
 - 论文与审计链路：实验计划、结果审计、claim/citation/proof 检查、LaTeX 写作、rebuttal 和 resubmit。
 - 紧凑项目记忆：`PROJECT_STATUS.md`、`PROJECT_BRIEF.md`、`NEXT_ACTIONS.md`、`findings.md`、`EXPERIMENT_LOG.md`，以及阶段性 `RESEARCH_BLUEPRINT.md` / `BLUEPRINT_GATE.md` / `PROJECT_GUIDE.md`。
 
+## 最近更新
+
+- 新增 `research-blueprint`：在正式实验、AutoDL 正式运行或论文写作前生成 `RESEARCH_BLUEPRINT.md` 和 `BLUEPRINT_GATE.md`。
+- `RESEARCH_BLUEPRINT.md` 开头固定包含“总体进度表”，按数据获取、预处理、协议冻结、理论/方法、local smoke、AutoDL smoke、pilot、正式实验、证据审计、论文计划、初稿和投稿材料逐步打勾。
+- `experiment-plan`、`paper-plan`、`research-pipeline`、`research-repo-architect` 已接入 blueprint gate。
+- 安装 profile 已包含 `research-blueprint`，当前主线与 Codex mirror 均为 78 个 skill。
+
 <a id="quick-start"></a>
 
 ## 快速开始
@@ -41,7 +48,7 @@ powershell -ExecutionPolicy Bypass -File tools\install_debuffer.ps1 $targetRepo 
 
 安装器会在本技能库本地维护 `.debuffer_registry/installed-projects.tsv`，记录哪些项目从这个 checkout 安装过。该登记表只用于本机批量更新，已被 Git 忽略。
 
-Windows 上优先双击根目录的 `Install Debuffer Skills.vbs`，这样只打开图形界面，不会同时保留命令行窗口；若系统禁用 VBS，再用 `Install Debuffer Skills.cmd` 兜底。图形界面是纯中文简化版，默认安装 `full`，主要操作只有 `安装/重连`、`更新全部`、`扫描旧项目`。
+Windows 上可以双击根目录的 `Install Debuffer Skills.cmd` 打开中文图形界面。默认安装 `full`，主要操作只有 `安装/重连`、`更新全部`、`扫描旧项目`。
 
 macOS 上可以直接双击根目录的 `Install Debuffer Skills.command`，选择安装到单个 repo 或更新所有登记项目。若 Finder 提示无法执行，先在终端运行：
 
