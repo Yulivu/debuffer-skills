@@ -6,7 +6,7 @@
 
 ## 包状态
 
-**Full catalog**: [docs/SKILLS_CATALOG.md](docs/SKILLS_CATALOG.md) - **77 skills**.
+**Full catalog**: [docs/SKILLS_CATALOG.md](docs/SKILLS_CATALOG.md) - **78 skills**.
 
 | 区域 | 路径 | 说明 |
 |---|---|---|
@@ -25,7 +25,7 @@
 - **AutoDL 优先**：GPU/HPC 工作准备 preflight、smoke suite、数据清单、结果回传和正式运行审批。
 - **远程命令 gate**：`ssh`、`scp`、`rsync`、`screen`、`tmux`、`nohup` 形成命令块、风险说明和审批点。
 - **评审 prompt-only**：审查类 skill 产出 `review-prompts/<scope>_review_prompt.md`，独立对话评审，当前对话整理反馈和行动项。
-- **文档紧凑**：维护 `PROJECT_STATUS.md`、`PROJECT_BRIEF.md`、`NEXT_ACTIONS.md`、`findings.md`、`EXPERIMENT_LOG.md`；阶段门刷新 `PROJECT_GUIDE.md`。
+- **文档紧凑**：维护 `PROJECT_STATUS.md`、`PROJECT_BRIEF.md`、`NEXT_ACTIONS.md`、`findings.md`、`EXPERIMENT_LOG.md`；关键阶段门刷新 `RESEARCH_BLUEPRINT.md`、`BLUEPRINT_GATE.md` 或 `PROJECT_GUIDE.md`。
 - **AutoSci-lite**：使用 A-E idea 路径、`idea-stage/IDEA_MEMORY.md`、`experiments/NEGATIVE_RESULTS.md`、pilot gate 和明确宏观状态机。
 - **证据边界**：smoke 表示工程可跑；论文证据来自 `experiments/runs/` 经审计后的 `experiments/results/`。
 
@@ -59,6 +59,7 @@ Blockers: ...
 | 建仓/迁移 | `/research-repo-architect` | 轻量结构、项目状态、AutoDL hooks |
 | 方向起步 | `/idea-discovery` | 最小 brief、文献问题、review prompt |
 | 想法整理 | `/research-refine` | 方法假设和下一步实验 |
+| 研究蓝图 | `/research-blueprint` | 总体进度表、理论基础、实验安排、可复现协议和 gate |
 | 实验计划 | `/experiment-plan` | 可复现协议、run order、预算 |
 | 实验实现 | `/experiment-bridge` | 本地 tiny checks、AutoDL handoff、code review prompt |
 | 远程准备 | `/autodl-hpc` | preflight、smoke、数据清单、审批 gate |
@@ -78,7 +79,7 @@ powershell -ExecutionPolicy Bypass -File tools\install_debuffer.ps1 C:\path\to\p
 
 | Profile | 用途 |
 |---|---|
-| `full` | 默认，全量 77 skills |
+| `full` | 默认，全量 78 skills |
 | `core-research` | 建仓、idea、实验计划、AutoDL、基础审计 |
 | `paper` | 论文写作、编译、图表、审计、rebuttal/resubmit |
 | `review` | prompt-only 外部评审和证据审计 |

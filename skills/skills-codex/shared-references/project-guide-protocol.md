@@ -19,14 +19,22 @@ Maintain these compact files whenever the project is active:
 
 Create larger guide documents only at stage gates:
 
+- `RESEARCH_BLUEPRINT.md`: create or substantially refresh when the project is
+  ready to move into formal experiment planning, AutoDL/HPC formal runs, or
+  paper planning and needs a rigorous whole-project design.
+- `BLUEPRINT_GATE.md`: create with `RESEARCH_BLUEPRINT.md`; record
+  PASS / CONDITIONAL / BLOCKED for the next allowed stage.
 - `PROJECT_GUIDE.md`: create or substantially refresh when the project has a
-  stable idea/method and needs a coherent whole-project blueprint.
+  stable idea/method and needs a lighter coherent project guide. If
+  `RESEARCH_BLUEPRINT.md` exists, treat it as the stricter source and avoid
+  duplicating a second long whole-project guide.
 - `EXPERIMENT_PROTOCOL.md`: create before implementation or formal runs, and
   freeze before AutoDL/HPC formal execution.
 - `EVIDENCE_LEDGER.md`: create after results exist, mapping claims to raw run
   folders, metrics, figures, tables, and unresolved evidence gaps.
 - `PAPER_GUIDE.md`: create before manuscript writing, usually by compacting
-  `PROJECT_GUIDE.md`, `EXPERIMENT_PROTOCOL.md`, and `EVIDENCE_LEDGER.md`.
+  `RESEARCH_BLUEPRINT.md` or `PROJECT_GUIDE.md`, `EXPERIMENT_PROTOCOL.md`,
+  and `EVIDENCE_LEDGER.md`.
 
 ## Macro Phases
 
@@ -50,6 +58,42 @@ For the stricter AutoSci-lite state contract, read
 current phase, startup mode, target venue, active idea or method, last accepted
 artifact, next gate, blockers, and the phase map with the current phase marked.
 
+## RESEARCH_BLUEPRINT.md Gate
+
+Generate or refresh `RESEARCH_BLUEPRINT.md` only at important handoffs:
+
+- before a stable method becomes a formal experiment protocol;
+- before AutoDL/HPC formal suites are prepared or approved;
+- after experiments finish and before paper planning begins;
+- when the user explicitly asks for a detailed research blueprint.
+
+Do not use this artifact for routine status updates. Patch and compact an
+existing `RESEARCH_BLUEPRINT.md` instead of creating another long report.
+
+`RESEARCH_BLUEPRINT.md` must start with:
+
+```markdown
+## 0. 总体进度表
+| 顺序 | 阶段 | 完成 | 当前证据 / 产物 | 下一步 |
+```
+
+Use ordered stages from data acquisition and preprocessing through task
+protocol, theory/method freeze, repo/reproducibility readiness, local smoke,
+AutoDL smoke, pilot, formal runs, evidence audit, paper plan, manuscript, and
+submission. Mark completion with `[x]` only when there is concrete evidence or
+a named artifact; use `[ ]` for intended work and `N/A` only with an evidence
+note.
+
+The document should then cover background, problem definition, core insight,
+theory/proof obligations, system or algorithm details, datasets, baselines,
+claim-to-evidence-to-experiment mapping, detailed experiments, AutoDL/HPC
+execution, implementation/repo structure, reproducibility, paper prerequisites,
+risks, and the next gate.
+
+`BLUEPRINT_GATE.md` is the compact decision companion. It should say whether
+the next allowed step is `research-refine`, `experiment-plan`, `autodl-hpc`,
+`paper-plan`, or stop.
+
 ## PROJECT_GUIDE.md Gate
 
 Generate or refresh `PROJECT_GUIDE.md` when at least one is true:
@@ -61,6 +105,9 @@ Generate or refresh `PROJECT_GUIDE.md` when at least one is true:
 
 Do not generate it for a vague `venue-only` start unless the user asks. In early
 stages, use `PROJECT_BRIEF.md` plus `NEXT_ACTIONS.md`.
+
+If `RESEARCH_BLUEPRINT.md` is present, keep `PROJECT_GUIDE.md` short or skip it.
+The blueprint is the detailed source for formal experiment and paper gates.
 
 Recommended `PROJECT_GUIDE.md` sections:
 
@@ -120,6 +167,8 @@ artifact:
 
 - stable framing -> `PROJECT_BRIEF.md`;
 - current phase and blockers -> `PROJECT_STATUS.md`;
+- detailed stage-gate design -> `RESEARCH_BLUEPRINT.md` plus
+  `BLUEPRINT_GATE.md`;
 - experiment facts -> `EXPERIMENT_PROTOCOL.md` or `EXPERIMENT_LOG.md`;
 - result-to-claim mapping -> `EVIDENCE_LEDGER.md` or `findings.md`;
 - manuscript decisions -> `PAPER_GUIDE.md`.

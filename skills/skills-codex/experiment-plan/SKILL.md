@@ -29,6 +29,11 @@ without generating redundant long documents:
 - Keep `refine-logs/EXPERIMENT_PLAN.md` as the operational roadmap. Create or
   refresh root `EXPERIMENT_PROTOCOL.md` only when the plan is ready for
   implementation, AutoDL smoke preparation, or formal-run freezing.
+- Before a formal experiment protocol or AutoDL formal-run plan, read
+  `RESEARCH_BLUEPRINT.md` and `BLUEPRINT_GATE.md` when present. If they are
+  absent and the method is stable enough for formal runs, run or request
+  `research-blueprint` first. Do not block exploratory experiment planning on a
+  missing blueprint.
 - If the idea is still exploratory, update only compact state such as
   `PROJECT_BRIEF.md` and `NEXT_ACTIONS.md`; do not emit `PROJECT_GUIDE.md`,
   `EVIDENCE_LEDGER.md`, or `PAPER_GUIDE.md` unless their gates are reached.
@@ -51,6 +56,9 @@ without generating redundant long documents:
 
 Read the most relevant existing files first if they exist:
 
+- `RESEARCH_BLUEPRINT.md`
+- `BLUEPRINT_GATE.md`
+- `PROJECT_STATUS.md`
 - `refine-logs/FINAL_PROPOSAL.md`
 - `refine-logs/REVIEW_SUMMARY.md`
 - `refine-logs/REFINEMENT_REPORT.md`

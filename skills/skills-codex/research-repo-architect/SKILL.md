@@ -23,7 +23,8 @@ when available. Default to a lightweight, AutoDL-first shape:
 - Read `../shared-references/project-guide-protocol.md` when creating project
   memory. Keep `PROJECT_STATUS.md` current so future sessions know the macro
   phase; prefer `PROJECT_BRIEF.md`, `NEXT_ACTIONS.md`, `findings.md`, and
-  `EXPERIMENT_LOG.md`; create or refresh `PROJECT_GUIDE.md` only at stage gates.
+  `EXPERIMENT_LOG.md`; create or refresh `RESEARCH_BLUEPRINT.md`,
+  `BLUEPRINT_GATE.md`, or `PROJECT_GUIDE.md` only at stage gates.
 - Read `../shared-references/autosci-lite-patterns.md` when scaffolding idea
   discovery, failure memory, pilot gates, or the macro state machine.
 - For external review, create `review-prompts/` rather than wiring direct API,
@@ -37,6 +38,10 @@ Start by deciding which path applies:
 - **Existing repo migration**: Audit first, produce a migration map, then move code in small validated phases.
 - **skill framework or skill repo**: Preserve the `skills/`, `skills/skills-codex/`, `skills/shared-references/`, `tools/`, `templates/`, `docs/`, `tests/`, and `mcp-servers/` contracts instead of forcing everything into `src/` and `scripts/`.
 - **skill-managed research project**: Combine the SpectralStore experiment layout with skill runtime artifacts such as `research-wiki/`, `idea-stage/`, `refine-logs/`, `review-stage/`, `paper/`, and `.debuffer_skills/`.
+- **research blueprint handoff**: When a stable method is about to become a
+  formal experiment protocol or paper plan, preserve `RESEARCH_BLUEPRINT.md`
+  and `BLUEPRINT_GATE.md` as tracked project memory instead of burying the
+  decisions in terminal logs.
 - **AutoDL/HPC-ready research project**: Add target-machine setup, preflight, smoke, result-transfer, and formal-run approval boundaries without weakening source/config/run/result separation.
 - **Lightweight project start**: When materials are sparse, create only the
   minimal brief, plan, architecture, and next-action files needed for the current
@@ -146,6 +151,8 @@ Use this path when a normal research project is being operated by skill workflow
 
 - Keep reusable implementation in `src/<package_name>/` and experiment runners in `scripts/` as usual.
 - Keep skill handoff artifacts where downstream skills expect them unless the user asks for a breaking migration: `RESEARCH_BRIEF.md`, `EXPERIMENT_PLAN.md`, `NARRATIVE_REPORT.md`, `idea-stage/`, `refine-logs/`, `review-stage/`, `paper/`, and `research-wiki/`.
+- Keep blueprint artifacts at the project root when present:
+  `RESEARCH_BLUEPRINT.md` and `BLUEPRINT_GATE.md`.
 - Treat `.debuffer_skills/` as runtime state. Keep traces, caches, wakeup state, and local skill symlinks out of Git unless the project explicitly wants reproducible agent provenance.
 - If `research-wiki/` exists, preserve it as persistent project memory. Do not move it under `docs/` or `experiments/`.
 - Experiment outputs still go under `experiments/runs/`; curated tables and figures still go under `experiments/results/` and `experiments/visualizations/`.

@@ -41,6 +41,10 @@ autonomous settings below unless the user explicitly asks for legacy automation:
 - **AUTO_WRITE = false** remains the default. Produce compact `PROJECT_BRIEF.md`,
   `findings.md`, `EXPERIMENT_LOG.md`, and `NEXT_ACTIONS.md`; create
   `NARRATIVE_REPORT.md` only when paper writing needs it or the user asks.
+- **BLUEPRINT_GATE = required at handoffs**: before formal experiment planning,
+  AutoDL formal runs, or paper planning, create or refresh
+  `RESEARCH_BLUEPRINT.md` and `BLUEPRINT_GATE.md` via `/research-blueprint`.
+  Keep routine updates compact.
 
 For venue-specific review and writing, read
 `../shared-references/venue-profiles.md` and apply the target venue profile
@@ -49,8 +53,9 @@ For venue-specific review and writing, read
 Read `../shared-references/project-guide-protocol.md` when the user wants a
 project-wide guide or when crossing a stage gate. Keep `PROJECT_STATUS.md`
 updated after each accepted stage. Generate `PROJECT_GUIDE.md`,
-`EXPERIMENT_PROTOCOL.md`, `EVIDENCE_LEDGER.md`, or `PAPER_GUIDE.md` only when
-their gate conditions are met; otherwise update compact memory files.
+`RESEARCH_BLUEPRINT.md`, `BLUEPRINT_GATE.md`, `EXPERIMENT_PROTOCOL.md`,
+`EVIDENCE_LEDGER.md`, or `PAPER_GUIDE.md` only when their gate conditions are
+met; otherwise update compact memory files.
 
 ## Constants
 
@@ -74,11 +79,12 @@ their gate conditions are met; otherwise update compact memory files.
 This skill chains the entire research lifecycle into a single pipeline:
 
 ```
-/idea-discovery → /experiment-bridge → /auto-review-loop → /paper-writing (optional)
-├── Workflow 1 ──┤├── Workflow 1.5 ──┤├── Workflow 2 ───┤ ├── Workflow 3 ──┤
+/idea-discovery → /research-blueprint → /experiment-bridge → /auto-review-loop → /paper-writing (optional)
+├── Workflow 1 ──┤├── Stage-gate design ──┤├── Workflow 1.5 ──┤├── Workflow 2 ───┤├── Workflow 3 ──┤
 ```
 
-It orchestrates up to four major workflows in sequence. Workflow 3 (paper writing) is optional and controlled by `AUTO_WRITE`.
+It orchestrates four major workflows plus a blueprint stage gate. Workflow 3
+(paper writing) is optional and controlled by `AUTO_WRITE`.
 
 ## Resumable runs (`— resume <run_id>`)
 
@@ -161,6 +167,16 @@ Recommended: Idea 1. Shall I proceed with implementation?
 **If AUTO_PROCEED=true:** Present the top ideas, wait 10 seconds for user input. If no response, auto-select the #1 ranked idea (highest pilot signal + novelty confirmed) and proceed to Stage 2. Log: `"AUTO_PROCEED: selected Idea 1 — [title]"`.
 
 > ⚠️ **This gate waits for user confirmation when AUTO_PROCEED=false.** When `true`, it auto-proceeds after presenting results. The rest of the pipeline (Stages 2-3) is expensive (GPU time + multiple review rounds), so set `AUTO_PROCEED=false` if you want a final review checkpoint before committing GPU resources.
+
+### Stage 1.5: Research Blueprint Gate
+
+When the user commits to an idea or stable method, run `/research-blueprint`
+before implementation or formal experiment planning. It writes
+`RESEARCH_BLUEPRINT.md` with the sequential overall progress table and
+`BLUEPRINT_GATE.md` with PASS / CONDITIONAL / BLOCKED. Continue only to the
+allowed next step recorded in the gate. If the idea is still exploratory, keep
+using `PROJECT_BRIEF.md`, `PROJECT_STATUS.md`, and `NEXT_ACTIONS.md` instead of
+creating the large blueprint.
 
 ### Stage 2: Experiment Bridge (Workflow 1.5)
 

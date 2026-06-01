@@ -17,16 +17,19 @@ Read `../shared-references/lightweight-research-pack.md`,
   and existing legacy venue labels. Apply the target venue profile before
   freezing claims, evidence, and section order.
 - Prefer compact inputs (`PROJECT_STATUS.md`, `PROJECT_BRIEF.md`,
-  `PAPER_GUIDE.md`, `EVIDENCE_LEDGER.md`, `EXPERIMENT_PROTOCOL.md`,
-  `findings.md`, `EXPERIMENT_LOG.md`, `CLAIMS_FROM_RESULTS.md`,
-  `idea-stage/IDEA_CANDIDATES.md`) before reading long reports.
+  `BLUEPRINT_GATE.md`, `PAPER_GUIDE.md`, `EVIDENCE_LEDGER.md`,
+  `EXPERIMENT_PROTOCOL.md`, `findings.md`, `EXPERIMENT_LOG.md`,
+  `CLAIMS_FROM_RESULTS.md`, `idea-stage/IDEA_CANDIDATES.md`) before reading
+  long reports. Read `RESEARCH_BLUEPRINT.md` before freezing the outline when
+  it exists.
 - Generate a concise `PAPER_PLAN.md` by default: title candidates, abstract
   skeleton, claims-evidence matrix, section outline, figure/table inventory,
   missing-evidence list, and venue risks.
 - When moving from evidence audit to outline work, update `PROJECT_STATUS.md`
   to `paper plan`. Create or refresh `PAPER_GUIDE.md` only when the manuscript
-  gate is reached, compacting `PROJECT_GUIDE.md`, `EXPERIMENT_PROTOCOL.md`, and
-  `EVIDENCE_LEDGER.md` instead of duplicating them.
+  gate is reached, compacting `RESEARCH_BLUEPRINT.md` or `PROJECT_GUIDE.md`,
+  `EXPERIMENT_PROTOCOL.md`, and `EVIDENCE_LEDGER.md` instead of duplicating
+  them.
 - For outline review, write `review-prompts/paper_plan_review_prompt.md` and
   wait for pasted feedback. Do not call reviewer agents by default.
 - Emit `GAP_REPORT.md` only when style reference or evidence gaps make it useful;
@@ -46,7 +49,8 @@ The skill expects one or more of these in the project directory:
 2. **review-stage/AUTO_REVIEW.md** — auto-review loop conclusions *(fall back to `./AUTO_REVIEW.md` if not found)*
 3. **Experiment results** — JSON files in `figures/`, screen logs, tables
 4. **idea-stage/IDEA_REPORT.md** — from idea-discovery pipeline (if applicable) *(fall back to `./IDEA_REPORT.md` if not found)*
-5. **CLAIMS_FROM_RESULTS.md** — structured claim judgment from `/result-to-claim` (preferred if available)
+5. **Blueprint / gate files** (if available): `RESEARCH_BLUEPRINT.md`, `BLUEPRINT_GATE.md` — preferred for paper-readiness assumptions, theory, claim map, experiment design, reproducibility, and known gaps.
+6. **CLAIMS_FROM_RESULTS.md** — structured claim judgment from `/result-to-claim` (preferred if available)
 
 If none exist, ask the user to describe the paper's contribution in 3-5 sentences.
 
@@ -63,9 +67,12 @@ Keep the existing workflow and outputs, but use the shared references below to i
 ### Step 1: Extract Claims and Evidence
 
 Before extracting from long narrative reports, read `PROJECT_STATUS.md`,
-`PAPER_GUIDE.md`, `EVIDENCE_LEDGER.md`, and `EXPERIMENT_PROTOCOL.md` when they
-exist. If they conflict with older logs, prefer the newer gate artifact and
-surface the conflict in the missing-evidence list.
+`BLUEPRINT_GATE.md`, `RESEARCH_BLUEPRINT.md`, `PAPER_GUIDE.md`,
+`EVIDENCE_LEDGER.md`, and `EXPERIMENT_PROTOCOL.md` when they exist. If they
+conflict with older logs, prefer the newer gate artifact and surface the
+conflict in the missing-evidence list. If no blueprint exists and the project is
+moving from experiments into paper writing, run or request `research-blueprint`
+unless the user explicitly wants only a lightweight outline.
 
 **First check for `CLAIMS_FROM_RESULTS.md`** — if it exists, use it as the starting point for claims and merge it with any additional evidence from the narrative documents below.
 

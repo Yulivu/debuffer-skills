@@ -21,8 +21,11 @@ This file defines the default behavior for the customized research skills.
   gates, and macro state. Read `autosci-lite-patterns.md` when a project starts
   from a broad direction, has failed ideas/results, or is preparing formal
   AutoDL experiments.
-- Stage-gate guides such as `PROJECT_GUIDE.md`, `EXPERIMENT_PROTOCOL.md`,
-  `EVIDENCE_LEDGER.md`, and `PAPER_GUIDE.md` appear at handoff points.
+- Stage-gate guides such as `RESEARCH_BLUEPRINT.md`, `BLUEPRINT_GATE.md`,
+  `PROJECT_GUIDE.md`, `EXPERIMENT_PROTOCOL.md`, `EVIDENCE_LEDGER.md`, and
+  `PAPER_GUIDE.md` appear at handoff points. Use `RESEARCH_BLUEPRINT.md` for
+  the detailed pre-experiment or pre-paper design; keep routine updates in
+  compact memory files.
 - Generated tutorials, rendered HTML, screenshots, PDFs, slide decks, and
   media assets live in the target project when explicitly requested.
 
@@ -134,3 +137,5 @@ For this customized skill bundle:
 - Long generated tutorials, demo media, PDFs, and rendered artifacts belong to
   target projects with explicit user request.
 - Long project reports include a compaction plan and a stage-gate refresh path.
+  `RESEARCH_BLUEPRINT.md` is patched at major gates, not regenerated on every
+  session.

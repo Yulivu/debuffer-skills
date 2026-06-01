@@ -118,21 +118,21 @@ profile_includes_name() {
             ;;
         core-research)
             case "$name" in
-                research-repo-architect|research-pipeline|idea-discovery|idea-creator|research-refine|experiment-plan|experiment-bridge|run-experiment|monitor-experiment|experiment-queue|analyze-results|autodl-hpc|ablation-planner|training-check|system-profile|research-review|auto-review-loop|experiment-audit|result-to-claim|paper-claim-audit|citation-audit|research-lit|arxiv|semantic-scholar|openalex|deepxiv|exa-search|alphaxiv|novelty-check|comm-lit-review|wiki-enrich|research-wiki|figure-spec|render-html)
+                research-repo-architect|research-pipeline|idea-discovery|idea-creator|research-refine|research-blueprint|experiment-plan|experiment-bridge|run-experiment|monitor-experiment|experiment-queue|analyze-results|autodl-hpc|ablation-planner|training-check|system-profile|research-review|auto-review-loop|experiment-audit|result-to-claim|paper-claim-audit|citation-audit|research-lit|arxiv|semantic-scholar|openalex|deepxiv|exa-search|alphaxiv|novelty-check|comm-lit-review|wiki-enrich|research-wiki|figure-spec|render-html)
                     return 0
                     ;;
             esac
             ;;
         paper)
             case "$name" in
-                paper-writing|paper-plan|paper-write|paper-compile|paper-figure|paper-illustration|paper-illustration-image2|figure-description|figure-spec|mermaid-diagram|render-html|paper-talk|paper-slides|slides-polish|paper-poster|proof-writer|proof-checker|formula-derivation|citation-audit|paper-claim-audit|result-to-claim|kill-argument|auto-paper-improvement-loop|writing-systems-papers|rebuttal|resubmit-pipeline|overleaf-sync|research-review|auto-review-loop|research-refine)
+                paper-writing|paper-plan|paper-write|paper-compile|paper-figure|paper-illustration|paper-illustration-image2|figure-description|figure-spec|mermaid-diagram|render-html|paper-talk|paper-slides|slides-polish|paper-poster|proof-writer|proof-checker|formula-derivation|citation-audit|paper-claim-audit|result-to-claim|kill-argument|auto-paper-improvement-loop|writing-systems-papers|rebuttal|resubmit-pipeline|overleaf-sync|research-review|auto-review-loop|research-refine|research-blueprint)
                     return 0
                     ;;
             esac
             ;;
         review)
             case "$name" in
-                research-review|auto-review-loop|experiment-audit|result-to-claim|paper-claim-audit|citation-audit|proof-checker|kill-argument|novelty-check|research-refine|auto-paper-improvement-loop|rebuttal|research-lit|arxiv|semantic-scholar|openalex|deepxiv|exa-search|alphaxiv|render-html)
+                research-review|auto-review-loop|experiment-audit|result-to-claim|paper-claim-audit|citation-audit|proof-checker|kill-argument|novelty-check|research-refine|research-blueprint|auto-paper-improvement-loop|rebuttal|research-lit|arxiv|semantic-scholar|openalex|deepxiv|exa-search|alphaxiv|render-html)
                     return 0
                     ;;
             esac

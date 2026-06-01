@@ -312,7 +312,7 @@ function Test-ProfileIncludesName {
         'core-research' {
             return $Name -in @(
                 'research-repo-architect', 'research-pipeline', 'idea-discovery',
-                'idea-creator', 'research-refine',
+                'idea-creator', 'research-refine', 'research-blueprint',
                 'experiment-plan', 'experiment-bridge',
                 'run-experiment', 'monitor-experiment', 'experiment-queue',
                 'analyze-results', 'autodl-hpc', 'ablation-planner',
@@ -335,7 +335,7 @@ function Test-ProfileIncludesName {
                 'kill-argument', 'auto-paper-improvement-loop',
                 'writing-systems-papers', 'rebuttal', 'resubmit-pipeline',
                 'overleaf-sync', 'research-review', 'auto-review-loop',
-                'research-refine'
+                'research-refine', 'research-blueprint'
             )
         }
         'review' {
@@ -343,7 +343,7 @@ function Test-ProfileIncludesName {
                 'research-review', 'auto-review-loop', 'experiment-audit',
                 'result-to-claim', 'paper-claim-audit', 'citation-audit',
                 'proof-checker', 'kill-argument', 'novelty-check',
-                'research-refine', 'auto-paper-improvement-loop', 'rebuttal',
+                'research-refine', 'research-blueprint', 'auto-paper-improvement-loop', 'rebuttal',
                 'research-lit', 'arxiv', 'semantic-scholar', 'openalex',
                 'deepxiv', 'exa-search', 'alphaxiv', 'render-html'
             )

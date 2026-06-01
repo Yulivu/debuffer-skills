@@ -1,6 +1,6 @@
 # debuffer-skills
 
-这是一个面向科研项目的轻量化 Codex skills 定制包。当前提供 **77 个 skill**，主线与 Codex mirror 均为 **77 个 skill**，完整清单见 [docs/SKILLS_CATALOG.md](docs/SKILLS_CATALOG.md)。
+这是一个面向科研项目的轻量化 Codex skills 定制包。当前提供 **78 个 skill**，主线与 Codex mirror 均为 **78 个 skill**，完整清单见 [docs/SKILLS_CATALOG.md](docs/SKILLS_CATALOG.md)。
 
 ## 当前提供
 
@@ -10,7 +10,7 @@
 - 多起步阶段适配：`venue-only`、`reference-paper`、`reference-codebase`、`idea-doc`、`existing-repo`、`partial-results`。
 - AutoSci-lite 启发式：A-E idea 生成路径、轻量失败记忆、pilot gate 和明确项目宏观状态机。
 - 论文与审计链路：实验计划、结果审计、claim/citation/proof 检查、LaTeX 写作、rebuttal 和 resubmit。
-- 紧凑项目记忆：`PROJECT_STATUS.md`、`PROJECT_BRIEF.md`、`NEXT_ACTIONS.md`、`findings.md`、`EXPERIMENT_LOG.md` 和阶段性 `PROJECT_GUIDE.md`。
+- 紧凑项目记忆：`PROJECT_STATUS.md`、`PROJECT_BRIEF.md`、`NEXT_ACTIONS.md`、`findings.md`、`EXPERIMENT_LOG.md`，以及阶段性 `RESEARCH_BLUEPRINT.md` / `BLUEPRINT_GATE.md` / `PROJECT_GUIDE.md`。
 
 <a id="quick-start"></a>
 
@@ -112,7 +112,7 @@ powershell -ExecutionPolicy Bypass -File tools\reconcile_debuffer_installs.ps1 -
 
 - `research-repo-architect`：创建或迁移科研仓库，匹配起步阶段，维护项目宏观状态。
 - `autodl-hpc`：准备 AutoDL/HPC 运行、数据策略、preflight、smoke gate、结果传输和正式运行审批。
-- `idea-discovery` / `research-refine` / `experiment-plan`：从方向、参考论文、代码库或初步 idea 走到可验证实验计划。
+- `idea-discovery` / `research-refine` / `research-blueprint` / `experiment-plan`：从方向、参考论文、代码库或初步 idea 走到严密研究蓝图和可验证实验计划。
 - `research-review` / `auto-review-loop` / `paper-claim-audit` / `citation-audit`：生成独立评审 prompt，并整理反馈为行动项。
 - `paper-writing` / `paper-write` / `paper-compile`：把已审计证据组织成论文草稿、LaTeX 和提交前检查。
 - `rebuttal` / `resubmit-pipeline`：处理会议/期刊反馈、rebuttal 和换 venue 投稿。
@@ -168,8 +168,8 @@ AAAI/ICLR 侧重 novelty、实验说服力和叙事；JMLR 侧重完整性、严
 仓库文档入口为根中文 `README.md` 和 `docs/SKILLS_CATALOG.md`。项目运行文档采用少量、阶段化、可融合的结构：
 
 - 起步阶段产出 `PROJECT_BRIEF.md`、`PROJECT_STATUS.md`、`NEXT_ACTIONS.md`。
-- 形成实验证据后维护 `findings.md`、`EXPERIMENT_LOG.md`、`PROJECT_GUIDE.md`。
-- 阶段门或重要交接时刷新 `PROJECT_GUIDE.md`。
+- 形成实验证据后维护 `findings.md`、`EXPERIMENT_LOG.md`、`EVIDENCE_LEDGER.md`。
+- 实验计划、AutoDL 正式运行或论文写作前刷新 `RESEARCH_BLUEPRINT.md` 和 `BLUEPRINT_GATE.md`；较轻交接可只刷新 `PROJECT_GUIDE.md`。
 
 ## 仓库结构
 
