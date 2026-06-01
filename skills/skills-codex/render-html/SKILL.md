@@ -9,6 +9,13 @@ allowed-tools: Bash(*), Read, Write, spawn_agent
 
 > **Markdown is for writers. HTML is for readers.** Research workflow nodes write Markdown (canonical, audit-trail-friendly, machine-parseable). `/render-html` turns *selected* artifacts into a polished single-file HTML view for the human who actually has to read them. The Markdown stays the source of truth.
 
+## Design Reference
+
+For visual hierarchy, chart/table presentation, callout usage, blockquote
+styling intent, and Markdown authoring patterns tuned for this skill, read
+`DESIGN.md` in the same skill directory before creating or revising chart-heavy
+or reader-facing reports.
+
 ## When to use this skill
 
 **Use `/render-html` for** research artifacts that have a real human reader:
@@ -240,6 +247,7 @@ Verdict rules:
 - Unordered/ordered lists with 2-space nested indentation
 - Code blocks with optional language (` ```python `) — gets `<pre><code class="language-python">` for highlight.js
 - ASCII-art code blocks (heuristic: many box-drawing chars) → `<pre class="diagram">` with a distinct cream-yellow background
+- Workflow code blocks (` ```workflow `, ` ```flowchart `, ` ```flow `) → rendered as stacked flow nodes with directional arrows instead of plain code, intended to fix workflow diagrams that would otherwise display as text
 - Tables with `:---` / `:---:` / `---:` alignment
 - Blockquotes `> ...` — emoji-prefix detection routes to callout variants:
   - `⚠️` → `.callout-warn` (Warning)

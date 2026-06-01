@@ -535,16 +535,41 @@ def render_list(ordered: bool, items: list[str]) -> str:
     return "".join(out)
 
 
+def render_workflow(content: str) -> str:
+    lines = [line.rstrip() for line in content.splitlines() if line.strip()]
+    nodes: list[str] = []
+    for line in lines:
+        text = line.strip()
+        text = re.sub(r"^[\|\-\s]*[└├│─>]+[\s>]*", "", text)
+        text = re.sub(r"^[\-\s]*>[\s]*", "", text)
+        if text:
+            nodes.append(text)
+    if not nodes:
+        return '<div class="flowchart flowchart-empty"></div>'
+
+    parts = ['<div class="flowchart" role="img" aria-label="Workflow diagram">']
+    for idx, node in enumerate(nodes):
+        parts.append(f'<div class="flow-node">{render_inline(node)}</div>')
+        if idx < len(nodes) - 1:
+            parts.append('<div class="flow-arrow" aria-hidden="true">↓</div>')
+    parts.append("</div>")
+    return "".join(parts)
+
+
 def render_code(lang: str, content: str) -> str:
     escaped = html_lib.escape(content)
-    if lang:
-        return f'<pre><code class="language-{html_lib.escape(lang, quote=True)}">{escaped}</code></pre>'
+    normalized_lang = lang.strip().lower()
+    if normalized_lang in {"workflow", "flowchart", "flow"}:
+        return render_workflow(content)
     # Heuristic: if content looks like an ASCII art diagram (mostly box-drawing
     # chars and pipes), tag the surrounding <pre> with class="diagram".
     diagram_chars = set("│─┌┐└┘├┤┬┴┼▲▼◀▶━┃┏┓┗┛╭╮╰╯═║╔╗╚╝╠╣╦╩╬║▶▼─")
     sample = content[:200]
-    if sample and sum(1 for c in sample if c in diagram_chars) >= 4:
+    diagram_like_langs = {"", "text", "plain", "plaintext", "ascii", "diagram"}
+    if sample and sum(1 for c in sample if c in diagram_chars) >= 4 and normalized_lang in diagram_like_langs:
         return f'<pre class="diagram"><code>{escaped}</code></pre>'
+    if lang:
+        return f'<pre><code class="language-{html_lib.escape(lang, quote=True)}">{escaped}</code></pre>'
     return f"<pre><code>{escaped}</code></pre>"
 
 
