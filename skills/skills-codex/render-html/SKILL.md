@@ -9,6 +9,13 @@ allowed-tools: Bash(*), Read, Write, spawn_agent
 
 > **Markdown is for writers. HTML is for readers.** Research workflow nodes write Markdown (canonical, audit-trail-friendly, machine-parseable). `/render-html` turns *selected* artifacts into a polished single-file HTML view for the human who actually has to read them. The Markdown stays the source of truth.
 
+## Design Reference
+
+For visual hierarchy, chart/table presentation, callout usage, blockquote
+styling intent, and Markdown authoring patterns tuned for this skill, read
+`DESIGN.md` in the same skill directory before creating or revising chart-heavy
+or reader-facing reports.
+
 ## When to use this skill
 
 **Use `/render-html` for** research artifacts that have a real human reader:
