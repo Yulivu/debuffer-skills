@@ -1,12 +1,7 @@
 #Requires -Version 5.1
 <#
 .SYNOPSIS
-    GUI manager for project-local debuffer-skills installs.
-
-.DESCRIPTION
-    Launch from the debuffer-skills repo. The window can install skills into a
-    selected project, discover older installs, or update every registered
-    project from the local registry.
+    Minimal GUI manager for debuffer-skills.
 #>
 
 [CmdletBinding()]
@@ -21,9 +16,62 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+try {
+    [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding($false)
+    $OutputEncoding = [Console]::OutputEncoding
+} catch {}
 
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
+
+function T {
+    param([string]$Value)
+    return [System.Text.RegularExpressions.Regex]::Unescape($Value)
+}
+
+$Ui = @{
+    Title = T '\u6280\u80fd\u5305\u7ba1\u7406\u5668'
+    Intro = T '\u5b89\u88c5\u5230\u9879\u76ee\uff0c\u6216\u66f4\u65b0\u5df2\u767b\u8bb0\u9879\u76ee\u3002'
+    Project = T '\u9879\u76ee\u76ee\u5f55'
+    Choose = T '\u9009\u62e9'
+    Scope = T '\u5b89\u88c5\u8303\u56f4'
+    Full = T '\u5168\u90e8\u6280\u80fd\uff08\u9ed8\u8ba4\uff09'
+    Core = T '\u79d1\u7814\u6838\u5fc3'
+    Paper = T '\u8bba\u6587\u5199\u4f5c'
+    Review = T '\u8bc4\u5ba1\u5ba1\u8ba1'
+    Preview = T '\u53ea\u9884\u89c8\uff0c\u4e0d\u4fee\u6539'
+    Registry = T '\u5df2\u767b\u8bb0\u9879\u76ee\uff1a{0}'
+    Install = T '\u5b89\u88c5/\u91cd\u8fde'
+    Update = T '\u66f4\u65b0\u5168\u90e8'
+    Discover = T '\u626b\u63cf\u65e7\u9879\u76ee'
+    Open = T '\u6253\u5f00\u9879\u76ee'
+    Close = T '\u5173\u95ed'
+    Ready = T '\u5c31\u7eea\u3002'
+    SkillRepo = T '\u6280\u80fd\u5e93\uff1a{0}'
+    DefaultScope = T '\u9ed8\u8ba4\u5b89\u88c5\u8303\u56f4\uff1a\u5168\u90e8\u6280\u80fd'
+    SelectProject = T '\u8bf7\u9009\u62e9\u9879\u76ee\u76ee\u5f55\u3002'
+    SelectProjectFolder = T '\u9009\u62e9\u8981\u5b89\u88c5\u6280\u80fd\u7684\u9879\u76ee\u76ee\u5f55'
+    SelectScanFolder = T '\u9009\u62e9\u8981\u626b\u63cf\u7684\u4e0a\u7ea7\u76ee\u5f55'
+    ProjectSet = T '\u9879\u76ee\u76ee\u5f55\uff1a{0}'
+    InvalidRepo = T '\u4e0d\u662f\u6709\u6548\u7684 debuffer-skills \u76ee\u5f55\uff1a{0}'
+    RepoMissing = T '\u65e0\u6cd5\u5b9a\u4f4d debuffer-skills \u76ee\u5f55\uff1a{0}'
+    MissingTool = T '\u7f3a\u5c11\u5fc5\u8981\u5de5\u5177\uff1a{0}'
+    InstallerMissing = T '\u627e\u4e0d\u5230\u5b89\u88c5\u5668\uff1a{0}'
+    UpdaterMissing = T '\u627e\u4e0d\u5230\u66f4\u65b0\u5668\uff1a{0}'
+    ScannerMissing = T '\u627e\u4e0d\u5230\u626b\u63cf\u5668\uff1a{0}'
+    ProjectMissing = T '\u9879\u76ee\u76ee\u5f55\u4e0d\u5b58\u5728\uff1a{0}'
+    ScanMissing = T '\u626b\u63cf\u76ee\u5f55\u4e0d\u5b58\u5728\uff1a{0}'
+    SameRepo = T '\u76ee\u6807\u9879\u76ee\u4e0d\u80fd\u662f\u6280\u80fd\u5e93\u672c\u8eab\u3002'
+    Running = T '\u6267\u884c\u4e2d...'
+    ExitCode = T '\u547d\u4ee4\u5931\u8d25\uff0c\u9000\u51fa\u7801\uff1a{0}'
+    InstallDone = T '\u5b89\u88c5/\u91cd\u8fde\u5b8c\u6210\u3002'
+    UpdateDone = T '\u66f4\u65b0\u5168\u90e8\u5b8c\u6210\u3002'
+    PreviewDone = T '\u66f4\u65b0\u9884\u89c8\u5b8c\u6210\u3002'
+    DiscoverDone = T '\u626b\u63cf\u5b8c\u6210\u3002'
+    Failed = T '\u64cd\u4f5c\u5931\u8d25'
+    ValidateOk = T '\u56fe\u5f62\u754c\u9762\u6821\u9a8c\u901a\u8fc7\u3002'
+    DefaultProfile = T '\u9ed8\u8ba4\u8303\u56f4\uff1afull'
+}
 
 function Resolve-RepoRoot {
     param([string]$ExplicitRepo)
@@ -32,7 +80,7 @@ function Resolve-RepoRoot {
         if (Test-Path -LiteralPath (Join-Path $candidate 'tools\install_debuffer.ps1') -PathType Leaf) {
             return $candidate
         }
-        throw "Invalid debuffer-skills repo: $candidate"
+        throw ($Ui.InvalidRepo -f $candidate)
     }
 
     $dir = (Resolve-Path -LiteralPath $PSScriptRoot).ProviderPath
@@ -48,7 +96,7 @@ function Resolve-RepoRoot {
         if ([string]::IsNullOrWhiteSpace($parent) -or $parent -eq $dir) { break }
         $dir = $parent
     }
-    throw "Cannot locate debuffer-skills repo from $PSScriptRoot"
+    throw ($Ui.RepoMissing -f $PSScriptRoot)
 }
 
 function Same-Path {
@@ -91,7 +139,7 @@ function Select-Folder {
     return $null
 }
 
-function Invoke-PowerShellTool {
+function Invoke-Tool {
     param(
         [string]$RepoRoot,
         [string[]]$Arguments,
@@ -99,13 +147,12 @@ function Invoke-PowerShellTool {
         [string]$DoneText
     )
 
-    $displayArgs = ($Arguments | ForEach-Object { Quote-ProcessArgument $_ }) -join ' '
     Append-Log $LogBox ''
-    Append-Log $LogBox "PS> powershell $displayArgs"
+    Append-Log $LogBox $Ui.Running
 
     $psi = New-Object System.Diagnostics.ProcessStartInfo
     $psi.FileName = 'powershell'
-    $psi.Arguments = $displayArgs
+    $psi.Arguments = ($Arguments | ForEach-Object { Quote-ProcessArgument $_ }) -join ' '
     $psi.WorkingDirectory = $RepoRoot
     $psi.UseShellExecute = $false
     $psi.RedirectStandardOutput = $true
@@ -124,31 +171,63 @@ function Invoke-PowerShellTool {
     if ($stdout) { Append-Log $LogBox $stdout }
     if ($stderr) { Append-Log $LogBox $stderr }
     if ($process.ExitCode -ne 0) {
-        throw "Command exited with code $($process.ExitCode)."
+        throw ($Ui.ExitCode -f $process.ExitCode)
     }
     Append-Log $LogBox $DoneText
+}
+
+function Get-ProfileValue {
+    param([string]$DisplayText)
+    if ($DisplayText -eq $Ui.Core) { return 'core-research' }
+    if ($DisplayText -eq $Ui.Paper) { return 'paper' }
+    if ($DisplayText -eq $Ui.Review) { return 'review' }
+    return 'full'
+}
+
+function Get-ProfileDisplay {
+    param([string]$Value)
+    switch ($Value) {
+        'core-research' { return $Ui.Core }
+        'paper' { return $Ui.Paper }
+        'review' { return $Ui.Review }
+        default { return $Ui.Full }
+    }
+}
+
+function Get-RegistryText {
+    param([string]$RepoRoot)
+    $path = Join-Path $RepoRoot '.debuffer_registry\installed-projects.tsv'
+    if (-not (Test-Path -LiteralPath $path -PathType Leaf)) {
+        return ($Ui.Registry -f 0)
+    }
+    $count = 0
+    foreach ($line in Get-Content -LiteralPath $path -Encoding UTF8) {
+        if (-not $line.StartsWith('#') -and $line.Trim()) { $count++ }
+    }
+    return ($Ui.Registry -f $count)
 }
 
 function Run-Installer {
     param(
         [string]$RepoRoot,
         [string]$TargetProject,
-        [string]$SelectedPlatform,
         [string]$SelectedProfile,
-        [bool]$Reconcile,
-        [bool]$DryRun,
+        [bool]$PreviewOnly,
         [System.Windows.Forms.TextBox]$LogBox
     )
 
     $installer = Join-Path $RepoRoot 'tools\install_debuffer.ps1'
     if (-not (Test-Path -LiteralPath $installer -PathType Leaf)) {
-        throw "Installer not found: $installer"
+        throw ($Ui.InstallerMissing -f $installer)
+    }
+    if ([string]::IsNullOrWhiteSpace($TargetProject)) {
+        throw $Ui.SelectProject
     }
     if (-not (Test-Path -LiteralPath $TargetProject -PathType Container)) {
-        throw "Target project folder does not exist: $TargetProject"
+        throw ($Ui.ProjectMissing -f $TargetProject)
     }
     if (Same-Path $RepoRoot $TargetProject) {
-        throw "Target project cannot be the debuffer-skills repo itself."
+        throw $Ui.SameRepo
     }
 
     $args = @(
@@ -156,33 +235,29 @@ function Run-Installer {
         '-ExecutionPolicy', 'Bypass',
         '-File', $installer,
         $TargetProject,
-        '-Platform', $SelectedPlatform,
+        '-Platform', $Platform,
         '-Repo', $RepoRoot,
         '-Profile', $SelectedProfile
     )
-    if ($Reconcile) { $args += '-Reconcile' }
-    if ($DryRun) { $args += '-DryRun' }
-
-    Invoke-PowerShellTool -RepoRoot $RepoRoot -Arguments $args -LogBox $LogBox -DoneText 'Install command completed.'
+    if ($PreviewOnly) { $args += '-DryRun' }
+    Invoke-Tool -RepoRoot $RepoRoot -Arguments $args -LogBox $LogBox -DoneText $Ui.InstallDone
 }
 
 function Run-RegistryUpdate {
     param(
         [string]$RepoRoot,
-        [bool]$Apply,
-        [bool]$Prune,
+        [bool]$PreviewOnly,
         [System.Windows.Forms.TextBox]$LogBox
     )
 
     $updater = Join-Path $RepoRoot 'tools\reconcile_debuffer_installs.ps1'
     if (-not (Test-Path -LiteralPath $updater -PathType Leaf)) {
-        throw "Updater not found: $updater"
+        throw ($Ui.UpdaterMissing -f $updater)
     }
     $args = @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', $updater)
-    if ($Apply) { $args += '-Apply' }
-    if ($Prune) { $args += '-Prune' }
-    $done = $(if ($Apply) { 'Update command completed.' } else { 'Update preview completed.' })
-    Invoke-PowerShellTool -RepoRoot $RepoRoot -Arguments $args -LogBox $LogBox -DoneText $done
+    if (-not $PreviewOnly) { $args += '-Apply' }
+    $done = if ($PreviewOnly) { $Ui.PreviewDone } else { $Ui.UpdateDone }
+    Invoke-Tool -RepoRoot $RepoRoot -Arguments $args -LogBox $LogBox -DoneText $done
 }
 
 function Run-RegistryDiscover {
@@ -194,36 +269,27 @@ function Run-RegistryDiscover {
 
     $updater = Join-Path $RepoRoot 'tools\reconcile_debuffer_installs.ps1'
     if (-not (Test-Path -LiteralPath $updater -PathType Leaf)) {
-        throw "Updater not found: $updater"
+        throw ($Ui.ScannerMissing -f $updater)
     }
     if (-not (Test-Path -LiteralPath $DiscoverRoot -PathType Container)) {
-        throw "Discovery root does not exist: $DiscoverRoot"
+        throw ($Ui.ScanMissing -f $DiscoverRoot)
     }
     $args = @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', $updater, '-DiscoverRoot', $DiscoverRoot, '-List')
-    Invoke-PowerShellTool -RepoRoot $RepoRoot -Arguments $args -LogBox $LogBox -DoneText 'Discovery completed.'
+    Invoke-Tool -RepoRoot $RepoRoot -Arguments $args -LogBox $LogBox -DoneText $Ui.DiscoverDone
 }
 
-function Get-RegistryText {
-    param([string]$RepoRoot)
-    $path = Join-Path $RepoRoot '.debuffer_registry\installed-projects.tsv'
-    if (-not (Test-Path -LiteralPath $path -PathType Leaf)) {
-        return 'Registry: none yet'
-    }
-    $count = 0
-    foreach ($line in Get-Content -LiteralPath $path -Encoding UTF8) {
-        if (-not $line.StartsWith('#') -and $line.Trim()) { $count++ }
-    }
-    return "Registry: $count project(s)"
-}
-
-function New-UiButton {
-    param([string]$Text, [int]$Width = 128)
+function New-Button {
+    param([string]$Text, [int]$Width)
     $button = New-Object System.Windows.Forms.Button
     $button.Text = $Text
     $button.Width = $Width
     $button.Height = 32
-    $button.Margin = New-Object System.Windows.Forms.Padding(6, 4, 0, 4)
-    $button.UseVisualStyleBackColor = $true
+    $button.Margin = New-Object System.Windows.Forms.Padding(6, 2, 0, 2)
+    $button.FlatStyle = 'Flat'
+    $button.FlatAppearance.BorderColor = [System.Drawing.Color]::FromArgb(205, 210, 218)
+    $button.BackColor = [System.Drawing.Color]::FromArgb(246, 247, 249)
+    $button.ForeColor = [System.Drawing.Color]::FromArgb(30, 35, 42)
+    $button.UseVisualStyleBackColor = $false
     return $button
 }
 
@@ -233,22 +299,22 @@ if ($ValidateOnly) {
     foreach ($required in @('tools\install_debuffer.ps1', 'tools\reconcile_debuffer_installs.ps1')) {
         $path = Join-Path $repoRoot $required
         if (-not (Test-Path -LiteralPath $path -PathType Leaf)) {
-            throw "Required tool not found: $path"
+            throw ($Ui.MissingTool -f $path)
         }
     }
-    Write-Host 'GUI manager validation ok.'
-    Write-Host "Skill repo: $repoRoot"
-    Write-Host "Default profile: $Profile"
+    Write-Host $Ui.ValidateOk
+    Write-Host ($Ui.SkillRepo -f $repoRoot)
+    Write-Host $Ui.DefaultProfile
     exit 0
 }
 
 $form = New-Object System.Windows.Forms.Form
-$form.Text = 'Debuffer Skills Manager'
+$form.Text = $Ui.Title
 $form.StartPosition = 'CenterScreen'
-$form.Size = New-Object System.Drawing.Size(900, 680)
-$form.MinimumSize = New-Object System.Drawing.Size(820, 600)
-$form.Font = New-Object System.Drawing.Font('Segoe UI', 9)
-$form.BackColor = [System.Drawing.Color]::FromArgb(247, 248, 250)
+$form.Size = New-Object System.Drawing.Size(680, 430)
+$form.MinimumSize = New-Object System.Drawing.Size(640, 400)
+$form.Font = New-Object System.Drawing.Font('Microsoft YaHei UI', 9)
+$form.BackColor = [System.Drawing.Color]::White
 
 $main = New-Object System.Windows.Forms.TableLayoutPanel
 $main.Dock = 'Fill'
@@ -256,7 +322,7 @@ $main.Padding = New-Object System.Windows.Forms.Padding(14)
 $main.ColumnCount = 1
 $main.RowCount = 5
 $main.ColumnStyles.Add((New-Object System.Windows.Forms.ColumnStyle([System.Windows.Forms.SizeType]::Percent, 100))) | Out-Null
-foreach ($height in @(78, 178, 104, 0, 46)) {
+foreach ($height in @(50, 36, 36, 40, 0)) {
     if ($height -eq 0) {
         $main.RowStyles.Add((New-Object System.Windows.Forms.RowStyle([System.Windows.Forms.SizeType]::Percent, 100))) | Out-Null
     } else {
@@ -265,154 +331,89 @@ foreach ($height in @(78, 178, 104, 0, 46)) {
 }
 $form.Controls.Add($main)
 
-$header = New-Object System.Windows.Forms.Panel
-$header.Dock = 'Fill'
-$title = New-Object System.Windows.Forms.Label
-$title.Text = 'debuffer-skills'
-$title.Font = New-Object System.Drawing.Font('Segoe UI Semibold', 18)
-$title.AutoSize = $true
-$title.Location = New-Object System.Drawing.Point(2, 2)
-$subtitle = New-Object System.Windows.Forms.Label
-$subtitle.Text = 'Install project-local skills, then update every registered project from one place.'
-$subtitle.Font = New-Object System.Drawing.Font('Segoe UI', 10)
-$subtitle.ForeColor = [System.Drawing.Color]::FromArgb(80, 86, 96)
-$subtitle.AutoSize = $true
-$subtitle.Location = New-Object System.Drawing.Point(4, 42)
-$header.Controls.Add($title)
-$header.Controls.Add($subtitle)
-$main.Controls.Add($header, 0, 0)
+$titlePanel = New-Object System.Windows.Forms.Panel
+$titlePanel.Dock = 'Fill'
+$titleLabel = New-Object System.Windows.Forms.Label
+$titleLabel.Text = $Ui.Title
+$titleLabel.Font = New-Object System.Drawing.Font('Microsoft YaHei UI', 15, [System.Drawing.FontStyle]::Bold)
+$titleLabel.AutoSize = $true
+$titleLabel.Location = New-Object System.Drawing.Point(0, 0)
+$introLabel = New-Object System.Windows.Forms.Label
+$introLabel.Text = $Ui.Intro
+$introLabel.AutoSize = $true
+$introLabel.ForeColor = [System.Drawing.Color]::FromArgb(88, 88, 88)
+$introLabel.Location = New-Object System.Drawing.Point(2, 30)
+$titlePanel.Controls.Add($titleLabel)
+$titlePanel.Controls.Add($introLabel)
+$main.Controls.Add($titlePanel, 0, 0)
 
-$installGroup = New-Object System.Windows.Forms.GroupBox
-$installGroup.Text = 'Install or reconcile one project'
-$installGroup.Dock = 'Fill'
-$installGroup.Padding = New-Object System.Windows.Forms.Padding(12)
-$installLayout = New-Object System.Windows.Forms.TableLayoutPanel
-$installLayout.Dock = 'Fill'
-$installLayout.ColumnCount = 3
-$installLayout.RowCount = 4
-$installLayout.ColumnStyles.Add((New-Object System.Windows.Forms.ColumnStyle([System.Windows.Forms.SizeType]::Absolute, 92))) | Out-Null
-$installLayout.ColumnStyles.Add((New-Object System.Windows.Forms.ColumnStyle([System.Windows.Forms.SizeType]::Percent, 100))) | Out-Null
-$installLayout.ColumnStyles.Add((New-Object System.Windows.Forms.ColumnStyle([System.Windows.Forms.SizeType]::Absolute, 118))) | Out-Null
-foreach ($height in @(34, 34, 34, 42)) {
-    $installLayout.RowStyles.Add((New-Object System.Windows.Forms.RowStyle([System.Windows.Forms.SizeType]::Absolute, $height))) | Out-Null
-}
-$installGroup.Controls.Add($installLayout)
-$main.Controls.Add($installGroup, 0, 1)
-
-$repoLabel = New-Object System.Windows.Forms.Label
-$repoLabel.Text = 'Skill repo'
-$repoLabel.TextAlign = 'MiddleLeft'
-$repoText = New-Object System.Windows.Forms.TextBox
-$repoText.Text = $repoRoot
-$repoText.ReadOnly = $true
-$repoText.Dock = 'Fill'
-$repoButton = New-UiButton -Text 'Change...'
-$repoButton.Dock = 'Fill'
-
+$projectPanel = New-Object System.Windows.Forms.TableLayoutPanel
+$projectPanel.Dock = 'Fill'
+$projectPanel.ColumnCount = 3
+$projectPanel.RowCount = 1
+$projectPanel.ColumnStyles.Add((New-Object System.Windows.Forms.ColumnStyle([System.Windows.Forms.SizeType]::Absolute, 72))) | Out-Null
+$projectPanel.ColumnStyles.Add((New-Object System.Windows.Forms.ColumnStyle([System.Windows.Forms.SizeType]::Percent, 100))) | Out-Null
+$projectPanel.ColumnStyles.Add((New-Object System.Windows.Forms.ColumnStyle([System.Windows.Forms.SizeType]::Absolute, 78))) | Out-Null
 $projectLabel = New-Object System.Windows.Forms.Label
-$projectLabel.Text = 'Target repo'
+$projectLabel.Text = $Ui.Project
 $projectLabel.TextAlign = 'MiddleLeft'
 $projectText = New-Object System.Windows.Forms.TextBox
 $projectText.Text = $ProjectPath
 $projectText.Dock = 'Fill'
-$projectButton = New-UiButton -Text 'Choose...'
+$projectText.BorderStyle = 'FixedSingle'
+$projectButton = New-Button -Text $Ui.Choose -Width 70
 $projectButton.Dock = 'Fill'
+$projectPanel.Controls.Add($projectLabel, 0, 0)
+$projectPanel.Controls.Add($projectText, 1, 0)
+$projectPanel.Controls.Add($projectButton, 2, 0)
+$main.Controls.Add($projectPanel, 0, 1)
 
-$profileLabel = New-Object System.Windows.Forms.Label
-$profileLabel.Text = 'Profile'
-$profileLabel.TextAlign = 'MiddleLeft'
-$profilePanel = New-Object System.Windows.Forms.FlowLayoutPanel
-$profilePanel.Dock = 'Fill'
-$profilePanel.FlowDirection = 'LeftToRight'
-$profilePanel.WrapContents = $false
-$profileCombo = New-Object System.Windows.Forms.ComboBox
-$profileCombo.DropDownStyle = 'DropDownList'
-[void]$profileCombo.Items.AddRange(@('full', 'core-research', 'paper', 'review'))
-$profileCombo.SelectedItem = $Profile
-if (-not $profileCombo.SelectedItem) { $profileCombo.SelectedItem = 'full' }
-$profileCombo.Width = 180
-$platformCombo = New-Object System.Windows.Forms.ComboBox
-$platformCombo.DropDownStyle = 'DropDownList'
-[void]$platformCombo.Items.AddRange(@('codex', 'claude', 'auto'))
-$platformCombo.SelectedItem = $Platform
-if (-not $platformCombo.SelectedItem) { $platformCombo.SelectedItem = 'codex' }
-$platformCombo.Width = 130
-$platformLabelSmall = New-Object System.Windows.Forms.Label
-$platformLabelSmall.Text = 'Platform'
-$platformLabelSmall.TextAlign = 'MiddleLeft'
-$platformLabelSmall.Width = 58
-$profilePanel.Controls.Add($profileCombo)
-$profilePanel.Controls.Add($platformLabelSmall)
-$profilePanel.Controls.Add($platformCombo)
-
-$optionLabel = New-Object System.Windows.Forms.Label
-$optionLabel.Text = 'Options'
-$optionLabel.TextAlign = 'MiddleLeft'
 $optionPanel = New-Object System.Windows.Forms.FlowLayoutPanel
 $optionPanel.Dock = 'Fill'
 $optionPanel.FlowDirection = 'LeftToRight'
 $optionPanel.WrapContents = $false
-$reconcileCheck = New-Object System.Windows.Forms.CheckBox
-$reconcileCheck.Text = 'Reconcile existing install'
-$reconcileCheck.AutoSize = $true
-$dryRunCheck = New-Object System.Windows.Forms.CheckBox
-$dryRunCheck.Text = 'Preview only'
-$dryRunCheck.AutoSize = $true
-$optionPanel.Controls.Add($reconcileCheck)
-$optionPanel.Controls.Add($dryRunCheck)
-$installButton = New-UiButton -Text 'Install' -Width 112
-$installButton.Dock = 'Right'
-
-$installLayout.Controls.Add($repoLabel, 0, 0)
-$installLayout.Controls.Add($repoText, 1, 0)
-$installLayout.Controls.Add($repoButton, 2, 0)
-$installLayout.Controls.Add($projectLabel, 0, 1)
-$installLayout.Controls.Add($projectText, 1, 1)
-$installLayout.Controls.Add($projectButton, 2, 1)
-$installLayout.Controls.Add($profileLabel, 0, 2)
-$installLayout.Controls.Add($profilePanel, 1, 2)
-$installLayout.SetColumnSpan($profilePanel, 2)
-$installLayout.Controls.Add($optionLabel, 0, 3)
-$installLayout.Controls.Add($optionPanel, 1, 3)
-$installLayout.Controls.Add($installButton, 2, 3)
-
-$updateGroup = New-Object System.Windows.Forms.GroupBox
-$updateGroup.Text = 'Update registered projects'
-$updateGroup.Dock = 'Fill'
-$updateGroup.Padding = New-Object System.Windows.Forms.Padding(12)
-$updateLayout = New-Object System.Windows.Forms.TableLayoutPanel
-$updateLayout.Dock = 'Fill'
-$updateLayout.ColumnCount = 2
-$updateLayout.RowCount = 2
-$updateLayout.ColumnStyles.Add((New-Object System.Windows.Forms.ColumnStyle([System.Windows.Forms.SizeType]::Percent, 100))) | Out-Null
-$updateLayout.ColumnStyles.Add((New-Object System.Windows.Forms.ColumnStyle([System.Windows.Forms.SizeType]::Absolute, 452))) | Out-Null
-$updateLayout.RowStyles.Add((New-Object System.Windows.Forms.RowStyle([System.Windows.Forms.SizeType]::Absolute, 34))) | Out-Null
-$updateLayout.RowStyles.Add((New-Object System.Windows.Forms.RowStyle([System.Windows.Forms.SizeType]::Absolute, 38))) | Out-Null
-$updateGroup.Controls.Add($updateLayout)
-$main.Controls.Add($updateGroup, 0, 2)
-
+$scopeLabel = New-Object System.Windows.Forms.Label
+$scopeLabel.Text = $Ui.Scope
+$scopeLabel.TextAlign = 'MiddleLeft'
+$scopeLabel.Width = 72
+$profileCombo = New-Object System.Windows.Forms.ComboBox
+$profileCombo.DropDownStyle = 'DropDownList'
+[void]$profileCombo.Items.AddRange([object[]]@($Ui.Full, $Ui.Core, $Ui.Paper, $Ui.Review))
+$profileCombo.SelectedItem = Get-ProfileDisplay $Profile
+if (-not $profileCombo.SelectedItem) { $profileCombo.SelectedIndex = 0 }
+$profileCombo.Width = 160
+$previewCheck = New-Object System.Windows.Forms.CheckBox
+$previewCheck.Text = $Ui.Preview
+$previewCheck.AutoSize = $true
+$previewCheck.Margin = New-Object System.Windows.Forms.Padding(16, 7, 0, 0)
 $registryLabel = New-Object System.Windows.Forms.Label
 $registryLabel.Text = Get-RegistryText $repoRoot
-$registryLabel.TextAlign = 'MiddleLeft'
-$registryLabel.Dock = 'Fill'
-$pruneCheck = New-Object System.Windows.Forms.CheckBox
-$pruneCheck.Text = 'Prune missing entries on update'
-$pruneCheck.AutoSize = $true
-$pruneCheck.Dock = 'Left'
-$updateButtons = New-Object System.Windows.Forms.FlowLayoutPanel
-$updateButtons.Dock = 'Fill'
-$updateButtons.FlowDirection = 'RightToLeft'
-$updateButtons.WrapContents = $false
-$updateButton = New-UiButton -Text 'Update' -Width 112
-$previewUpdateButton = New-UiButton -Text 'Preview' -Width 112
-$discoverButton = New-UiButton -Text 'Discover...' -Width 112
-$updateButtons.Controls.Add($updateButton)
-$updateButtons.Controls.Add($previewUpdateButton)
-$updateButtons.Controls.Add($discoverButton)
-$updateLayout.Controls.Add($registryLabel, 0, 0)
-$updateLayout.Controls.Add($pruneCheck, 1, 0)
-$updateLayout.Controls.Add($updateButtons, 0, 1)
-$updateLayout.SetColumnSpan($updateButtons, 2)
+$registryLabel.AutoSize = $true
+$registryLabel.Margin = New-Object System.Windows.Forms.Padding(18, 8, 0, 0)
+$optionPanel.Controls.Add($scopeLabel)
+$optionPanel.Controls.Add($profileCombo)
+$optionPanel.Controls.Add($previewCheck)
+$optionPanel.Controls.Add($registryLabel)
+$main.Controls.Add($optionPanel, 0, 2)
+
+$buttonPanel = New-Object System.Windows.Forms.FlowLayoutPanel
+$buttonPanel.Dock = 'Fill'
+$buttonPanel.FlowDirection = 'LeftToRight'
+$buttonPanel.WrapContents = $false
+$installButton = New-Button -Text $Ui.Install -Width 96
+$updateButton = New-Button -Text $Ui.Update -Width 96
+$discoverButton = New-Button -Text $Ui.Discover -Width 104
+$openButton = New-Button -Text $Ui.Open -Width 88
+$closeButton = New-Button -Text $Ui.Close -Width 72
+$buttonPanel.Controls.Add($installButton)
+$buttonPanel.Controls.Add($updateButton)
+$buttonPanel.Controls.Add($discoverButton)
+$buttonPanel.Controls.Add($openButton)
+$buttonPanel.Controls.Add($closeButton)
+$main.Controls.Add($buttonPanel, 0, 3)
+$installButton.BackColor = [System.Drawing.Color]::FromArgb(36, 99, 235)
+$installButton.ForeColor = [System.Drawing.Color]::White
+$installButton.FlatAppearance.BorderColor = [System.Drawing.Color]::FromArgb(36, 99, 235)
 
 $logBox = New-Object System.Windows.Forms.TextBox
 $logBox.Multiline = $true
@@ -421,85 +422,48 @@ $logBox.ReadOnly = $true
 $logBox.WordWrap = $false
 $logBox.Dock = 'Fill'
 $logBox.Font = New-Object System.Drawing.Font('Consolas', 9)
-$logBox.BackColor = [System.Drawing.Color]::FromArgb(255, 255, 255)
-$main.Controls.Add($logBox, 0, 3)
+$logBox.BackColor = [System.Drawing.Color]::FromArgb(250, 250, 250)
+$main.Controls.Add($logBox, 0, 4)
 
-$bottomPanel = New-Object System.Windows.Forms.FlowLayoutPanel
-$bottomPanel.Dock = 'Fill'
-$bottomPanel.FlowDirection = 'RightToLeft'
-$closeButton = New-UiButton -Text 'Close' -Width 104
-$openButton = New-UiButton -Text 'Open Target' -Width 116
-$bottomPanel.Controls.Add($closeButton)
-$bottomPanel.Controls.Add($openButton)
-$main.Controls.Add($bottomPanel, 0, 4)
+function Refresh-RegistryLabel {
+    $registryLabel.Text = Get-RegistryText $repoRoot
+}
 
 function Set-Busy {
     param([bool]$Busy)
-    foreach ($button in @($installButton, $updateButton, $previewUpdateButton, $discoverButton, $repoButton, $projectButton, $openButton)) {
+    foreach ($button in @($installButton, $updateButton, $discoverButton, $projectButton, $openButton, $closeButton)) {
         $button.Enabled = -not $Busy
     }
-    $form.Cursor = $(if ($Busy) { [System.Windows.Forms.Cursors]::WaitCursor } else { [System.Windows.Forms.Cursors]::Default })
+    $form.Cursor = if ($Busy) { [System.Windows.Forms.Cursors]::WaitCursor } else { [System.Windows.Forms.Cursors]::Default }
 }
 
-$repoButton.Add_Click({
-    $selected = Select-Folder -Description 'Choose debuffer-skills repo' -InitialPath $repoText.Text
-    if ($selected) {
-        try {
-            $resolved = Resolve-RepoRoot -ExplicitRepo $selected
-            $repoText.Text = $resolved
-            $registryLabel.Text = Get-RegistryText $resolved
-            Append-Log $logBox "Skill repo set to: $resolved"
-        } catch {
-            [System.Windows.Forms.MessageBox]::Show($_.Exception.Message, 'Invalid skill repo', 'OK', 'Error') | Out-Null
-        }
-    }
-})
+function Show-Failure {
+    param([string]$Message)
+    Append-Log $logBox $Message
+    [System.Windows.Forms.MessageBox]::Show($Message, $Ui.Failed, [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error) | Out-Null
+}
 
 $projectButton.Add_Click({
-    $selected = Select-Folder -Description 'Choose target research project repo' -InitialPath $projectText.Text
+    $selected = Select-Folder -Description $Ui.SelectProjectFolder -InitialPath $projectText.Text
     if ($selected) {
         $projectText.Text = $selected
-        Append-Log $logBox "Target repo set to: $selected"
+        Append-Log $logBox ($Ui.ProjectSet -f $selected)
     }
 })
-
-$openButton.Add_Click({
-    if ($projectText.Text -and (Test-Path -LiteralPath $projectText.Text -PathType Container)) {
-        Start-Process explorer.exe $projectText.Text
-    }
-})
-
-$closeButton.Add_Click({ $form.Close() })
 
 $installButton.Add_Click({
     Set-Busy $true
     try {
         Run-Installer `
-            -RepoRoot $repoText.Text `
+            -RepoRoot $repoRoot `
             -TargetProject $projectText.Text `
-            -SelectedPlatform ([string]$platformCombo.SelectedItem) `
-            -SelectedProfile ([string]$profileCombo.SelectedItem) `
-            -Reconcile $reconcileCheck.Checked `
-            -DryRun $dryRunCheck.Checked `
+            -SelectedProfile (Get-ProfileValue ([string]$profileCombo.SelectedItem)) `
+            -PreviewOnly $previewCheck.Checked `
             -LogBox $logBox
-        $registryLabel.Text = Get-RegistryText $repoText.Text
-        [System.Windows.Forms.MessageBox]::Show('Install command completed.', 'debuffer-skills', 'OK', 'Information') | Out-Null
+        Refresh-RegistryLabel
+        [System.Windows.Forms.MessageBox]::Show($Ui.InstallDone, $Ui.Title, [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information) | Out-Null
     } catch {
-        Append-Log $logBox $_.Exception.Message
-        [System.Windows.Forms.MessageBox]::Show($_.Exception.Message, 'Install failed', 'OK', 'Error') | Out-Null
-    } finally {
-        Set-Busy $false
-    }
-})
-
-$previewUpdateButton.Add_Click({
-    Set-Busy $true
-    try {
-        Run-RegistryUpdate -RepoRoot $repoText.Text -Apply $false -Prune $false -LogBox $logBox
-        $registryLabel.Text = Get-RegistryText $repoText.Text
-    } catch {
-        Append-Log $logBox $_.Exception.Message
-        [System.Windows.Forms.MessageBox]::Show($_.Exception.Message, 'Update preview failed', 'OK', 'Error') | Out-Null
+        Show-Failure $_.Exception.Message
     } finally {
         Set-Busy $false
     }
@@ -508,34 +472,43 @@ $previewUpdateButton.Add_Click({
 $updateButton.Add_Click({
     Set-Busy $true
     try {
-        Run-RegistryUpdate -RepoRoot $repoText.Text -Apply $true -Prune $pruneCheck.Checked -LogBox $logBox
-        $registryLabel.Text = Get-RegistryText $repoText.Text
-        [System.Windows.Forms.MessageBox]::Show('Update command completed.', 'debuffer-skills', 'OK', 'Information') | Out-Null
+        Run-RegistryUpdate -RepoRoot $repoRoot -PreviewOnly $previewCheck.Checked -LogBox $logBox
+        Refresh-RegistryLabel
+        if (-not $previewCheck.Checked) {
+            [System.Windows.Forms.MessageBox]::Show($Ui.UpdateDone, $Ui.Title, [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information) | Out-Null
+        }
     } catch {
-        Append-Log $logBox $_.Exception.Message
-        [System.Windows.Forms.MessageBox]::Show($_.Exception.Message, 'Update failed', 'OK', 'Error') | Out-Null
+        Show-Failure $_.Exception.Message
     } finally {
         Set-Busy $false
     }
 })
 
 $discoverButton.Add_Click({
-    $selected = Select-Folder -Description 'Scan for existing debuffer installs under this folder' -InitialPath ([Environment]::GetFolderPath('Desktop'))
+    $selected = Select-Folder -Description $Ui.SelectScanFolder -InitialPath ([Environment]::GetFolderPath('Desktop'))
     if (-not $selected) { return }
     Set-Busy $true
     try {
-        Run-RegistryDiscover -RepoRoot $repoText.Text -DiscoverRoot $selected -LogBox $logBox
-        $registryLabel.Text = Get-RegistryText $repoText.Text
+        Run-RegistryDiscover -RepoRoot $repoRoot -DiscoverRoot $selected -LogBox $logBox
+        Refresh-RegistryLabel
+        [System.Windows.Forms.MessageBox]::Show($Ui.DiscoverDone, $Ui.Title, [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information) | Out-Null
     } catch {
-        Append-Log $logBox $_.Exception.Message
-        [System.Windows.Forms.MessageBox]::Show($_.Exception.Message, 'Discovery failed', 'OK', 'Error') | Out-Null
+        Show-Failure $_.Exception.Message
     } finally {
         Set-Busy $false
     }
 })
 
-Append-Log $logBox 'Ready.'
-Append-Log $logBox "Skill repo: $repoRoot"
-Append-Log $logBox 'Default profile: full'
+$openButton.Add_Click({
+    if ($projectText.Text -and (Test-Path -LiteralPath $projectText.Text -PathType Container)) {
+        Start-Process explorer.exe -ArgumentList @("`"$($projectText.Text)`"")
+    }
+})
+
+$closeButton.Add_Click({ $form.Close() })
+
+Append-Log $logBox $Ui.Ready
+Append-Log $logBox ($Ui.SkillRepo -f $repoRoot)
+Append-Log $logBox $Ui.DefaultScope
 
 [void]$form.ShowDialog()

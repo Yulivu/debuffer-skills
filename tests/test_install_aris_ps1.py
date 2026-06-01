@@ -193,8 +193,8 @@ def test_install_aris_ps1_updates_local_registry(tmp_path: Path) -> None:
 def test_install_debuffer_gui_validate_only_defaults_full() -> None:
     result = run_ps(["-ValidateOnly"], script=GUI_PS1)
 
-    assert "GUI manager validation ok." in result.stdout
-    assert "Default profile: full" in result.stdout
+    assert "图形界面校验通过。" in result.stdout
+    assert "默认范围：full" in result.stdout
 
 
 def test_install_aris_ps1_migrates_legacy_state_dir(tmp_path: Path) -> None:

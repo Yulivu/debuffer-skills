@@ -24,14 +24,14 @@ cd debuffer-skills
 给 Codex 项目安装 project-local skills：
 
 ```bash
-read -r -p "Target repo path: " target_repo
+read -r -p "目标项目路径: " target_repo
 bash tools/install_debuffer_codex.sh "$target_repo" --repo "$PWD"
 ```
 
 Windows PowerShell：
 
 ```powershell
-$targetRepo = Read-Host "Target repo path"
+$targetRepo = Read-Host "目标项目路径"
 powershell -ExecutionPolicy Bypass -File tools\install_debuffer.ps1 $targetRepo -Platform codex -Repo (Get-Location).Path
 ```
 
@@ -41,7 +41,7 @@ powershell -ExecutionPolicy Bypass -File tools\install_debuffer.ps1 $targetRepo 
 
 安装器会在本技能库本地维护 `.debuffer_registry/installed-projects.tsv`，记录哪些项目从这个 checkout 安装过。该登记表只用于本机批量更新，已被 Git 忽略。
 
-Windows 上可以直接双击根目录的 `Install Debuffer Skills.cmd`。窗口支持两类操作：给单个目标 repo 安装/重连 skills，以及一键更新登记表里的所有已安装项目。
+Windows 上可以直接双击根目录的 `Install Debuffer Skills.cmd`。图形界面是纯中文简化版，默认安装 `full`，主要操作只有 `安装/重连`、`更新全部`、`扫描旧项目`。
 
 macOS 上可以直接双击根目录的 `Install Debuffer Skills.command`，选择安装到单个 repo 或更新所有登记项目。若 Finder 提示无法执行，先在终端运行：
 
@@ -56,7 +56,7 @@ Windows PowerShell：
 ```powershell
 # 在 debuffer-skills 仓库根目录运行
 $skillRepo = (Get-Location).Path
-$targetRepo = Read-Host "Target repo path"
+$targetRepo = Read-Host "目标项目路径"
 Copy-Item (Join-Path $skillRepo "tools\use_debuffer_skills.ps1") $targetRepo
 Set-Location $targetRepo
 powershell -ExecutionPolicy Bypass -File .\use_debuffer_skills.ps1 -Repo $skillRepo
@@ -67,7 +67,7 @@ Git Bash / Linux / AutoDL：
 ```bash
 # 在 debuffer-skills 仓库根目录运行
 skill_repo="$(pwd)"
-read -r -p "Target repo path: " target_repo
+read -r -p "目标项目路径: " target_repo
 cp "$skill_repo/tools/use_debuffer_skills.sh" "$target_repo/"
 cd "$target_repo"
 bash use_debuffer_skills.sh --repo "$skill_repo"
