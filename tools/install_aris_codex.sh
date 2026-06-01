@@ -113,7 +113,7 @@ profile_includes_name() {
             ;;
         core-research)
             case "$name" in
-                research-repo-architect|research-pipeline|idea-discovery|idea-discovery-robot|idea-creator|research-refine|research-refine-pipeline|experiment-plan|experiment-bridge|run-experiment|monitor-experiment|experiment-queue|analyze-results|autodl-hpc|ablation-planner|training-check|system-profile|research-review|auto-review-loop|experiment-audit|result-to-claim|paper-claim-audit|citation-audit|research-lit|arxiv|semantic-scholar|openalex|deepxiv|exa-search|alphaxiv|novelty-check|comm-lit-review|wiki-enrich|research-wiki|figure-spec|render-html)
+                research-repo-architect|research-pipeline|idea-discovery|idea-creator|research-refine|experiment-plan|experiment-bridge|run-experiment|monitor-experiment|experiment-queue|analyze-results|autodl-hpc|ablation-planner|training-check|system-profile|research-review|auto-review-loop|experiment-audit|result-to-claim|paper-claim-audit|citation-audit|research-lit|arxiv|semantic-scholar|openalex|deepxiv|exa-search|alphaxiv|novelty-check|comm-lit-review|wiki-enrich|research-wiki|figure-spec|render-html)
                     return 0
                     ;;
             esac

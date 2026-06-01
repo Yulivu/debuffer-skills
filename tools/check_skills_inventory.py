@@ -41,6 +41,7 @@ IGNORED_README_SCAN_PARTS = {
     ".aris",
     ".agents",
     ".pytest_cache",
+    ".pytest_tmp",
     "__pycache__",
     "node_modules",
     ".venv",

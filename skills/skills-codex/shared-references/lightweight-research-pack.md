@@ -130,7 +130,7 @@ tasks with bounded runtime.
 For this customized skill bundle:
 
 - Root Chinese `README.md` and `docs/SKILLS_CATALOG.md` are the public docs.
-- `docs/SKILLS_CATALOG.md` stays compact and reflects the 79 skills.
+- `docs/SKILLS_CATALOG.md` stays compact and reflects the active skill count.
 - Long generated tutorials, demo media, PDFs, and rendered artifacts belong to
   target projects with explicit user request.
 - Long project reports include a compaction plan and a stage-gate refresh path.

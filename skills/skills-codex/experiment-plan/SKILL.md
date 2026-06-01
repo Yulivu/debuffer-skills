@@ -9,7 +9,7 @@ Refine and concretize: **$ARGUMENTS**
 
 ## Overview
 
-Use this skill after the method is stable enough that the next question becomes: **what exact experiments should we run, in what order, to defend the paper?** If the user wants the full chain in one request, prefer `/research-refine-pipeline`.
+Use this skill after the method is stable enough that the next question becomes: **what exact experiments should we run, in what order, to defend the paper?** If the user wants the full chain in one request, run `/research-refine` first and continue here once the method thesis is stable.
 
 The goal is not to generate a giant benchmark wishlist. The goal is to turn a proposal into a **claim -> evidence -> run order** roadmap that supports four things:
 
@@ -294,7 +294,6 @@ Tracker file: refine-logs/EXPERIMENT_TRACKER.md
 ## Composing with Other Skills
 
 ```
-/research-refine-pipeline -> one-shot method + experiment planning
 /research-refine   -> method and claim refinement
 /experiment-plan   -> detailed experiment roadmap
 /run-experiment    -> execute the runs

@@ -1,6 +1,6 @@
 # Skills Catalog
 
-这个目录是 `debuffer-skills` 的紧凑技能清单。当前主线与 Codex mirror 均为 **79 skills**。
+这个目录是 `debuffer-skills` 的紧凑技能清单。当前主线与 Codex mirror 均为 **77 skills**。
 
 默认流程：本地轻量检查，AutoDL/HPC 运行准备，prompt-only 评审，紧凑项目记忆。
 
@@ -34,7 +34,6 @@
 | [`/grant-proposal`](../skills/grant-proposal/SKILL.md) | 辅助输出 | 生成项目本地辅助材料、通知或学习文档。 | 把输出写到目标项目，配套简短审查或通知流程。 |
 | [`/idea-creator`](../skills/idea-creator/SKILL.md) | 想法与方法 | 把假设、方法和 venue 风险整理成可验证计划。 | 建立 claim map、实验路线、风险表和最小验证集。 |
 | [`/idea-discovery`](../skills/idea-discovery/SKILL.md) | 流程编排 | 串联多个 skill，把方向、实验、评审和论文推进到阶段产物。 | 读取项目状态，选择下游 skill，输出紧凑记录和下一步。 |
-| [`/idea-discovery-robot`](../skills/idea-discovery-robot/SKILL.md) | 流程编排 | 串联多个 skill，把方向、实验、评审和论文推进到阶段产物。 | 读取项目状态，选择下游 skill，输出紧凑记录和下一步。 |
 | [`/interview-cheatsheet`](../skills/interview-cheatsheet/SKILL.md) | 辅助输出 | 生成项目本地辅助材料、通知或学习文档。 | 把输出写到目标项目，配套简短审查或通知流程。 |
 | [`/invention-structuring`](../skills/invention-structuring/SKILL.md) | 专利 | 围绕发明点、现有技术和法域格式生成专利草案。 | 检索先有技术，结构化发明点，生成权利要求和说明书。 |
 | [`/jurisdiction-format`](../skills/jurisdiction-format/SKILL.md) | 专利 | 围绕发明点、现有技术和法域格式生成专利草案。 | 检索先有技术，结构化发明点，生成权利要求和说明书。 |
@@ -69,7 +68,6 @@
 | [`/research-lit`](../skills/research-lit/SKILL.md) | 文献与知识库 | 检索、整理和补全文献与项目知识。 | 使用本地笔记、论文库和网络检索，保留摘要和证据路径。 |
 | [`/research-pipeline`](../skills/research-pipeline/SKILL.md) | 流程编排 | 串联多个 skill，把方向、实验、评审和论文推进到阶段产物。 | 读取项目状态，选择下游 skill，输出紧凑记录和下一步。 |
 | [`/research-refine`](../skills/research-refine/SKILL.md) | 想法与方法 | 把假设、方法和 venue 风险整理成可验证计划。 | 建立 claim map、实验路线、风险表和最小验证集。 |
-| [`/research-refine-pipeline`](../skills/research-refine-pipeline/SKILL.md) | 流程编排 | 串联多个 skill，把方向、实验、评审和论文推进到阶段产物。 | 读取项目状态，选择下游 skill，输出紧凑记录和下一步。 |
 | [`/research-repo-architect`](../skills/research-repo-architect/SKILL.md) | 其他 | 提供对应场景的专项处理能力。 | 遵循 SKILL.md 的触发条件和轻量包默认边界。 |
 | [`/research-review`](../skills/research-review/SKILL.md) | 评审与审计 | 生成 prompt-only 评审和证据审计产物。 | 写入 review-prompts/，按照独立对话反馈整理行动项。 |
 | [`/research-wiki`](../skills/research-wiki/SKILL.md) | 文献与知识库 | 检索、整理和补全文献与项目知识。 | 使用本地笔记、论文库和网络检索，保留摘要和证据路径。 |

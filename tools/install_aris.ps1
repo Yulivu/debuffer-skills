@@ -307,8 +307,8 @@ function Test-ProfileIncludesName {
         'core-research' {
             return $Name -in @(
                 'research-repo-architect', 'research-pipeline', 'idea-discovery',
-                'idea-discovery-robot', 'idea-creator', 'research-refine',
-                'research-refine-pipeline', 'experiment-plan', 'experiment-bridge',
+                'idea-creator', 'research-refine',
+                'experiment-plan', 'experiment-bridge',
                 'run-experiment', 'monitor-experiment', 'experiment-queue',
                 'analyze-results', 'autodl-hpc', 'ablation-planner',
                 'training-check', 'system-profile', 'research-review',

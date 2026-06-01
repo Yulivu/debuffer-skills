@@ -1,6 +1,6 @@
 # debuffer-skills
 
-这是一个面向科研项目的轻量化 Codex skills 定制包。当前提供 **79 个 skill**，主线与 Codex mirror 均为 **79 个 skill**，完整清单见 [docs/SKILLS_CATALOG.md](docs/SKILLS_CATALOG.md)。
+这是一个面向科研项目的轻量化 Codex skills 定制包。当前提供 **77 个 skill**，主线与 Codex mirror 均为 **77 个 skill**，完整清单见 [docs/SKILLS_CATALOG.md](docs/SKILLS_CATALOG.md)。
 
 ## 当前提供
 

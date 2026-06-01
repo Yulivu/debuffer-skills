@@ -38,7 +38,6 @@ Determine the output language using this priority:
 | /experiment-plan | Full | EXPERIMENT_PLAN.md follows setting |
 | /experiment-bridge | Full | EXPERIMENT_RESULTS.md follows setting |
 | /research-refine | Full | FINAL_PROPOSAL.md follows setting |
-| /research-refine-pipeline | Full | PIPELINE_SUMMARY.md follows setting |
 | /research-pipeline | Full | Inherits from sub-skills |
 | /result-to-claim | Full | Claim descriptions follow setting |
 | /paper-writing | Skip | Always English LaTeX for submission |

@@ -1,6 +1,6 @@
 ---
 name: "idea-discovery"
-description: "Workflow 1: Full idea discovery pipeline. Orchestrates research-lit \u2192 idea-creator \u2192 novelty-check \u2192 research-review \u2192 research-refine-pipeline to go from a broad research direction to validated, pilot-tested ideas. Use when user says \\\"\u627eidea\u5168\u6d41\u7a0b\\\", \\\"idea discovery pipeline\\\", \\\"\u4ece\u96f6\u5f00\u59cb\u627e\u65b9\u5411\\\", or wants the complete idea exploration workflow."
+description: "Workflow 1: Full idea discovery pipeline. Orchestrates research-lit \u2192 idea-creator \u2192 novelty-check \u2192 research-review \u2192 research-refine plus experiment-plan to go from a broad research direction to validated, pilot-tested ideas. Also handles robotics / embodied AI directions through simulation-first robotics mode. Use when user says \\\"\u627eidea\u5168\u6d41\u7a0b\\\", \\\"idea discovery pipeline\\\", \\\"\u4ece\u96f6\u5f00\u59cb\u627e\u65b9\u5411\\\", \\\"robotics idea discovery\\\", \\\"embodied AI idea\\\", or wants the complete idea exploration workflow."
 ---
 
 # Workflow 1: Idea Discovery Pipeline
@@ -12,8 +12,8 @@ Orchestrate a complete idea discovery workflow for: **$ARGUMENTS**
 This skill chains sub-skills into a single automated pipeline:
 
 ```
-/research-lit → /idea-creator → /novelty-check → /research-review → /research-refine-pipeline
-  (survey)      (brainstorm)    (verify novel)    (critical feedback)  (refine method + plan experiments)
+/research-lit → /idea-creator → /novelty-check → /research-review → /research-refine → /experiment-plan
+  (survey)      (brainstorm)    (verify novel)    (critical feedback)  (method)        (experiment plan)
 ```
 
 Each phase builds on the previous one's output. The final deliverables are a validated `idea-stage/IDEA_REPORT.md` with ranked ideas, plus a refined proposal (`refine-logs/FINAL_PROPOSAL.md`) and experiment plan (`refine-logs/EXPERIMENT_PLAN.md`) for the top idea.
@@ -39,6 +39,9 @@ lightweight idea discovery unless the user requests a full report:
 - Treat `idea-creator` as the owner of A-E candidate generation. This workflow
   should only pass startup mode, landscape, reference material, venue
   constraints, and failure-memory context into `idea-creator`.
+- If the direction is robotics or embodied AI, use robotics mode: simulation
+  first, benchmark-specific ideas only, explicit embodiment/task/action frame,
+  failure metrics, and no real-robot execution without user approval.
 
 ## Constants
 
@@ -233,8 +236,12 @@ For the surviving top idea(s), get brutal feedback:
 
 After review, refine the top idea into a concrete proposal and plan experiments:
 
-```
-/research-refine-pipeline "[top idea description + pilot results + reviewer feedback]"
+Run `/research-refine` first, then `/experiment-plan` when the method thesis is
+stable:
+
+```text
+/research-refine "[top idea description + pilot results + reviewer feedback]"
+/experiment-plan "[refine-logs/FINAL_PROPOSAL.md]"
 ```
 
 **What this does:**
@@ -269,7 +276,7 @@ Finalize `idea-stage/IDEA_REPORT.md` with all accumulated information:
 
 **Direction**: $ARGUMENTS
 **Date**: [today]
-**Pipeline**: research-lit → idea-creator → novelty-check → research-review → research-refine-pipeline
+**Pipeline**: research-lit → idea-creator → novelty-check → research-review → research-refine → experiment-plan
 
 ## Executive Summary
 [2-3 sentences: best idea, key evidence, recommended next step]

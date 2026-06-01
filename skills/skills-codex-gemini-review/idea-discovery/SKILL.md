@@ -29,7 +29,7 @@ Orchestrate a complete idea discovery workflow for: **$ARGUMENTS**
 This skill chains sub-skills into a single automated pipeline:
 
 ```
-/research-lit → /idea-creator → /novelty-check → /research-review → /research-refine-pipeline
+/research-lit → /idea-creator → /novelty-check → /research-review → /research-refine → /experiment-plan
   (survey)      (brainstorm)    (verify novel)    (critical feedback)  (refine method + plan experiments)
 ```
 
@@ -147,7 +147,8 @@ For the surviving top idea(s), get brutal feedback:
 After review, refine the top idea into a concrete proposal and plan experiments:
 
 ```
-/research-refine-pipeline "[top idea description + pilot results + reviewer feedback]"
+/research-refine "[top idea description + pilot results + reviewer feedback]"
+/experiment-plan "[refine-logs/FINAL_PROPOSAL.md]"
 ```
 
 **What this does:**
@@ -182,7 +183,7 @@ Finalize `idea-stage/IDEA_REPORT.md` with all accumulated information:
 
 **Direction**: $ARGUMENTS
 **Date**: [today]
-**Pipeline**: research-lit → idea-creator → novelty-check → research-review → research-refine-pipeline
+**Pipeline**: research-lit → idea-creator → novelty-check → research-review → research-refine → experiment-plan
 
 ## Executive Summary
 [2-3 sentences: best idea, key evidence, recommended next step]

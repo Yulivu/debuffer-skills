@@ -15,8 +15,8 @@ MCP reviewer, or SSH automation.
 - `research-refine` may borrow A-E paths as route-selection lenses after a
   problem or candidate idea exists. It should not run a broad idea search; if
   the task still needs new candidates, hand off to `idea-creator`.
-- `idea-discovery-robot` adds robotics constraints and then delegates candidate
-  generation to `idea-creator`.
+- `idea-discovery` robotics mode adds embodied-AI constraints and then
+  delegates candidate generation to `idea-creator`.
 - `experiment-plan` and `autodl-hpc` own pilot gates, smoke/formal run
   separation, and experiment-level negative memory after an idea is selected.
 

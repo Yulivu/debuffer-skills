@@ -6,7 +6,7 @@
 
 ## 包状态
 
-**Full catalog**: [docs/SKILLS_CATALOG.md](docs/SKILLS_CATALOG.md) - **79 skills**.
+**Full catalog**: [docs/SKILLS_CATALOG.md](docs/SKILLS_CATALOG.md) - **77 skills**.
 
 | 区域 | 路径 | 说明 |
 |---|---|---|
@@ -80,7 +80,7 @@ powershell -ExecutionPolicy Bypass -File tools\install_debuffer.ps1 C:\path\to\p
 | `core-research` | 建仓、idea、实验计划、AutoDL、基础审计 |
 | `paper` | 论文写作、编译、图表、审计、rebuttal/resubmit |
 | `review` | prompt-only 外部评审和证据审计 |
-| `full` | 全量 79 skills |
+| `full` | 全量 77 skills |
 
 ## 修改仓库时的校验
 
