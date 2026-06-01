@@ -38,6 +38,9 @@ lightweight idea discovery unless the user requests a full report:
   AutoDL-ready smoke/formal plan and ask for approval.
 - External critique is prompt-only by default: write
   `review-prompts/idea_review_prompt.md` and wait for pasted feedback.
+- Treat `idea-creator` as the owner of A-E candidate generation. This workflow
+  should only pass startup mode, landscape, reference material, venue
+  constraints, and failure-memory context into `idea-creator`.
 
 ## Constants
 
@@ -174,10 +177,16 @@ Invoke `/idea-creator` with the landscape context (and `idea-stage/REF_PAPER_SUM
 
 **What this does:**
 - If `idea-stage/REF_PAPER_SUMMARY.md` exists, include it as context — ideas should build on, improve, or extend the reference paper
+- Delegate A-E candidate generation and compact idea-memory updates to
+  `idea-creator`; do not restate that logic here.
+- Pass `idea-stage/IDEA_MEMORY.md` and `experiments/NEGATIVE_RESULTS.md` as
+  banlist context unless the user explicitly asks to revisit a failed direction.
 - Brainstorm 8-12 concrete ideas via GPT-5.4 xhigh
 - Filter by feasibility, compute cost, quick novelty search
 - Deep validate top ideas (full novelty check + devil's advocate)
-- Run parallel pilot experiments on available GPUs (top 2-3 ideas)
+- Prepare pilot specs for top ideas. Do not run heavy pilots locally; when GPU
+  time is needed, create AutoDL-ready pilot command blocks and wait for approval
+  or pasted results.
 - Rank by empirical signal
 - Output `idea-stage/IDEA_REPORT.md`
 
@@ -326,6 +335,11 @@ Write `idea-stage/IDEA_CANDIDATES.md` — a lean summary of the top 3-5 survivin
 ```
 
 This file is intentionally small (~30 lines) so downstream skills and session recovery can read it without loading the full `idea-stage/IDEA_REPORT.md` (~200+ lines).
+
+Update `idea-stage/IDEA_MEMORY.md` append-only for every accepted, rejected,
+pilot-pass, pilot-fail, or inconclusive idea using the template in
+`autosci-lite-patterns.md`. Keep the entry short and specific enough that future
+sessions know what not to repeat.
 
 ## Output Protocols
 

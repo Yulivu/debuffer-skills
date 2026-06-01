@@ -11,6 +11,12 @@ Generate publishable research ideas for: $ARGUMENTS
 
 Given a broad research direction from the user, systematically generate, validate, and rank concrete research ideas. This skill composes with `/research-lit`, `/novelty-check`, and `/research-review` to form a complete idea discovery pipeline.
 
+This is the owner of AutoSci-lite A-E candidate generation. Read
+`../shared-references/autosci-lite-patterns.md` before Phase 2 and use it for
+idea paths, compact failure memory, pilot gates, and the macro state map. Other
+skills may orchestrate or specialize this workflow, but they should not duplicate
+the A-E generation rules.
+
 ## Constants
 
 - **PILOT_MAX_HOURS = 2** — Skip any pilot estimated to take > 2 hours per GPU. Flag as "needs manual pilot".
@@ -93,13 +99,21 @@ spawn_agent:
     Key gaps identified:
     [paste gaps from Phase 1]
 
-    Generate 8-12 concrete research ideas. For each idea:
+    Read the AutoSci-lite A-E idea-path contract from
+    `../shared-references/autosci-lite-patterns.md`. Generate 8-12 concrete
+    research ideas across the applicable paths. Do not force all five paths;
+    choose paths based on the available material and avoid anything already
+    ruled out by `idea-stage/IDEA_MEMORY.md` or
+    `experiments/NEGATIVE_RESULTS.md`.
+
+    For each idea:
     1. One-sentence summary
     2. Core hypothesis (what you expect to find and why)
     3. Minimum viable experiment (what's the cheapest way to test this?)
     4. Expected contribution type: empirical finding / new method / theoretical result / diagnostic
     5. Risk level: LOW (likely works) / MEDIUM (50-50) / HIGH (speculative)
     6. Estimated effort: days / weeks / months
+    7. AutoSci-lite path (A-E), source context, minimal validation, and failure risk
 
     Prioritize ideas that are:
     - Testable with moderate compute (8x RTX 3090 or less)

@@ -24,6 +24,8 @@ when available. Default to a lightweight, AutoDL-first shape:
   memory. Keep `PROJECT_STATUS.md` current so future sessions know the macro
   phase; prefer `PROJECT_BRIEF.md`, `NEXT_ACTIONS.md`, `findings.md`, and
   `EXPERIMENT_LOG.md`; create or refresh `PROJECT_GUIDE.md` only at stage gates.
+- Read `../shared-references/autosci-lite-patterns.md` when scaffolding idea
+  discovery, failure memory, pilot gates, or the macro state machine.
 - For external review, create `review-prompts/` rather than wiring direct API,
   agent, or SSH automation into the repository.
 
@@ -40,6 +42,9 @@ Start by deciding which path applies:
   minimal brief, plan, architecture, and next-action files needed for the current
   startup mode. Avoid generating a full research wiki or large Markdown bundle
   until the project has evidence worth preserving.
+- **AutoSci-lite lifecycle**: Use A-E idea paths, append-only failure memory,
+  pilot gates, and the explicit `PROJECT_STATUS.md` phase map without adopting a
+  full wiki platform.
 
 For detailed directory rules, read `references/architecture.md`. For skill-pack-specific work, read `references/skill-pack-architecture.md`. For AutoDL/HPC work, read `references/autodl-hpc.md`. For migration work, also read `references/migration-playbook.md`.
 
@@ -60,6 +65,7 @@ For detailed directory rules, read `references/architecture.md`. For skill-pack-
 6. Add a short root `README.md` for installation, smoke checks, data, and reproduction commands. Use `docs/` for internal runbooks and maintenance notes.
 7. Add a conservative `.gitignore` so raw data, generated runs, caches, model checkpoints, and large binary artifacts are not tracked.
 8. If the repo uses project-local skills, keep skill runtime state out of Git by default: `.debuffer_skills/traces/`, `.debuffer_skills/cache/`, `.debuffer_skills/runs/`, `.debuffer_skills/meta/events.jsonl`, and project-local `.agents/skills/` symlinks.
+9. Keep compact project memory tracked when it exists: `idea-stage/IDEA_MEMORY.md` and `experiments/NEGATIVE_RESULTS.md` are decision memory, not runtime traces.
 
 ## Startup Mode Scaffolds
 
@@ -81,6 +87,15 @@ For detailed directory rules, read `references/architecture.md`. For skill-pack-
 For every startup mode, create or update `PROJECT_STATUS.md` with the current
 macro phase, target venue, last accepted artifact, next gate, blockers, and the
 phase map from `project-guide-protocol.md`.
+
+When idea exploration or experiment planning begins, initialize compact memory
+only as needed:
+
+- `idea-stage/IDEA_MEMORY.md` for accepted/rejected/pilot-status idea entries.
+- `experiments/NEGATIVE_RESULTS.md` for failed or inconclusive run evidence.
+
+Do not create a full `research-wiki/` or graph unless the user asks for a
+long-lived knowledge base.
 
 ## Existing Repo Migration
 
@@ -142,6 +157,9 @@ Use this path when the repo will run on AutoDL or another SSH GPU/HPC machine.
 - Read `references/autodl-hpc.md` before adding or changing remote-run scripts.
 - Keep target-machine setup in `scripts/autodl_setup.sh` and machine checks/wrappers in `scripts/hpc/`.
 - Keep AutoDL smoke suites under `experiments/suites/`, with raw outputs under `experiments/runs/autodl_smoke/` and preflight reports under `experiments/runs/preflight/`.
+- Add a pilot gate before formal suites: bounded pilot spec, raw outputs under
+  `experiments/runs/pilot/`, and pass/fail/inconclusive decision recorded before
+  formal approval.
 - Keep formal suite definitions disabled or explicitly gated by default. Require a dry-run and user approval before formal execution.
 - Keep AutoDL operational docs in `docs/runbooks/AUTODL_HPC_RUNBOOK.md` or an equivalent runbook.
 - Treat large uploaded data as an explicit manifest concern: expected paths under `data/raw/` or `data/processed/`, with `data/DATA_MANIFEST.md` updated for anything not tracked in Git.

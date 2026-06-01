@@ -19,6 +19,13 @@ Four principles dominate this skill:
 3. **One paper, one dominant contribution.** Prefer one sharp thesis plus at most one supporting contribution.
 4. **Modern leverage is a prior, not a decoration.** When LLM / VLM / Diffusion / RL / distillation / inference-time scaling naturally fit the bottleneck, use them concretely. Do not bolt them on as buzzwords.
 
+Read `../shared-references/autosci-lite-patterns.md` before Phase 1. Use its
+skill-boundary note: `research-refine` may borrow A-E as route-selection
+lenses for an existing problem, while broad candidate generation belongs to
+`idea-creator`. Scan `idea-stage/IDEA_MEMORY.md` plus
+`experiments/NEGATIVE_RESULTS.md` to avoid repeating failed mechanisms or
+experiment directions.
+
 ```
 User input (PROBLEM + vague APPROACH)
   -> Phase 0 (Claude): Freeze Problem Anchor
@@ -171,6 +178,12 @@ Before locking the method, compare two candidate routes if both are plausible:
 - **Route A: Elegant minimal route** — the smallest mechanism that directly targets the bottleneck.
 - **Route B: Frontier-native route** — a more modern route that uses LLM / VLM / Diffusion / RL / distillation / inference-time scaling *only if* it gives a cleaner or stronger story.
 
+When the input is still broad but the problem is visible, derive route
+candidates from the AutoSci-lite A-E paths in
+`../shared-references/autosci-lite-patterns.md`. Keep this to route selection,
+not broad idea discovery; if the user still needs multiple new candidate ideas,
+hand off to `/idea-creator`.
+
 Then decide:
 
 - Which route is more likely to become a strong paper under the stated constraints?
@@ -178,6 +191,10 @@ Then decide:
 - Which route avoids contribution sprawl?
 
 If both routes are weak, rethink the framing instead of combining them into a larger system by default.
+
+If a route is rejected because it repeats a failed idea, append a short entry to
+`idea-stage/IDEA_MEMORY.md`. If the rejection is driven by experiment evidence,
+also append `experiments/NEGATIVE_RESULTS.md`.
 
 #### Step 1.4: Concretize the Method First
 

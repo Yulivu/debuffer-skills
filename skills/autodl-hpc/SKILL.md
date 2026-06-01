@@ -21,10 +21,13 @@ Read `references/autodl-hpc.md` before issuing commands, writing a runbook, or c
 - Keep runbooks concise. Merge repeated operational notes into
   `docs/runbooks/AUTODL_HPC_RUNBOOK.md` instead of generating new long Markdown
   files for every attempt.
+- Read `../shared-references/autosci-lite-patterns.md` for the pilot gate and
+  negative-memory rules. Formal suites require a passed pilot or an explicit
+  waiver recorded in the runbook.
 
 ## Workflow
 
-1. Classify the current phase: bootstrap, data staging, setup, preflight, smoke, formal approval, formal execution, result download, or local audit.
+1. Classify the current phase: bootstrap, data staging, setup, preflight, smoke, pilot gate, formal approval, formal execution, result download, or local audit.
 2. Confirm the repo has the expected contracts before remote execution:
    - `scripts/autodl_setup.sh`
    - `scripts/hpc/preflight_autodl.py`
@@ -38,8 +41,9 @@ Read `references/autodl-hpc.md` before issuing commands, writing a runbook, or c
 4. Keep code sync Git-based: create a machine-specific deploy key on AutoDL, add the public key to GitHub, clone/pull with `git pull --ff-only`, and never copy a local private key to the server.
 5. Treat AutoDL as offline except for GitHub access. Required data must already be tracked or uploaded explicitly into expected `data/raw/` or `data/processed/` paths.
 6. Run setup, preflight, dry-run, smoke, bundle audit, tests, and lint before any formal run.
-7. Require explicit user approval before enabling or running any formal suite. Dry-run formal suites first.
-8. Download raw run folders back under `experiments/runs/...`; do not copy them into `experiments/results/` until local audit and result-to-claim scripts have passed.
+7. Run or review a bounded pilot gate before formal suites. Pilot output stays under `experiments/runs/pilot/...` or another raw run path and is not paper evidence.
+8. Require explicit user approval before enabling or running any formal suite. Dry-run formal suites first.
+9. Download raw run folders back under `experiments/runs/...`; do not copy them into `experiments/results/` until local audit and result-to-claim scripts have passed.
 
 ## Key Rules
 
@@ -47,8 +51,12 @@ Read `references/autodl-hpc.md` before issuing commands, writing a runbook, or c
 - Do not upload the whole local repository with FileZilla/SFTP, and never sync `.git/`.
 - Do not rely on runtime downloads from UCI, Kaggle, or other external data sites on AutoDL.
 - Do not write smoke output into `experiments/results/`.
+- Do not treat pilot output as paper evidence; use it only to decide whether
+  formal runs are safe to launch.
 - Do not edit a frozen protocol after seeing smoke or formal outputs unless making an explicit protocol revision.
 - Stop at a failed gate and report the failed command, artifact path, and required fix.
+- If pilot or smoke fails, update `experiments/NEGATIVE_RESULTS.md` with the
+  run id, artifact path, failure reason, and decision.
 
 ## Coordination
 

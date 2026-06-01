@@ -17,6 +17,10 @@ This file defines the default behavior for the customized research skills.
 - Compact artifacts are preferred: `PROJECT_BRIEF.md`, `PROJECT_STATUS.md`,
   `NEXT_ACTIONS.md`, `findings.md`, `EXPERIMENT_LOG.md`, and concise
   `*_SUMMARY.md` files.
+- AutoSci-lite patterns are available for idea paths, failure memory, pilot
+  gates, and macro state. Read `autosci-lite-patterns.md` when a project starts
+  from a broad direction, has failed ideas/results, or is preparing formal
+  AutoDL experiments.
 - Stage-gate guides such as `PROJECT_GUIDE.md`, `EXPERIMENT_PROTOCOL.md`,
   `EVIDENCE_LEDGER.md`, and `PAPER_GUIDE.md` appear at handoff points.
 - Generated tutorials, rendered HTML, screenshots, PDFs, slide decks, and
@@ -47,6 +51,14 @@ Classify the project before scaffolding or planning:
 
 Early modes start with a brief, assumptions, literature map, and smallest
 validation plan. Later modes start with artifact inventory and evidence audit.
+
+## Idea And Failure Memory
+
+Use `autosci-lite-patterns.md` for the A-E idea paths and lightweight negative
+memory. Keep `idea-stage/IDEA_MEMORY.md` and
+`experiments/NEGATIVE_RESULTS.md` compact and append-only. Before generating
+new ideas or experiment plans, scan them as a banlist so the project does not
+repeat failed directions.
 
 ## Review Prompt Contract
 
@@ -92,6 +104,8 @@ AutoDL/HPC work follows the `autodl-hpc` skill:
 - Git-based code sync and target-machine deploy-key bootstrap.
 - Offline data policy with `data/DATA_MANIFEST.md`.
 - Preflight and smoke gates before formal suites.
+- Pilot gate before formal suites unless equivalent smoke evidence already
+  exists. Pilot output is engineering evidence, not paper evidence.
 - Formal-run approval after dry-run and smoke output are accepted.
 - Raw run outputs return to `experiments/runs/`; curated paper evidence goes
   to `experiments/results/` after local audit.

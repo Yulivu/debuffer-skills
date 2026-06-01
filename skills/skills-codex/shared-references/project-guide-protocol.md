@@ -45,6 +45,11 @@ Map: direction -> idea -> method -> repo scaffold -> [experiment protocol] -> lo
 Update `PROJECT_STATUS.md` after every meaningful phase transition or accepted
 artifact. Keep it short enough to read at the start of every session.
 
+For the stricter AutoSci-lite state contract, read
+`autosci-lite-patterns.md`. `PROJECT_STATUS.md` should include at least:
+current phase, startup mode, target venue, active idea or method, last accepted
+artifact, next gate, blockers, and the phase map with the current phase marked.
+
 ## PROJECT_GUIDE.md Gate
 
 Generate or refresh `PROJECT_GUIDE.md` when at least one is true:
@@ -82,6 +87,11 @@ Every experiment block in `EXPERIMENT_PROTOCOL.md` or
 - **Expected result / decision rule**: what result would support, weaken, or
   falsify the claim.
 - **Reproducibility entrypoint**: config path, suite path, command, output dir.
+
+Before formal AutoDL/HPC runs, add a pilot gate from
+`autosci-lite-patterns.md` unless an equivalent smoke/pilot artifact already
+exists. Pilot evidence checks readiness only; formal claims still require
+audited runs.
 
 Before a formal run, each block must map to versioned configs under
 `experiments/configs/`, suite entries under `experiments/suites/`, and raw

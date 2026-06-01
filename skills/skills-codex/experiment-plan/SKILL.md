@@ -32,6 +32,10 @@ without generating redundant long documents:
 - If the idea is still exploratory, update only compact state such as
   `PROJECT_BRIEF.md` and `NEXT_ACTIONS.md`; do not emit `PROJECT_GUIDE.md`,
   `EVIDENCE_LEDGER.md`, or `PAPER_GUIDE.md` unless their gates are reached.
+- Also read `../shared-references/autosci-lite-patterns.md`. Before writing a
+  formal run plan, scan `idea-stage/IDEA_MEMORY.md` and
+  `experiments/NEGATIVE_RESULTS.md`, then add a pilot gate unless equivalent
+  smoke evidence already exists or the user explicitly waives it.
 
 ## Constants
 
@@ -127,6 +131,17 @@ Use this milestone structure:
 4. **Decision stage** — run the decisive ablations for novelty, simplicity, and frontier necessity
 5. **Polish stage** — robustness, qualitative figures, appendix extras
 
+Insert a **Pilot gate** before any formal AutoDL/HPC suite:
+
+- Pilot spec: reduced dataset/subset, baseline included, proposed variant,
+  decisive metrics, bounded budget, and pass/fail/inconclusive rules.
+- Output path: `experiments/runs/pilot/<slug>/`.
+- If GPU time is needed, write an AutoDL-ready command block or suite path and
+  wait for user approval or pasted results.
+- Pilot pass means "no obvious collapse"; it does not support paper claims.
+- Pilot fail or inconclusive must update `experiments/NEGATIVE_RESULTS.md`, and
+  idea-level consequences should update `idea-stage/IDEA_MEMORY.md`.
+
 For each milestone, estimate:
 
 - compute cost
@@ -182,6 +197,14 @@ Use this structure:
 | Milestone | Goal | Runs | Decision Gate | Cost | Risk |
 |-----------|------|------|---------------|------|------|
 | M0        | ...  | ...  | ...           | ...  | ...  |
+
+## Pilot Gate
+- Pilot spec:
+- Reduced budget:
+- Pass/fail/inconclusive rules:
+- AutoDL handoff:
+- Output path:
+- Decision before formal runs:
 
 ## Compute and Data Budget
 - Total estimated GPU-hours:

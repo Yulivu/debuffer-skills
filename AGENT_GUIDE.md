@@ -25,6 +25,7 @@
 - **远程命令 gate**：`ssh`、`scp`、`rsync`、`screen`、`tmux`、`nohup` 形成命令块、风险说明和审批点。
 - **评审 prompt-only**：审查类 skill 产出 `review-prompts/<scope>_review_prompt.md`，独立对话评审，当前对话整理反馈和行动项。
 - **文档紧凑**：维护 `PROJECT_STATUS.md`、`PROJECT_BRIEF.md`、`NEXT_ACTIONS.md`、`findings.md`、`EXPERIMENT_LOG.md`；阶段门刷新 `PROJECT_GUIDE.md`。
+- **AutoSci-lite**：使用 A-E idea 路径、`idea-stage/IDEA_MEMORY.md`、`experiments/NEGATIVE_RESULTS.md`、pilot gate 和明确宏观状态机。
 - **证据边界**：smoke 表示工程可跑；论文证据来自 `experiments/runs/` 经审计后的 `experiments/results/`。
 
 ## 项目阶段

@@ -8,6 +8,7 @@
 - AutoDL/HPC 运行准备：preflight、smoke suite、数据清单、结果回传和正式运行审批。
 - prompt-only 外部评审：把上下文整理到 `review-prompts/`，交给独立对话评审，再消费粘贴回来的反馈。
 - 多起步阶段适配：`venue-only`、`reference-paper`、`reference-codebase`、`idea-doc`、`existing-repo`、`partial-results`。
+- AutoSci-lite 启发式：A-E idea 生成路径、轻量失败记忆、pilot gate 和明确项目宏观状态机。
 - 论文与审计链路：实验计划、结果审计、claim/citation/proof 检查、LaTeX 写作、rebuttal 和 resubmit。
 - 紧凑项目记忆：`PROJECT_STATUS.md`、`PROJECT_BRIEF.md`、`NEXT_ACTIONS.md`、`findings.md`、`EXPERIMENT_LOG.md` 和阶段性 `PROJECT_GUIDE.md`。
 
