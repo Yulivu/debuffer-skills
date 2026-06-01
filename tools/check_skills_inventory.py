@@ -38,6 +38,7 @@ REQUIRED_README_ANCHORS = (
 IGNORED_README_SCAN_PARTS = {
     ".git",
     ".debuffer_skills",
+    ".debuffer_registry",
     ".aris",
     ".agents",
     ".pytest_cache",

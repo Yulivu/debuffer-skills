@@ -11,6 +11,7 @@ import pytest
 REPO_ROOT = Path(__file__).resolve().parents[1]
 INSTALL_SCRIPT = REPO_ROOT / "tools" / "install_aris_codex.sh"
 UPDATE_SCRIPT = REPO_ROOT / "tools" / "smart_update_codex.sh"
+RECONCILE_SCRIPT = REPO_ROOT / "tools" / "reconcile_debuffer_installs.sh"
 
 pytestmark = pytest.mark.skipif(
     os.name == "nt" and (shutil.which("bash") is None or shutil.which("cp") is None),
@@ -176,6 +177,108 @@ def test_install_aris_codex_reconcile_and_uninstall(tmp_path: Path) -> None:
     assert not (project / ".agents" / "skills" / "beta").exists()
     assert (project / ".debuffer_skills" / "installed-skills-codex.txt.prev").exists()
     assert "debuffer Codex Skill Scope" not in (project / "AGENTS.md").read_text()
+
+
+def test_install_aris_codex_updates_local_registry(tmp_path: Path) -> None:
+    repo = make_minimal_aris_repo(tmp_path)
+    project = tmp_path / "project"
+    project.mkdir()
+    registry = tmp_path / "registry" / "installed-projects.tsv"
+    env = {**os.environ, "DEBUFFER_REGISTRY_PATH": str(registry)}
+
+    run(
+        [
+            "bash",
+            str(INSTALL_SCRIPT),
+            str(project),
+            "--aris-repo",
+            str(repo),
+            "--profile",
+            "full",
+            "--quiet",
+        ],
+        env=env,
+    )
+
+    registry_text = registry.read_text(encoding="utf-8")
+    assert f"{project}\tcodex\t.debuffer_skills/installed-skills-codex.txt\tfull\t{repo}\t" in registry_text
+
+    run(
+        [
+            "bash",
+            str(INSTALL_SCRIPT),
+            str(project),
+            "--aris-repo",
+            str(repo),
+            "--uninstall",
+            "--quiet",
+        ],
+        env=env,
+    )
+
+    assert f"{project}\tcodex\t" not in registry.read_text(encoding="utf-8")
+
+
+def test_reconcile_debuffer_installs_previews_registered_projects(tmp_path: Path) -> None:
+    repo = make_minimal_aris_repo(tmp_path)
+    project = tmp_path / "project"
+    project.mkdir()
+    registry = tmp_path / "registry" / "installed-projects.tsv"
+    env = {**os.environ, "DEBUFFER_REGISTRY_PATH": str(registry)}
+
+    run(
+        [
+            "bash",
+            str(INSTALL_SCRIPT),
+            str(project),
+            "--aris-repo",
+            str(repo),
+            "--profile",
+            "full",
+            "--quiet",
+        ],
+        env=env,
+    )
+
+    preview = run(["bash", str(RECONCILE_SCRIPT)], env=env)
+
+    assert "Mode: preview" in preview.stdout
+    assert str(project) in preview.stdout
+    assert "install_debuffer_codex.sh" in preview.stdout
+    assert "--reconcile" in preview.stdout
+
+
+def test_reconcile_debuffer_installs_discovers_existing_manifests(tmp_path: Path) -> None:
+    repo = make_minimal_aris_repo(tmp_path)
+    project = tmp_path / "project"
+    project.mkdir()
+    registry = tmp_path / "registry" / "installed-projects.tsv"
+    install_env = {**os.environ, "DEBUFFER_REGISTRY_DISABLE": "1"}
+    reconcile_env = {**os.environ, "DEBUFFER_REGISTRY_PATH": str(registry)}
+
+    run(
+        [
+            "bash",
+            str(INSTALL_SCRIPT),
+            str(project),
+            "--aris-repo",
+            str(repo),
+            "--profile",
+            "full",
+            "--quiet",
+        ],
+        env=install_env,
+    )
+    assert not registry.exists()
+
+    discovered = run(
+        ["bash", str(RECONCILE_SCRIPT), "--discover", str(tmp_path), "--list"],
+        env=reconcile_env,
+    )
+
+    registry_text = registry.read_text(encoding="utf-8")
+    assert f"{project}\tcodex\t.debuffer_skills/installed-skills-codex.txt\tfull\t" in registry_text
+    assert str(project) in discovered.stdout
 
 
 def test_install_aris_codex_profile_scopes_inventory(tmp_path: Path) -> None:

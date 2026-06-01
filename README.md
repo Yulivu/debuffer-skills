@@ -39,6 +39,8 @@ powershell -ExecutionPolicy Bypass -File tools\install_debuffer.ps1 $targetRepo 
 
 安装后，目标项目只会增加项目本地入口：`.agents/skills/`（Codex）和 `.debuffer_skills/`（安装 manifest、锁、helper 链接与运行状态）。这些是本地工作区状态，默认不要提交；已有旧版状态目录时，重新运行安装器会自动迁移到 `.debuffer_skills/`。
 
+安装器会在本技能库本地维护 `.debuffer_registry/installed-projects.tsv`，记录哪些项目从这个 checkout 安装过。该登记表只用于本机批量更新，已被 Git 忽略。
+
 Windows 上可以直接双击根目录的 `Install Debuffer Skills.cmd`，在窗口里选择要安装 skills 的目标 repo、profile 和是否 reconcile，然后点击 Install。
 
 macOS 上可以直接双击根目录的 `Install Debuffer Skills.command`，在弹出的选择器里选择目标 repo 和 profile。若 Finder 提示无法执行，先在终端运行：
@@ -76,6 +78,32 @@ bash use_debuffer_skills.sh --repo "$skill_repo" --profile core-research
 ```powershell
 $skillRepo = Read-Host "debuffer-skills repo path"
 powershell -ExecutionPolicy Bypass -File .\use_debuffer_skills.ps1 -Repo $skillRepo
+```
+
+批量更新所有已安装项目：
+
+```bash
+git pull
+bash tools/reconcile_debuffer_installs.sh
+bash tools/reconcile_debuffer_installs.sh --apply
+```
+
+Windows PowerShell：
+
+```powershell
+git pull
+powershell -ExecutionPolicy Bypass -File tools\reconcile_debuffer_installs.ps1
+powershell -ExecutionPolicy Bypass -File tools\reconcile_debuffer_installs.ps1 -Apply
+```
+
+如果是已经安装过、但还没有进入登记表的旧项目，先扫描一次项目根目录：
+
+```bash
+bash tools/reconcile_debuffer_installs.sh --discover "$HOME/Desktop"
+```
+
+```powershell
+powershell -ExecutionPolicy Bypass -File tools\reconcile_debuffer_installs.ps1 -DiscoverRoot "$HOME\Desktop"
 ```
 
 <a id="skills-catalog"></a>

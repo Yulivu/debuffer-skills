@@ -47,5 +47,8 @@ patent/
 # OMC runtime state
 .omc/
 
-# ARIS runtime state (per-project traces, caches, installed-skills manifest)
+# Legacy project runtime state
 .aris/
+
+# debuffer local registry of projects installed from this checkout
+.debuffer_registry/

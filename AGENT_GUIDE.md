@@ -14,6 +14,7 @@
 | Codex mirror | `skills/skills-codex/<name>/SKILL.md` | Codex 路由适配 |
 | 共享契约 | `skills/shared-references/*.md` | 轻量包、评审、证据、helper、项目状态协议 |
 | 工具 | `tools/` | 安装器、同步器、库存检查和共享 helper |
+| 本地登记 | `.debuffer_registry/` | 已安装项目登记表，本机状态，Git 忽略 |
 | 文档 | `docs/SKILLS_CATALOG.md` | 中文紧凑技能目录 |
 | 活动 MCP | `mcp-servers/` | 只保留 `manual-review` 和 `codex-image2` |
 | 归档区 | `archived/` | 历史 MCP、测试和实验性代码，保留在 Git 中 |
@@ -81,6 +82,24 @@ powershell -ExecutionPolicy Bypass -File tools\install_debuffer.ps1 C:\path\to\p
 | `paper` | 论文写作、编译、图表、审计、rebuttal/resubmit |
 | `review` | prompt-only 外部评审和证据审计 |
 | `full` | 全量 77 skills |
+
+## 批量更新已安装项目
+
+安装器成功写入项目 manifest 后，会把项目登记到本技能库的 `.debuffer_registry/installed-projects.tsv`。更新技能库后，从本仓库根目录统一刷新：
+
+```bash
+git pull
+bash tools/reconcile_debuffer_installs.sh
+bash tools/reconcile_debuffer_installs.sh --apply
+```
+
+```powershell
+git pull
+powershell -ExecutionPolicy Bypass -File tools\reconcile_debuffer_installs.ps1
+powershell -ExecutionPolicy Bypass -File tools\reconcile_debuffer_installs.ps1 -Apply
+```
+
+旧项目没有登记时，先用 `--discover <root>` / `-DiscoverRoot <root>` 扫描已有 `.debuffer_skills/installed-skills*.txt`。
 
 ## 修改仓库时的校验
 

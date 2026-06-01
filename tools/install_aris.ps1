@@ -54,6 +54,11 @@ $SupportNames = @('shared-references')
 $script:LockDir = $null
 $script:LockAcquired = $false
 
+$registryHelper = Join-Path $PSScriptRoot 'debuffer_registry.ps1'
+if (Test-Path -LiteralPath $registryHelper -PathType Leaf) {
+    . $registryHelper
+}
+
 function Die {
     param([string]$Message)
     throw $Message
@@ -950,6 +955,13 @@ function Do-Uninstall {
     Remove-ToolsJunction (Split-Path -Parent $ManifestPath) $recordedRepo $Config.ManifestName
     if (-not $DryRun) {
         Move-Item -LiteralPath $ManifestPath -Destination $ManifestPrevPath -Force
+        if (Get-Command Remove-DebufferInstallRegistry -ErrorAction SilentlyContinue) {
+            Remove-DebufferInstallRegistry `
+                -RepoRoot $recordedRepo `
+                -ProjectRoot $ProjectRoot `
+                -Platform $Config.Platform `
+                -ManifestRel "$StateDirName/$($Config.ManifestName)"
+        }
     }
     Remove-ManagedDocBlock $Config $DocPath
 }
@@ -1031,6 +1043,14 @@ function Invoke-Main {
     Apply-Plan $plan $repoRoot
     $manifestContent = New-ManifestContent $plan $repoRoot $projectRoot $selectedPlatform
     Commit-Manifest $manifestPath $manifestPrevPath $manifestContent
+    if (Get-Command Update-DebufferInstallRegistry -ErrorAction SilentlyContinue) {
+        Update-DebufferInstallRegistry `
+            -RepoRoot $repoRoot `
+            -ProjectRoot $projectRoot `
+            -Platform $selectedPlatform `
+            -ManifestRel "$StateDirName/$($config.ManifestName)" `
+            -Profile $Profile
+    }
     Ensure-ToolsJunction $arisDir $repoRoot
     Archive-LegacyCopy $legacy $arisDir
     $managedCount = @($plan | Where-Object { $_.Action -in @('REUSE', 'ADOPT', 'CREATE', 'UPDATE_TARGET') }).Count

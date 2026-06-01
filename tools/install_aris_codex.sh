@@ -98,6 +98,11 @@ prompt() { $QUIET && return 0; printf "%s " "$1" >&2; read -r REPLY; [[ "$REPLY"
 abs_path() { ( cd "$1" 2>/dev/null && pwd ) || return 1; }
 is_safe_name() { [[ "$1" =~ $SAFE_NAME_REGEX ]]; }
 is_symlink() { [[ -L "$1" ]]; }
+REGISTRY_HELPER="$(cd "$(dirname "$0")" && pwd)/debuffer_registry.sh"
+if [[ -f "$REGISTRY_HELPER" ]]; then
+    # shellcheck source=tools/debuffer_registry.sh
+    source "$REGISTRY_HELPER"
+fi
 validate_profile() {
     case "$PROFILE" in
         core-research|paper|review|full) ;;
@@ -682,6 +687,9 @@ do_uninstall() {
     rm -f "$manifest_data"
     if ! $DRY_RUN; then
         mv -f "$MANIFEST_PATH" "$MANIFEST_PREV"
+        if declare -F debuffer_registry_remove >/dev/null 2>&1; then
+            debuffer_registry_remove "$recorded_repo_root" "$PROJECT_PATH" "codex" "$ARIS_DIR_NAME/$MANIFEST_NAME"
+        fi
         log "  ✓ uninstalled (manifest preserved as $MANIFEST_PREV)"
     fi
     remove_agents_doc_block
@@ -747,6 +755,9 @@ log ""
 log "Applying:"
 apply_plan "$PLAN_FILE"
 commit_manifest "$MANIFEST_TMP"
+if declare -F debuffer_registry_upsert >/dev/null 2>&1; then
+    debuffer_registry_upsert "$ARIS_REPO" "$PROJECT_PATH" "codex" "$ARIS_DIR_NAME/$MANIFEST_NAME" "$PROFILE"
+fi
 
 INSTALLED_NAMES="$(mktemp -t debuffer-codex-names.XXXX)"
 awk -F'|' '$1=="REUSE"||$1=="ADOPT"||$1=="CREATE"||$1=="UPDATE_TARGET"{print $3}' "$PLAN_FILE" > "$INSTALLED_NAMES"

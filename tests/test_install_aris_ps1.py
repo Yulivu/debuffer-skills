@@ -10,6 +10,7 @@ import pytest
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 INSTALL_PS1 = REPO_ROOT / "tools" / "install_aris.ps1"
+RECONCILE_PS1 = REPO_ROOT / "tools" / "reconcile_debuffer_installs.ps1"
 
 
 def resolve_powershell() -> str | None:
@@ -27,14 +28,21 @@ pytestmark = pytest.mark.skipif(
 )
 
 
-def run_ps(args: list[str], *, check: bool = True) -> subprocess.CompletedProcess[str]:
+def run_ps(
+    args: list[str],
+    *,
+    check: bool = True,
+    script: Path = INSTALL_PS1,
+    env: dict[str, str] | None = None,
+) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
-        [PS_EXE, "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", str(INSTALL_PS1), *args],
+        [PS_EXE, "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", str(script), *args],
         cwd=REPO_ROOT,
         text=True,
         encoding="utf-8",
         capture_output=True,
         check=check,
+        env=env,
     )
 
 
@@ -156,6 +164,29 @@ def test_install_aris_ps1_codex_apply_reconcile_and_uninstall(tmp_path: Path) ->
     assert not (project / ".debuffer_skills" / "installed-skills-codex.txt").exists()
     assert (project / ".debuffer_skills" / "installed-skills-codex.txt.prev").exists()
     assert "debuffer Codex Skill Scope" not in (project / "AGENTS.md").read_text(encoding="utf-8")
+
+
+def test_install_aris_ps1_updates_local_registry(tmp_path: Path) -> None:
+    repo = make_minimal_repo(tmp_path)
+    project = tmp_path / "project"
+    project.mkdir()
+    registry = tmp_path / "registry" / "installed-projects.tsv"
+    env = {**os.environ, "DEBUFFER_REGISTRY_PATH": str(registry)}
+
+    run_ps([str(project), "-Platform", "codex", "-ArisRepo", str(repo)], env=env)
+
+    registry_text = registry.read_text(encoding="utf-8")
+    assert f"{project}\tcodex\t.debuffer_skills/installed-skills-codex.txt\tfull\t{repo}\t" in registry_text
+
+    preview = run_ps([], script=RECONCILE_PS1, env=env)
+    assert "Mode: preview" in preview.stdout
+    assert str(project) in preview.stdout
+    assert "install_debuffer.ps1" in preview.stdout
+    assert "-Reconcile" in preview.stdout
+
+    run_ps([str(project), "-Platform", "codex", "-ArisRepo", str(repo), "-Uninstall"], env=env)
+
+    assert f"{project}\tcodex\t" not in registry.read_text(encoding="utf-8")
 
 
 def test_install_aris_ps1_migrates_legacy_state_dir(tmp_path: Path) -> None:

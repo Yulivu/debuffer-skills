@@ -127,6 +127,11 @@ warn()     { echo "warning: $*" >&2; }
 die()      { echo "error: $*" >&2; exit 1; }
 prompt()   { $QUIET && return 1; printf "%s " "$1" >&2; read -r REPLY; [[ "$REPLY" =~ ^[Yy]$ ]]; }
 abs_path() { ( cd "$1" 2>/dev/null && pwd ) || return 1; }
+REGISTRY_HELPER="$(cd "$(dirname "$0")" && pwd)/debuffer_registry.sh"
+if [[ -f "$REGISTRY_HELPER" ]]; then
+    # shellcheck source=tools/debuffer_registry.sh
+    source "$REGISTRY_HELPER"
+fi
 
 is_safe_name() { [[ "$1" =~ $SAFE_NAME_REGEX ]]; }
 
@@ -729,6 +734,9 @@ do_uninstall() {
     if ! $DRY_RUN; then
         # Keep .prev for forensics, remove current manifest
         [[ -f "$MANIFEST_PATH" ]] && mv -f "$MANIFEST_PATH" "$MANIFEST_PREV"
+        if declare -F debuffer_registry_remove >/dev/null 2>&1; then
+            debuffer_registry_remove "$ARIS_REPO" "$PROJECT_PATH" "claude" "$ARIS_DIR_NAME/$MANIFEST_NAME"
+        fi
         log "  ✓ uninstalled (manifest preserved as $MANIFEST_PREV)"
     fi
 }
@@ -825,6 +833,9 @@ log ""
 log "Applying:"
 apply_plan "$PLAN_FILE" "$MANIFEST_TMP"
 commit_manifest "$MANIFEST_TMP"
+if declare -F debuffer_registry_upsert >/dev/null 2>&1; then
+    debuffer_registry_upsert "$ARIS_REPO" "$PROJECT_PATH" "claude" "$ARIS_DIR_NAME/$MANIFEST_NAME" "full"
+fi
 
 # Ensure project-local state-dir tools symlink (purely additive).
 # Runs after manifest commit so a failure here doesn't roll back skill links.
