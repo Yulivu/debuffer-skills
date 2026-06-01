@@ -21,7 +21,7 @@ param(
     [string]$Platform = 'codex',
 
     [ValidateSet('core-research', 'paper', 'review', 'full')]
-    [string]$Profile = 'core-research',
+    [string]$Profile = 'full',
 
     [switch]$Reconcile,
     [switch]$DryRun,

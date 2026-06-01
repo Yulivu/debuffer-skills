@@ -237,8 +237,8 @@ def check_inventory() -> list[str]:
             )
 
     required_policy_terms = {
-        README: ("--profile core-research", "review-prompts/", "AutoDL"),
-        AGENT_GUIDE: ("--profile core-research", "prompt-only", "AutoDL"),
+        README: ("profile", "review-prompts/", "AutoDL"),
+        AGENT_GUIDE: ("Profile", "prompt-only", "AutoDL"),
         SKILLS_ROOT / "shared-references" / "lightweight-research-pack.md": (
             "Install Profiles",
             "Remote Command Gate",

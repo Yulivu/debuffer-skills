@@ -6,6 +6,7 @@ set -uo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd -P)"
 REPO_ROOT="$SCRIPT_DIR"
 INSTALLER="$REPO_ROOT/tools/install_debuffer_codex.sh"
+UPDATER="$REPO_ROOT/tools/reconcile_debuffer_installs.sh"
 
 alert() {
     local title="$1"
@@ -24,10 +25,19 @@ return POSIX path of selectedFolder
 APPLESCRIPT
 }
 
+choose_action() {
+    osascript <<'APPLESCRIPT'
+set actionChoices to {"Install into one repo", "Update registered repos"}
+set selectedAction to choose from list actionChoices with title "debuffer-skills" with prompt "Choose an action:" default items {"Install into one repo"} without multiple selections allowed
+if selectedAction is false then error number -128
+return item 1 of selectedAction
+APPLESCRIPT
+}
+
 choose_profile() {
     osascript <<'APPLESCRIPT'
-set profileChoices to {"core-research", "paper", "review", "full"}
-set selectedProfile to choose from list profileChoices with title "debuffer-skills" with prompt "Choose install profile:" default items {"core-research"} without multiple selections allowed
+set profileChoices to {"full", "core-research", "paper", "review"}
+set selectedProfile to choose from list profileChoices with title "debuffer-skills" with prompt "Choose install profile:" default items {"full"} without multiple selections allowed
 if selectedProfile is false then error number -128
 return item 1 of selectedProfile
 APPLESCRIPT
@@ -58,7 +68,13 @@ end run
 APPLESCRIPT
 }
 
-if [[ ! -f "$INSTALLER" || ! -d "$REPO_ROOT/skills/skills-codex" ]]; then
+confirm_update() {
+    osascript <<'APPLESCRIPT' >/dev/null
+display dialog "Update every project registered by this debuffer-skills checkout?" with title "debuffer-skills" buttons {"Cancel", "Update"} default button "Update" cancel button "Cancel"
+APPLESCRIPT
+}
+
+if [[ ! -f "$INSTALLER" || ! -f "$UPDATER" || ! -d "$REPO_ROOT/skills/skills-codex" ]]; then
     echo "This launcher must be run from the root of a debuffer-skills repo." >&2
     alert "debuffer-skills" "This launcher must be run from the root of a debuffer-skills repo."
     exit 1
@@ -72,6 +88,27 @@ fi
 echo "debuffer-skills macOS installer"
 echo "Skill repo: $REPO_ROOT"
 echo
+
+ACTION="$(choose_action)" || exit 0
+
+if [[ "$ACTION" == "Update registered repos" ]]; then
+    confirm_update || exit 0
+    echo "Running registered project update..."
+    echo
+    bash "$UPDATER" --apply
+    STATUS=$?
+    echo
+    if [[ $STATUS -eq 0 ]]; then
+        echo "Update completed."
+        alert "debuffer-skills" "Update completed."
+    else
+        echo "Update failed with exit code $STATUS." >&2
+        alert "debuffer-skills" "Update failed with exit code $STATUS. Check the Terminal output."
+    fi
+    echo
+    read -r -p "Press Enter to close this window..."
+    exit "$STATUS"
+fi
 
 PROJECT_PATH="$(choose_folder)" || exit 0
 PROFILE="$(choose_profile)" || exit 0

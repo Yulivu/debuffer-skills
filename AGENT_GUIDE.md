@@ -69,19 +69,19 @@ Blockers: ...
 ## 安装 Profile
 
 ```bash
-bash tools/install_debuffer_codex.sh /path/to/project --repo "$PWD" --profile core-research
+bash tools/install_debuffer_codex.sh /path/to/project --repo "$PWD"
 ```
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File tools\install_debuffer.ps1 C:\path\to\project -Platform codex -Repo (Get-Location).Path -Profile core-research
+powershell -ExecutionPolicy Bypass -File tools\install_debuffer.ps1 C:\path\to\project -Platform codex -Repo (Get-Location).Path
 ```
 
 | Profile | 用途 |
 |---|---|
+| `full` | 默认，全量 77 skills |
 | `core-research` | 建仓、idea、实验计划、AutoDL、基础审计 |
 | `paper` | 论文写作、编译、图表、审计、rebuttal/resubmit |
 | `review` | prompt-only 外部评审和证据审计 |
-| `full` | 全量 77 skills |
 
 ## 批量更新已安装项目
 

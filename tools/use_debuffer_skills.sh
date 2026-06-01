@@ -8,7 +8,7 @@ set -euo pipefail
 
 PROJECT_PATH=""
 SKILL_REPO=""
-PROFILE="core-research"
+PROFILE="full"
 PLATFORM="codex"
 RECONCILE=false
 DRY_RUN=false

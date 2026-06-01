@@ -25,25 +25,25 @@ cd debuffer-skills
 
 ```bash
 read -r -p "Target repo path: " target_repo
-bash tools/install_debuffer_codex.sh "$target_repo" --repo "$PWD" --profile core-research
+bash tools/install_debuffer_codex.sh "$target_repo" --repo "$PWD"
 ```
 
 Windows PowerShell：
 
 ```powershell
 $targetRepo = Read-Host "Target repo path"
-powershell -ExecutionPolicy Bypass -File tools\install_debuffer.ps1 $targetRepo -Platform codex -Repo (Get-Location).Path -Profile core-research
+powershell -ExecutionPolicy Bypass -File tools\install_debuffer.ps1 $targetRepo -Platform codex -Repo (Get-Location).Path
 ```
 
-可用 profile：`core-research`、`paper`、`review`、`full`。新科研项目建议从 `core-research` 开始。
+可用 profile：`full`、`core-research`、`paper`、`review`。默认安装 `full`；只想轻量入口时再手动选择 `core-research`。
 
 安装后，目标项目只会增加项目本地入口：`.agents/skills/`（Codex）和 `.debuffer_skills/`（安装 manifest、锁、helper 链接与运行状态）。这些是本地工作区状态，默认不要提交；已有旧版状态目录时，重新运行安装器会自动迁移到 `.debuffer_skills/`。
 
 安装器会在本技能库本地维护 `.debuffer_registry/installed-projects.tsv`，记录哪些项目从这个 checkout 安装过。该登记表只用于本机批量更新，已被 Git 忽略。
 
-Windows 上可以直接双击根目录的 `Install Debuffer Skills.cmd`，在窗口里选择要安装 skills 的目标 repo、profile 和是否 reconcile，然后点击 Install。
+Windows 上可以直接双击根目录的 `Install Debuffer Skills.cmd`。窗口支持两类操作：给单个目标 repo 安装/重连 skills，以及一键更新登记表里的所有已安装项目。
 
-macOS 上可以直接双击根目录的 `Install Debuffer Skills.command`，在弹出的选择器里选择目标 repo 和 profile。若 Finder 提示无法执行，先在终端运行：
+macOS 上可以直接双击根目录的 `Install Debuffer Skills.command`，选择安装到单个 repo 或更新所有登记项目。若 Finder 提示无法执行，先在终端运行：
 
 ```bash
 chmod +x "Install Debuffer Skills.command"
@@ -59,7 +59,7 @@ $skillRepo = (Get-Location).Path
 $targetRepo = Read-Host "Target repo path"
 Copy-Item (Join-Path $skillRepo "tools\use_debuffer_skills.ps1") $targetRepo
 Set-Location $targetRepo
-powershell -ExecutionPolicy Bypass -File .\use_debuffer_skills.ps1 -Repo $skillRepo -Profile core-research
+powershell -ExecutionPolicy Bypass -File .\use_debuffer_skills.ps1 -Repo $skillRepo
 ```
 
 Git Bash / Linux / AutoDL：
@@ -70,7 +70,7 @@ skill_repo="$(pwd)"
 read -r -p "Target repo path: " target_repo
 cp "$skill_repo/tools/use_debuffer_skills.sh" "$target_repo/"
 cd "$target_repo"
-bash use_debuffer_skills.sh --repo "$skill_repo" --profile core-research
+bash use_debuffer_skills.sh --repo "$skill_repo"
 ```
 
 显式指定中央库：

@@ -11,6 +11,7 @@ import pytest
 REPO_ROOT = Path(__file__).resolve().parents[1]
 INSTALL_PS1 = REPO_ROOT / "tools" / "install_aris.ps1"
 RECONCILE_PS1 = REPO_ROOT / "tools" / "reconcile_debuffer_installs.ps1"
+GUI_PS1 = REPO_ROOT / "tools" / "install_debuffer_gui.ps1"
 
 
 def resolve_powershell() -> str | None:
@@ -187,6 +188,13 @@ def test_install_aris_ps1_updates_local_registry(tmp_path: Path) -> None:
     run_ps([str(project), "-Platform", "codex", "-ArisRepo", str(repo), "-Uninstall"], env=env)
 
     assert f"{project}\tcodex\t" not in registry.read_text(encoding="utf-8")
+
+
+def test_install_debuffer_gui_validate_only_defaults_full() -> None:
+    result = run_ps(["-ValidateOnly"], script=GUI_PS1)
+
+    assert "GUI manager validation ok." in result.stdout
+    assert "Default profile: full" in result.stdout
 
 
 def test_install_aris_ps1_migrates_legacy_state_dir(tmp_path: Path) -> None:
