@@ -220,6 +220,29 @@ Candidate memory
 Keep these diagrams narrow. If a diagram wraps visually, it stops functioning as
 a diagram.
 
+### 7.1 When to use `workflow` instead of `text`
+
+If you want a workflow to look like an actual flowchart rather than a styled
+code block, use a fenced block with the `workflow` language tag.
+
+Example:
+
+```workflow
+Project docs
+  -> Problem Anchor
+  -> Candidate framing comparison
+  -> Novelty / overlap scan
+  -> Reviewer-style critique
+  -> Experiment sufficiency check
+  -> Reframed contribution + next actions
+  -> Markdown report
+  -> HTML dashboard
+```
+
+The renderer converts this into stacked visual nodes with directional arrows.
+This is the preferred fix when a workflow diagram would otherwise display as
+plain text.
+
 ## 8. Chart and figure guidance
 
 `/render-html` does not generate charts by itself. It renders whatever chart

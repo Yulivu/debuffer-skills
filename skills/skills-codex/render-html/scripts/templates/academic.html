@@ -201,6 +201,39 @@ pre.diagram {
   line-height: 1.4;
 }
 
+.flowchart {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin: 20px auto;
+  padding: 20px 16px;
+  background:
+    radial-gradient(circle at top, rgba(184, 57, 14, 0.08), transparent 45%),
+    linear-gradient(180deg, #fcfaf4 0%, #f6f1e6 100%);
+  border: 1px solid var(--border-soft);
+  border-radius: 12px;
+}
+.flow-node {
+  width: min(100%, 520px);
+  padding: 12px 18px;
+  border-radius: 10px;
+  border: 1px solid rgba(26, 74, 140, 0.16);
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 6px 18px rgba(26, 26, 26, 0.06);
+  text-align: center;
+  font-size: 15px;
+  line-height: 1.45;
+  color: var(--ink);
+  font-weight: 600;
+}
+.flow-arrow {
+  color: var(--accent);
+  font-size: 22px;
+  line-height: 1;
+  font-weight: 700;
+}
+
 blockquote {
   margin: 18px 0;
   padding: 14px 18px;

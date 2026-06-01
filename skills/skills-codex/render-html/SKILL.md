@@ -247,6 +247,7 @@ Verdict rules:
 - Unordered/ordered lists with 2-space nested indentation
 - Code blocks with optional language (` ```python `) — gets `<pre><code class="language-python">` for highlight.js
 - ASCII-art code blocks (heuristic: many box-drawing chars) → `<pre class="diagram">` with a distinct cream-yellow background
+- Workflow code blocks (` ```workflow `, ` ```flowchart `, ` ```flow `) → rendered as stacked flow nodes with directional arrows instead of plain code, intended to fix workflow diagrams that would otherwise display as text
 - Tables with `:---` / `:---:` / `---:` alignment
 - Blockquotes `> ...` — emoji-prefix detection routes to callout variants:
   - `⚠️` → `.callout-warn` (Warning)
