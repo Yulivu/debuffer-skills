@@ -41,7 +41,7 @@ powershell -ExecutionPolicy Bypass -File tools\install_debuffer.ps1 $targetRepo 
 
 安装器会在本技能库本地维护 `.debuffer_registry/installed-projects.tsv`，记录哪些项目从这个 checkout 安装过。该登记表只用于本机批量更新，已被 Git 忽略。
 
-Windows 上可以直接双击根目录的 `Install Debuffer Skills.cmd`。图形界面是纯中文简化版，默认安装 `full`，主要操作只有 `安装/重连`、`更新全部`、`扫描旧项目`。
+Windows 上优先双击根目录的 `Install Debuffer Skills.vbs`，这样只打开图形界面，不会同时保留命令行窗口；若系统禁用 VBS，再用 `Install Debuffer Skills.cmd` 兜底。图形界面是纯中文简化版，默认安装 `full`，主要操作只有 `安装/重连`、`更新全部`、`扫描旧项目`。
 
 macOS 上可以直接双击根目录的 `Install Debuffer Skills.command`，选择安装到单个 repo 或更新所有登记项目。若 Finder 提示无法执行，先在终端运行：
 
