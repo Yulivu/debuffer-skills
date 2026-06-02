@@ -125,7 +125,7 @@ profile_includes_name() {
             ;;
         paper)
             case "$name" in
-                paper-writing|paper-plan|paper-write|paper-compile|paper-figure|paper-illustration|paper-illustration-image2|figure-description|figure-spec|mermaid-diagram|render-html|paper-talk|paper-slides|slides-polish|paper-poster|proof-writer|proof-checker|formula-derivation|citation-audit|paper-claim-audit|result-to-claim|kill-argument|auto-paper-improvement-loop|writing-systems-papers|rebuttal|resubmit-pipeline|overleaf-sync|research-review|auto-review-loop|research-refine|research-blueprint)
+                paper-writing|paper-plan|paper-write|paper-compile|paper-figure|paper-illustration|paper-illustration-image2|figure-description|figure-spec|mermaid-diagram|render-html|paper-talk|paper-slides|slides-polish|paper-poster|proof-writer|proof-checker|formula-derivation|citation-audit|paper-claim-audit|result-to-claim|kill-argument|auto-paper-improvement-loop|writing-systems-papers|rebuttal|resubmit-pipeline|overleaf-sync|overleaf-package|research-review|auto-review-loop|research-refine|research-blueprint)
                     return 0
                     ;;
             esac

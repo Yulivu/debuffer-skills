@@ -1,6 +1,6 @@
 # debuffer-skills
 
-这是一个面向科研项目的轻量化 Codex skills 定制包。当前提供 **78 个 skill**，主线与 Codex mirror 均为 **78 个 skill**，完整清单见 [docs/SKILLS_CATALOG.md](docs/SKILLS_CATALOG.md)。
+这是一个面向科研项目的轻量化 Codex skills 定制包。当前提供 **79 个 skill**，主线与 Codex mirror 均为 **79 个 skill**，完整清单见 [docs/SKILLS_CATALOG.md](docs/SKILLS_CATALOG.md)。
 
 ## 当前提供
 
@@ -20,7 +20,8 @@
 - `paper-plan` / `paper-writing` / `research-pipeline` 新增 manuscript-entry gate：smoke、pilot、toy、validation 只证明能跑，不能触发 LaTeX 正文。
 - `research-repo-architect` 增加根目录 Markdown 约束：普通科研 repo 根目录只保留 `README.md`、`PROJECT_STATUS.md` 和工具托管的 `AGENTS.md` / `CLAUDE.md`，其他 Markdown 进入 `docs/` 分类目录。
 - 共享输出记录从根目录 `MANIFEST.md` 调整为 `docs/project/OUTPUT_MANIFEST.md`；证明和公式推导默认进入 `docs/theory/`。
-- 安装 profile 已包含 `research-blueprint`，当前主线与 Codex mirror 均为 78 个 skill。
+- 新增 `overleaf-package`：把本地 LaTeX 论文树打成可手动上传到 Overleaf 的 zip，并生成简洁 manifest，不依赖 Overleaf Git bridge。
+- 安装 profile 已包含 `research-blueprint`，当前主线与 Codex mirror 均为 79 个 skill。
 
 <a id="quick-start"></a>
 
@@ -124,7 +125,7 @@ powershell -ExecutionPolicy Bypass -File tools\reconcile_debuffer_installs.ps1 -
 - `autodl-hpc`：准备 AutoDL/HPC 运行、数据策略、preflight、smoke gate、结果传输和正式运行审批。
 - `idea-discovery` / `research-refine` / `research-blueprint` / `experiment-plan`：从方向、参考论文、代码库或初步 idea 走到严密研究蓝图和可验证实验计划。
 - `research-review` / `auto-review-loop` / `paper-claim-audit` / `citation-audit`：生成独立评审 prompt，并整理反馈为行动项。
-- `paper-writing` / `paper-write` / `paper-compile`：把已审计证据组织成论文草稿、LaTeX 和提交前检查。
+- `paper-writing` / `paper-write` / `paper-compile` / `overleaf-package`：把已审计证据组织成论文草稿、LaTeX、Overleaf 上传包和提交前检查。
 - `rebuttal` / `resubmit-pipeline`：处理会议/期刊反馈、rebuttal 和换 venue 投稿。
 
 完整表见 [docs/SKILLS_CATALOG.md](docs/SKILLS_CATALOG.md)。

@@ -1,6 +1,6 @@
 # Skills Catalog
 
-这个目录是 `debuffer-skills` 的紧凑技能清单。当前主线与 Codex mirror 均为 **78 skills**。
+这个目录是 `debuffer-skills` 的紧凑技能清单。当前主线与 Codex mirror 均为 **79 skills**。
 
 默认流程：本地轻量检查，AutoDL/HPC 运行准备，prompt-only 评审，紧凑项目记忆。
 
@@ -44,6 +44,7 @@
 | [`/novelty-check`](../skills/novelty-check/SKILL.md) | 文献与知识库 | 检索、整理和补全文献与项目知识。 | 使用本地笔记、论文库和网络检索，保留摘要和证据路径。 |
 | [`/openalex`](../skills/openalex/SKILL.md) | 文献与知识库 | 检索、整理和补全文献与项目知识。 | 使用本地笔记、论文库和网络检索，保留摘要和证据路径。 |
 | [`/overleaf-sync`](../skills/overleaf-sync/SKILL.md) | 论文与图表 | 把已审计证据组织成论文、图表、演示和提交前检查。 | 连接证据矩阵、LaTeX、图表脚本和提交前 gate。 |
+| [`/overleaf-package`](../skills/overleaf-package/SKILL.md) | 论文与图表 | 把本地 LaTeX 论文树打成可手动上传到 Overleaf 的 zip 包。 | 递归收集 tex/figure/bib/sty/cls，排除构建垃圾，并输出 zip 与简洁 manifest。 |
 | [`/paper-claim-audit`](../skills/paper-claim-audit/SKILL.md) | 评审与审计 | 生成 prompt-only 评审和证据审计产物。 | 写入 review-prompts/，按照独立对话反馈整理行动项。 |
 | [`/paper-compile`](../skills/paper-compile/SKILL.md) | 论文与图表 | 把已审计证据组织成论文、图表、演示和提交前检查。 | 连接证据矩阵、LaTeX、图表脚本和提交前 gate。 |
 | [`/paper-figure`](../skills/paper-figure/SKILL.md) | 论文与图表 | 把已审计证据组织成论文、图表、演示和提交前检查。 | 连接证据矩阵、LaTeX、图表脚本和提交前 gate。 |

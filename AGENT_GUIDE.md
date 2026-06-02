@@ -6,7 +6,7 @@
 
 ## 包状态
 
-**Full catalog**: [docs/SKILLS_CATALOG.md](docs/SKILLS_CATALOG.md) - **78 skills**.
+**Full catalog**: [docs/SKILLS_CATALOG.md](docs/SKILLS_CATALOG.md) - **79 skills**.
 
 | 区域 | 路径 | 说明 |
 |---|---|---|
@@ -65,7 +65,7 @@ Blockers: ...
 | 远程准备 | `/autodl-hpc` | preflight、smoke、数据清单、审批 gate |
 | 外部评审 | `/research-review` | review prompt、反馈摘要、行动项 |
 | 证据审计 | `/experiment-audit`, `/paper-claim-audit`, `/citation-audit` | 审计 prompt、证据矩阵、修复清单 |
-| 论文写作 | `/paper-writing` | 论文计划、LaTeX、图表、提交前检查 |
+| 论文写作 | `/paper-writing`, `/overleaf-package` | 论文计划、LaTeX、图表、Overleaf 上传包、提交前检查 |
 
 ## 安装 Profile
 
@@ -79,7 +79,7 @@ powershell -ExecutionPolicy Bypass -File tools\install_debuffer.ps1 C:\path\to\p
 
 | Profile | 用途 |
 |---|---|
-| `full` | 默认，全量 78 skills |
+| `full` | 默认，全量 79 skills |
 | `core-research` | 建仓、idea、实验计划、AutoDL、基础审计 |
 | `paper` | 论文写作、编译、图表、审计、rebuttal/resubmit |
 | `review` | prompt-only 外部评审和证据审计 |

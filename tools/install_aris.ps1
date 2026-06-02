@@ -334,7 +334,7 @@ function Test-ProfileIncludesName {
                 'citation-audit', 'paper-claim-audit', 'result-to-claim',
                 'kill-argument', 'auto-paper-improvement-loop',
                 'writing-systems-papers', 'rebuttal', 'resubmit-pipeline',
-                'overleaf-sync', 'research-review', 'auto-review-loop',
+                'overleaf-sync', 'overleaf-package', 'research-review', 'auto-review-loop',
                 'research-refine', 'research-blueprint'
             )
         }

@@ -52,3 +52,6 @@ patent/
 
 # debuffer local registry of projects installed from this checkout
 .debuffer_registry/
+
+# Local handoff memory for platform/thread switches; never commit
+.debuffer_local/
