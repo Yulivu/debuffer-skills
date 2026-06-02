@@ -43,9 +43,10 @@ Create larger guide documents only at stage gates:
 - `docs/evidence/EVIDENCE_LEDGER.md`: create after results exist, mapping
   claims to raw run folders, metrics, figures, tables, and unresolved evidence
   gaps.
-- `docs/paper/PAPER_GUIDE.md`: create before manuscript writing, usually by
-  compacting `RESEARCH_BLUEPRINT.md` or `PROJECT_GUIDE.md`,
-  `EXPERIMENT_PROTOCOL.md`, and `EVIDENCE_LEDGER.md`.
+- `docs/paper/PAPER_GUIDE.md`: create only at the manuscript entry gate, after
+  formal runs and evidence audit are complete, usually by compacting
+  `RESEARCH_BLUEPRINT.md` or `PROJECT_GUIDE.md`, `EXPERIMENT_PROTOCOL.md`, and
+  `EVIDENCE_LEDGER.md`.
 
 ## Macro Phases
 
@@ -68,6 +69,25 @@ For the stricter AutoSci-lite state contract, read
 `autosci-lite-patterns.md`. `PROJECT_STATUS.md` should include at least:
 current phase, startup mode, target venue, active idea or method, last accepted
 artifact, next gate, blockers, and the phase map with the current phase marked.
+
+## Paper Gate Ordering
+
+The paper stages are ordered and cannot be skipped:
+
+`formal runs -> evidence audit -> paper plan -> manuscript -> submission`
+
+Hard rules:
+
+- Local smoke, AutoDL smoke, pilot, toy, or validation runs prove execution
+  readiness only. They do not open `paper-plan` or `paper-writing`.
+- `paper-plan` is allowed only after formal baseline/main/required ablation
+  results exist and the claim-to-evidence mapping names raw run folders,
+  metrics, configs, seeds, and unresolved gaps.
+- `paper-writing` is allowed only after an accepted `docs/paper/PAPER_PLAN.md`
+  and manuscript entry gate. If the evidence gate is missing or ambiguous, write
+  `docs/project/NEXT_ACTIONS.md` or a gap report instead of LaTeX prose.
+- A blueprint can route to `paper-plan` only when the evidence audit is already
+  complete. It must never route directly to `paper-writing`.
 
 ## RESEARCH_BLUEPRINT.md Gate
 
@@ -105,7 +125,8 @@ risks, and the next gate.
 
 `docs/project/BLUEPRINT_GATE.md` is the compact decision companion. It should
 say whether the next allowed step is `research-refine`, `experiment-plan`,
-`autodl-hpc`, `paper-plan`, or stop.
+`autodl-hpc`, `experiment-audit`, evidence-audited `paper-plan`, or stop. If
+formal runs or the evidence audit are missing, it must not select `paper-plan`.
 
 ## PROJECT_GUIDE.md Gate
 

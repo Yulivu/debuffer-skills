@@ -1,6 +1,6 @@
 ---
 name: research-blueprint
-description: Create or refresh a detailed stage-gate research blueprint before formal experiment planning, AutoDL formal runs, or paper planning. Use when Codex needs a project-specific `RESEARCH_BLUEPRINT.md` with rigorous theory, method, dataset, baseline, experiment, implementation, reproducibility, writing plans, and a sequential macro progress table; when the user asks for a complete research design document, project guide, pre-experiment blueprint, pre-paper blueprint, or wants to know whether the project is ready to run experiments or write the paper.
+description: Create or refresh a detailed stage-gate research blueprint before formal experiment planning, AutoDL formal runs, or a pre-paper evidence readiness check. Use when Codex needs a project-specific `RESEARCH_BLUEPRINT.md` with rigorous theory, method, dataset, baseline, experiment, implementation, reproducibility, paper-readiness prerequisites, and a sequential macro progress table; when the user asks for a complete research design document, project guide, pre-experiment blueprint, pre-paper evidence gate, or wants to know the next research stage. This skill is not manuscript drafting.
 ---
 
 # Research Blueprint
@@ -18,7 +18,9 @@ Write or refresh:
 
 - `docs/project/RESEARCH_BLUEPRINT.md` — canonical whole-project research blueprint.
 - `docs/project/BLUEPRINT_GATE.md` — concise pass/fail gate for moving into
-  `experiment-plan`, AutoDL formal runs, or `paper-plan`.
+  `experiment-plan`, AutoDL formal runs, `experiment-audit`, or
+  evidence-audited `paper-plan`. It must never route directly to
+  `paper-writing`.
 - `PROJECT_STATUS.md` — update current phase, last accepted artifact, next
   gate, blockers, and phase map.
 - `docs/project/NEXT_ACTIONS.md` — only the next 3-7 concrete actions.
@@ -57,7 +59,8 @@ Read the most relevant available files first:
 - `idea-stage/IDEA_REPORT.md`, `idea-stage/IDEA_MEMORY.md`
 - `experiments/NEGATIVE_RESULTS.md`
 - `docs/runbooks/AUTODL_HPC_RUNBOOK.md`, `data/DATA_MANIFEST.md`
-- paper sources or outline files when paper planning is already underway.
+- paper sources or outline files only when paper planning is already underway
+  after formal-run evidence audit.
 
 If information is absent, mark it as a gap. Do not invent citations, results,
 datasets, theorem statements, or implementation details.
@@ -162,7 +165,9 @@ Then include the following sections:
 - **Reproducibility**: require commit hash, dirty status, configs, resolved
   configs, seeds, environment, data manifest, run metadata, logs, metrics, and
   raw output folders.
-- **Paper readiness**: define what evidence is needed before `paper-plan`.
+- **Paper readiness**: define what formal-run evidence and audit artifacts are
+  needed before `paper-plan`; do not treat validation-only work as paper
+  readiness.
 
 ## BLUEPRINT_GATE.md
 
@@ -187,6 +192,8 @@ Write a compact gate document:
 | Baselines are sufficient and grouped | PASS/WARN/BLOCK |  |  |
 | Experiments are claim-driven | PASS/WARN/BLOCK |  |  |
 | Pilot gate is defined before formal runs | PASS/WARN/BLOCK |  |  |
+| Formal runs are complete for paper-level claims | PASS/WARN/BLOCK |  |  |
+| Evidence audit / claim ledger is complete | PASS/WARN/BLOCK |  |  |
 | Reproducibility contract is defined | PASS/WARN/BLOCK |  |  |
 | Paper readiness gaps are explicit | PASS/WARN/BLOCK |  |  |
 
@@ -194,16 +201,28 @@ Write a compact gate document:
 - ...
 
 ## Allowed Next Step
-- `research-refine` / `experiment-plan` / `autodl-hpc` / `paper-plan` / stop
+- `research-refine` / `experiment-plan` / `autodl-hpc` /
+  `experiment-audit` / `paper-plan` / stop
 ```
 
 Decision rules:
 
-- **PASS**: no `BLOCK`, and warnings do not change experiment validity.
+- **PASS**: no `BLOCK`, and warnings do not change the validity of the
+  selected next stage.
 - **CONDITIONAL**: no catastrophic flaw, but one or more fixes must happen
-  before formal AutoDL runs or paper writing.
+  before formal AutoDL runs or the next paper-readiness gate.
 - **BLOCKED**: the project lacks a stable problem, implementable method,
   claim map, data protocol, or reproducibility contract.
+- If formal baseline/main/required ablation runs are absent or only
+  local-smoke, AutoDL-smoke, pilot, toy, or validation runs exist, the allowed
+  next step must be `experiment-plan`, `autodl-hpc`, or stop. It must not be
+  `paper-plan` or `paper-writing`.
+- If formal runs exist but raw evidence, run metadata, result transfer, or
+  `docs/evidence/EVIDENCE_LEDGER.md` / `CLAIMS_FROM_RESULTS.md` is missing, the
+  allowed next step must be `experiment-audit` or evidence-ledger completion.
+- `paper-plan` is allowed only after formal runs for paper-level claims exist
+  and a claim-to-evidence audit maps claims to raw evidence. `paper-writing` is
+  never an allowed next step from `BLUEPRINT_GATE.md`.
 
 ## Project Status Update
 
@@ -230,6 +249,10 @@ Use the macro map from `project-guide-protocol.md`:
 - Do not generate a large document for a vague direction unless the user asks.
 - Do not claim readiness without evidence paths.
 - Do not treat pilot, smoke, or toy runs as paper evidence.
+- Do not advance from blueprint to `paper-plan` unless formal runs and the
+  evidence audit are complete. Validation-only projects stay in experiment or
+  audit phases.
+- Do not advance from blueprint directly to `paper-writing`.
 - Do not run heavy experiments locally. Prepare commands, configs, and gates.
 - Do not fabricate citations, theorem guarantees, dataset properties, or
   metrics.
@@ -242,7 +265,9 @@ If the gate decision allows experiments, the next skill is usually
 `experiment-plan`, which should read `docs/project/RESEARCH_BLUEPRINT.md`
 first.
 
-If results already exist and the project is moving to writing, the next skill is
-usually `paper-plan`, which should read `docs/project/RESEARCH_BLUEPRINT.md`,
+If formal results already exist and the evidence audit is complete, the next
+skill is usually `paper-plan`, which should read
+`docs/project/RESEARCH_BLUEPRINT.md`,
 `docs/experiments/EXPERIMENT_PROTOCOL.md`, and
-`docs/evidence/EVIDENCE_LEDGER.md`.
+`docs/evidence/EVIDENCE_LEDGER.md`. If only smoke, pilot, or validation results
+exist, route to `experiment-plan`, `autodl-hpc`, or `experiment-audit` instead.

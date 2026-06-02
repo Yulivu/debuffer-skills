@@ -1,6 +1,6 @@
 ---
 name: "paper-plan"
-description: "Prompt-only by default in the lightweight pack; Claude/Gemini reviewer transport is explicit opt-in. Generate a structured paper outline from review conclusions and experiment results. Use when user says \"写大纲\", \"paper outline\", \"plan the paper\", \"论文规划\", or wants to create a paper plan before writing."
+description: "Prompt-only by default in the lightweight pack; Claude/Gemini reviewer transport is explicit opt-in. Generate a structured paper outline from audited formal experiment results and review conclusions. Use when user says \"写大纲\", \"paper outline\", \"plan the paper\", \"论文规划\", or wants a paper plan after formal runs and evidence audit. If only smoke, pilot, toy, or validation results exist, produce a gap report or next actions instead of routing to manuscript drafting."
 ---
 
 > Override for Codex users who want **Gemini**, not a second Codex agent, to act as the reviewer. Install this package **after** `skills/skills-codex/*`.
@@ -19,6 +19,9 @@ overlay reviewer backend:
   such as `REVIEW_SUMMARY.md`, `NEXT_ACTIONS.md`, or the skill-specific log.
 - Keep heavy experiments AutoDL/HPC-gated and user-approved; local work stays at
   edits, tests, lint, dry-runs, and tiny smoke checks.
+- Keep the manuscript-entry gate from the base `paper-plan`: formal runs plus
+  `docs/evidence/EVIDENCE_LEDGER.md` or `CLAIMS_FROM_RESULTS.md` are required
+  before a normal `docs/paper/PAPER_PLAN.md` may hand off to drafting.
 
 # Paper Plan: From Review Conclusions to Paper Outline
 
@@ -41,9 +44,21 @@ The skill expects one or more of these in the project directory:
 
 If none exist, ask the user to describe the paper's contribution in 3-5 sentences.
 
+For regular paper planning, results must be formal and auditable. Smoke, pilot,
+toy, or validation runs are blockers for manuscript handoff.
+
 ## Workflow
 
 ### Step 1: Extract Claims and Evidence
+
+Run the paper-plan entry gate before drafting the outline:
+
+1. Confirm formal run evidence exists for paper-level claims.
+2. Confirm `docs/evidence/EVIDENCE_LEDGER.md`, `CLAIMS_FROM_RESULTS.md`, or an
+   equivalent audit maps claims to raw evidence and unresolved gaps.
+3. If either check fails, do not produce a normal paper plan and do not list
+   `/paper-write` or `/paper-writing` as a next step. Produce
+   `docs/project/NEXT_ACTIONS.md` or `docs/paper/GAP_REPORT.md` and stop.
 
 Read all available narrative documents and extract:
 
@@ -248,9 +263,17 @@ Save the final outline to `docs/paper/PAPER_PLAN.md`:
 [from Step 6, summarized]
 
 ## Next Steps
+[Choose exactly one block.]
+
+### Manuscript entry gate PASSED
 - [ ] /paper-figure to generate all figures
 - [ ] /paper-write to draft LaTeX
 - [ ] /paper-compile to build PDF
+
+### Manuscript entry gate NOT PASSED
+- [ ] Complete missing formal runs through /autodl-hpc or /experiment-plan
+- [ ] Run /experiment-audit or complete docs/evidence/EVIDENCE_LEDGER.md
+- [ ] Rerun /paper-plan after the evidence gate passes
 ```
 
 ## Output Protocols
@@ -262,6 +285,9 @@ Save the final outline to `docs/paper/PAPER_PLAN.md`:
 
 ## Key Rules
 
+- **No manuscript handoff without formal evidence** — if formal runs or the
+  evidence audit are missing, stop at gap reporting and do not recommend
+  `/paper-write`, `/paper-writing`, or LaTeX drafting.
 - **Large file handling**: If the Write tool fails due to file size, immediately retry using Bash (`cat << 'EOF' > file`) to write in chunks. Do NOT ask the user for permission — just do it silently.
 
 - **Do NOT generate author information** — leave author block as placeholder or anonymous

@@ -54,7 +54,7 @@
 | [`/paper-slides`](../skills/paper-slides/SKILL.md) | 论文与图表 | 把已审计证据组织成论文、图表、演示和提交前检查。 | 连接证据矩阵、LaTeX、图表脚本和提交前 gate。 |
 | [`/paper-talk`](../skills/paper-talk/SKILL.md) | 论文与图表 | 把已审计证据组织成论文、图表、演示和提交前检查。 | 连接证据矩阵、LaTeX、图表脚本和提交前 gate。 |
 | [`/paper-write`](../skills/paper-write/SKILL.md) | 论文与图表 | 把已审计证据组织成论文、图表、演示和提交前检查。 | 连接证据矩阵、LaTeX、图表脚本和提交前 gate。 |
-| [`/paper-writing`](../skills/paper-writing/SKILL.md) | 流程编排 | 串联多个 skill，把方向、实验、评审和论文推进到阶段产物。 | 读取项目状态，选择下游 skill，输出紧凑记录和下一步。 |
+| [`/paper-writing`](../skills/paper-writing/SKILL.md) | 论文与图表 | 在正式实验与 evidence audit 通过后，把已接受的 paper plan 推进为 LaTeX 正文。 | 先检查 manuscript-entry gate；未通过时只输出 gap / next actions，不生成正文。 |
 | [`/patent-novelty-check`](../skills/patent-novelty-check/SKILL.md) | 专利 | 围绕发明点、现有技术和法域格式生成专利草案。 | 检索先有技术，结构化发明点，生成权利要求和说明书。 |
 | [`/patent-pipeline`](../skills/patent-pipeline/SKILL.md) | 流程编排 | 串联多个 skill，把方向、实验、评审和论文推进到阶段产物。 | 读取项目状态，选择下游 skill，输出紧凑记录和下一步。 |
 | [`/patent-review`](../skills/patent-review/SKILL.md) | 评审与审计 | 生成 prompt-only 评审和证据审计产物。 | 写入 review-prompts/，按照独立对话反馈整理行动项。 |
@@ -65,7 +65,7 @@
 | [`/qzcli`](../skills/qzcli/SKILL.md) | 实验与算力 | 准备实验代码、本地轻量检查和 AutoDL/HPC 运行交接。 | 运行本地 tiny checks，写出远程命令块、数据清单和结果回传路径。 |
 | [`/rebuttal`](../skills/rebuttal/SKILL.md) | 流程编排 | 串联多个 skill，把方向、实验、评审和论文推进到阶段产物。 | 读取项目状态，选择下游 skill，输出紧凑记录和下一步。 |
 | [`/render-html`](../skills/render-html/SKILL.md) | 论文与图表 | 把已审计证据组织成论文、图表、演示和提交前检查。 | 连接证据矩阵、LaTeX、图表脚本和提交前 gate。 |
-| [`/research-blueprint`](../skills/research-blueprint/SKILL.md) | 想法与方法 | 在正式实验或写论文前生成严密研究蓝图。 | 写 `docs/project/RESEARCH_BLUEPRINT.md` 的总体进度表、理论/方法/数据/实验/可复现计划，并用 `docs/project/BLUEPRINT_GATE.md` 判定下一步。 |
+| [`/research-blueprint`](../skills/research-blueprint/SKILL.md) | 想法与方法 | 在正式实验、AutoDL 正式运行或论文证据准入前生成严密研究蓝图。 | 写 `docs/project/RESEARCH_BLUEPRINT.md` 的总体进度表、理论/方法/数据/实验/可复现计划，并用 `docs/project/BLUEPRINT_GATE.md` 判定下一步；不能直接路由到正文写作。 |
 | [`/research-lit`](../skills/research-lit/SKILL.md) | 文献与知识库 | 检索、整理和补全文献与项目知识。 | 使用本地笔记、论文库和网络检索，保留摘要和证据路径。 |
 | [`/research-pipeline`](../skills/research-pipeline/SKILL.md) | 流程编排 | 串联多个 skill，把方向、实验、评审和论文推进到阶段产物。 | 读取项目状态，选择下游 skill，输出紧凑记录和下一步。 |
 | [`/research-refine`](../skills/research-refine/SKILL.md) | 想法与方法 | 把假设、方法和 venue 风险整理成可验证计划。 | 建立 claim map、实验路线、风险表和最小验证集。 |

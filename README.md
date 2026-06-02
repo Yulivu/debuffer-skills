@@ -14,9 +14,10 @@
 
 ## 最近更新
 
-- 新增 `research-blueprint`：在正式实验、AutoDL 正式运行或论文写作前生成 `docs/project/RESEARCH_BLUEPRINT.md` 和 `docs/project/BLUEPRINT_GATE.md`。
+- `research-blueprint` 现在是正式实验、AutoDL 正式运行和论文证据准入的 gate；没有正式实验与 evidence audit 时，不会把下一步指向论文正文。
 - `docs/project/RESEARCH_BLUEPRINT.md` 开头固定包含“总体进度表”，按数据获取、预处理、协议冻结、理论/方法、local smoke、AutoDL smoke、pilot、正式实验、证据审计、论文计划、初稿和投稿材料逐步打勾。
 - `experiment-plan`、`paper-plan`、`research-pipeline`、`research-repo-architect` 已接入 blueprint gate。
+- `paper-plan` / `paper-writing` / `research-pipeline` 新增 manuscript-entry gate：smoke、pilot、toy、validation 只证明能跑，不能触发 LaTeX 正文。
 - `research-repo-architect` 增加根目录 Markdown 约束：普通科研 repo 根目录只保留 `README.md`、`PROJECT_STATUS.md` 和工具托管的 `AGENTS.md` / `CLAUDE.md`，其他 Markdown 进入 `docs/` 分类目录。
 - 共享输出记录从根目录 `MANIFEST.md` 调整为 `docs/project/OUTPUT_MANIFEST.md`；证明和公式推导默认进入 `docs/theory/`。
 - 安装 profile 已包含 `research-blueprint`，当前主线与 Codex mirror 均为 78 个 skill。
@@ -179,7 +180,7 @@ AAAI/ICLR 侧重 novelty、实验说服力和叙事；JMLR 侧重完整性、严
 - 根目录只保留必要入口和状态 Markdown：`README.md`、`PROJECT_STATUS.md`，以及工具托管的 `AGENTS.md` / `CLAUDE.md`。
 - 起步阶段产出 `docs/project/PROJECT_BRIEF.md`、`PROJECT_STATUS.md`、`docs/project/NEXT_ACTIONS.md`。
 - 形成实验证据后维护 `docs/evidence/findings.md`、`docs/experiments/EXPERIMENT_LOG.md`、`docs/evidence/EVIDENCE_LEDGER.md`。
-- 实验计划、AutoDL 正式运行或论文写作前刷新 `docs/project/RESEARCH_BLUEPRINT.md` 和 `docs/project/BLUEPRINT_GATE.md`；较轻交接可只刷新 `docs/project/PROJECT_GUIDE.md`。
+- 实验计划、AutoDL 正式运行或论文证据准入前刷新 `docs/project/RESEARCH_BLUEPRINT.md` 和 `docs/project/BLUEPRINT_GATE.md`；论文正文只能在正式实验与 evidence audit 通过后进入。
 - 输出清单写入 `docs/project/OUTPUT_MANIFEST.md`；理论证明、公式推导等写入 `docs/theory/`。
 
 ## 仓库结构

@@ -1,6 +1,6 @@
 ---
 name: research-pipeline
-description: "Lightweight AutoDL-first research pipeline: idea discovery → experiment bridge → prompt-only review loop → optional paper writing. Adapts to venue-only, reference-paper/codebase, idea-doc, existing-repo, or partial-results starts; avoids heavy local compute, defaults to concise artifacts, and prepares AutoDL/HPC gated runs. Use when user says \"全流程\", \"full pipeline\", \"从找idea到投稿\", \"end-to-end research\", or wants a complete but user-gated research lifecycle."
+description: "Lightweight AutoDL-first research pipeline: idea discovery → blueprint → experiment planning/AutoDL gates → prompt-only review/audit → optional evidence-gated paper planning. Adapts to venue-only, reference-paper/codebase, idea-doc, existing-repo, or partial-results starts; avoids heavy local compute, defaults to concise artifacts, and prepares AutoDL/HPC gated runs. Use when user says \"全流程\", \"full pipeline\", \"从找idea到投稿\", \"end-to-end research\", or wants a complete but user-gated research lifecycle. Manuscript drafting is allowed only after formal runs and evidence audit pass."
 argument-hint: [research-direction] [— resume <run_id>]
 allowed-tools: Bash(*), Read, Write, Edit, Grep, Glob, WebSearch, WebFetch, Skill, mcp__codex__codex, mcp__codex__codex-reply
 ---
@@ -38,11 +38,13 @@ autonomous settings below unless the user explicitly asks for legacy automation:
 - **LOCAL_HEAVY_COMPUTE = false**, **DEPLOY_TARGET = autodl**: local work is
   limited to edits, lint/tests, dry runs, and tiny smoke checks. Heavy training
   or sweeps must be prepared through `/autodl-hpc` with approval gates.
-- **AUTO_WRITE = false** remains the default. Produce compact
+- **AUTO_WRITE = false** remains the default and cannot override the evidence
+  gate. Produce compact
   `docs/project/PROJECT_BRIEF.md`, `docs/evidence/findings.md`,
   `docs/experiments/EXPERIMENT_LOG.md`, and
   `docs/project/NEXT_ACTIONS.md`; create `docs/paper/NARRATIVE_REPORT.md` only
-  when paper writing needs it or the user asks.
+  after formal runs and evidence audit pass, or when the user explicitly asks
+  for a clearly labeled pre-paper gap artifact.
 - **BLUEPRINT_GATE = required at handoffs**: before formal experiment planning,
   AutoDL formal runs, or paper planning, create or refresh
   `docs/project/RESEARCH_BLUEPRINT.md` and
@@ -63,16 +65,16 @@ their gate conditions are met; otherwise update compact memory files.
 
 ## Constants
 
-- **AUTO_PROCEED = true** — When `true`, Gate 1 auto-selects the top-ranked idea (highest pilot signal + novelty confirmed) and continues to implementation. When `false`, always waits for explicit user confirmation before proceeding.
+- **AUTO_PROCEED = false** — Wait for explicit user confirmation before leaving idea selection or any expensive gate.
 - **ARXIV_DOWNLOAD = false** — When `true`, `/research-lit` downloads the top relevant arXiv PDFs during literature survey. When `false` (default), only fetches metadata via arXiv API. Passed through to `/idea-discovery` → `/research-lit`.
-- **HUMAN_CHECKPOINT = false** — When `true`, the auto-review loops (Stage 3) pause after each round's review to let you see the score and provide custom modification instructions before fixes are implemented. When `false` (default), loops run fully autonomously. Passed through to `/auto-review-loop`.
+- **HUMAN_CHECKPOINT = true** — Pause review loops after each round so the user can inspect feedback before fixes or new experiments.
 - **REVIEWER_DIFFICULTY = medium** — How adversarial the reviewer is. `medium` (default): standard MCP review. `hard`: adds reviewer memory + debate protocol. `nightmare`: GPT reads repo directly via `codex exec` + memory + debate. Passed through to `/auto-review-loop`.
 - **CODE_REVIEW = true** — GPT-5.4 xhigh reviews experiment code before deployment. Catches logic bugs before wasting GPU hours. Set `false` to skip. Passed through to `/experiment-bridge`.
 - **BASE_REPO = false** — GitHub repo URL to use as base codebase. When set, `/experiment-bridge` clones the repo first and implements experiments on top of it. When `false` (default), writes code from scratch or reuses existing project files. Passed through to `/experiment-bridge`.
-- **COMPACT = false** — When `true`, generates compact summary files for short-context models and session recovery. Passed through to `/idea-discovery` and `/experiment-bridge`.
-- **AUTO_WRITE = false** — When `true`, automatically invoke Workflow 3 (`/paper-writing`) after Stage 4. Requires `VENUE` to be set. When `false` (default), Stage 4 generates `docs/paper/NARRATIVE_REPORT.md` and stops — user invokes `/paper-writing` manually.
+- **COMPACT = true** — Generate compact summary files for short-context models and session recovery. Passed through to `/idea-discovery` and `/experiment-bridge`.
+- **AUTO_WRITE = false** — When `true`, it may request the paper-writing workflow only after formal runs, evidence audit, and paper-plan gates pass. When `false` (default), stop at the next allowed gate and do not present manuscript commands.
 - **VENUE = ICLR** — Target venue for paper writing (Stage 5). Only used when `AUTO_WRITE=true`. Options: `ICLR`, `NeurIPS`, `ICML`, `CVPR`, `ACL`, `AAAI`, `ACM`, `IEEE_CONF`, `IEEE_JOURNAL`.
-- **RENDER_HTML = true** — When `true` (default), auto-render `docs/paper/NARRATIVE_REPORT.md` to HTML at Stage 4 completion via `/render-html`. Uses `--no-review` (this is an internal handoff doc to `/paper-writing`, not a reviewer-facing final artifact — the upstream Stage 3 auto-review loop already cross-model-reviewed the claims). Set `false` to skip, or pass `— render html: false`. **Non-blocking**: if `/render-html` fails or Codex MCP is unavailable, log the failure and continue — the HTML view is a nice-to-have, not a Stage 4 prerequisite.
+- **RENDER_HTML = false** — Render `docs/paper/NARRATIVE_REPORT.md` only when that evidence-audited artifact is actually generated and the user asks or opts in.
 
 - **RESUMABLE = true** — When `true` (default), the pipeline records per-stage state to `.debuffer_skills/runs/<run_id>.json` so a crashed/interrupted run can resume via `/research-pipeline — resume <run_id>` instead of restarting. Stage status splits `done` (executor finished writing) from `accepted` (the stage's cross-model gate / deterministic verifier passed); resume re-validates any `done`-but-unaccepted stage. See `shared-references/resumable-runs.md`.
 
@@ -80,15 +82,17 @@ their gate conditions are met; otherwise update compact memory files.
 
 ## Overview
 
-This skill chains the entire research lifecycle into a single pipeline:
+This skill chains the research lifecycle into a gated pipeline:
 
 ```
-/idea-discovery → /research-blueprint → /experiment-bridge → /auto-review-loop → /paper-writing (optional)
+/idea-discovery → /research-blueprint → /experiment-bridge/autodl-hpc → /experiment-audit → /paper-plan → /paper-writing (gated)
 ├── Workflow 1 ──┤├── Stage-gate design ──┤├── Workflow 1.5 ──┤├── Workflow 2 ───┤├── Workflow 3 ──┤
 ```
 
-It orchestrates four major workflows plus a blueprint stage gate. Workflow 3
-(paper writing) is optional and controlled by `AUTO_WRITE`.
+It orchestrates the major research workflows plus blueprint and evidence gates.
+Paper writing is optional and controlled by both `AUTO_WRITE` and the
+manuscript entry gate; `AUTO_WRITE=true` is ignored when formal evidence is
+missing.
 
 ## Resumable runs (`— resume <run_id>`)
 
@@ -101,14 +105,16 @@ Resolve the helper via the canonical chain (integration-contract §2):
 `.debuffer_skills/tools/run_state.py` → `tools/run_state.py` → `$ARIS_REPO/tools/run_state.py`
 (warn-and-skip if unresolved — never block the pipeline).
 
-**Phases**, in order: `idea-discovery, experiment-bridge, auto-review-loop, summary, paper-writing`.
+**Phases**, in order: `idea-discovery, experiment-bridge, auto-review-loop,
+evidence-summary`; append `paper-plan` and `paper-writing` only when their gates
+are actually opened.
 
 - **At start:** if `— resume <run_id>` was passed, run
   `run_state.py resume <root> <run_id>` — it prints the first non-`accepted`
   phase; **begin the pipeline at that stage** (re-run a `running`/`failed` stage;
   **re-audit** a `done`-but-unaccepted stage). Otherwise derive `<run_id>` from
   the direction slug + date and `run_state.py start <root> <run_id> --phases
-  "idea-discovery,experiment-bridge,auto-review-loop,summary,paper-writing"`.
+  "idea-discovery,experiment-bridge,auto-review-loop,evidence-summary"`.
 - **Per stage:** `set <run_id> <phase> running` on entry; `set <run_id> <phase>
   done --artifact <path>` once the stage's artifact is written.
 - **Mark `accepted` ONLY after the stage's gate passes** — never on the executor's
@@ -119,12 +125,13 @@ Resolve the helper via the canonical chain (integration-contract §2):
   | `idea-discovery` | Gate 1 cross-model jury / novelty-check passed | `codex-gpt-5.5` + thread id |
   | `experiment-bridge` | experiments actually ran (jobs completed) — deterministic | `deterministic:experiment-bridge` |
   | `auto-review-loop` | the loop hit its positive STOP (`score>=6 AND verdict∈{ready,almost}` — codex's verdict) | `codex-gpt-5.5` + final review trace id |
-  | `summary` | `docs/paper/NARRATIVE_REPORT.md` written (+ rendered if `RENDER_HTML`) — deterministic | `deterministic:summary` |
+  | `evidence-summary` | compact status files updated and Stage 4 gate recorded; `docs/paper/NARRATIVE_REPORT.md` only if evidence gate passed | `deterministic:evidence-summary` |
+  | `paper-plan` | `docs/paper/PAPER_PLAN.md` accepted and manuscript entry gate explicitly passed | `deterministic:paper-plan-gate` |
   | `paper-writing` | submission audits passed (`verify_paper_audits.sh` exit 0) — deterministic | `deterministic:verify_paper_audits.sh` |
 
-**If `AUTO_WRITE = false`** (default), `paper-writing` is not part of this run:
-after `summary` is accepted, `set <run_id> paper-writing skipped` so `resume`
-reports COMPLETE instead of pointing forever at a pending stage. Record each
+**If `AUTO_WRITE = false`** (default), `paper-plan` and `paper-writing` are not
+part of this run unless the user explicitly continues after the evidence gate.
+Do not mark a writing phase pending just because experiments validated. Record each
 `accept` `verdict_id` as a **durable handle** — the codex thread/trace id, or the
 path/sha of the deterministic verifier's report (e.g. the `verify_paper_audits.sh`
 output JSON) — not just the reviewer label.
@@ -231,26 +238,42 @@ Once initial results are in, start the autonomous improvement loop:
 
 **Output:** `review-stage/AUTO_REVIEW.md` with full review history and final assessment.
 
-### Stage 4: Research Summary & Writing Handoff
+### Stage 4: Evidence Summary & Paper-Readiness Gate
 
-After the auto-review loop completes, prepare the handoff for paper writing.
+After the auto-review loop completes, run an evidence-readiness gate before any
+paper handoff.
 
-**Step 1:** Write a final research status report (same as before).
+**Step 1:** Write or update the compact research status:
+- `PROJECT_STATUS.md`
+- `docs/evidence/findings.md`
+- `docs/experiments/EXPERIMENT_LOG.md`
+- `docs/project/NEXT_ACTIONS.md`
 
-**Step 2:** Generate `docs/paper/NARRATIVE_REPORT.md` from:
-- `IDEA_REPORT.md` (chosen idea, hypothesis, novelty justification)
-- Implementation details from the repo
-- Experiment configs and final results
-- `AUTO_REVIEW.md` (review history, weaknesses fixed, remaining limitations)
+**Step 2:** Check the manuscript-entry prerequisites:
+- formal baseline/main/required ablation runs exist for paper-level claims;
+- raw evidence names run folders, metrics, configs/resolved configs, seeds,
+  logs/metadata, and result summaries;
+- `docs/evidence/EVIDENCE_LEDGER.md`, `CLAIMS_FROM_RESULTS.md`, or an
+  equivalent audit maps claims to raw evidence and unresolved gaps;
+- `docs/project/BLUEPRINT_GATE.md` does not block paper planning.
+
+If any prerequisite fails, stop in the experiment/audit phase. Do not generate
+`docs/paper/NARRATIVE_REPORT.md`, do not render HTML, and do not present
+`/paper-writing`. The next step should be `experiment-plan`, `autodl-hpc`,
+`experiment-audit`, evidence-ledger completion, or stop.
+
+If the gate passes, generate `docs/paper/NARRATIVE_REPORT.md` as a compact
+evidence-audited handoff for `paper-plan`, not as a manuscript draft.
 
 The narrative report must contain:
 - Problem statement and core claim
 - Method summary
-- Key quantitative results with evidence for each claim
+- Formal quantitative results with raw evidence for each claim
 - Figure/table inventory (which exist, which need manual creation)
 - Limitations and remaining follow-up items
 
-**Output:** `docs/paper/NARRATIVE_REPORT.md` + research pipeline report.
+**Output:** compact status files, and `docs/paper/NARRATIVE_REPORT.md` only
+when the evidence gate passes.
 
 ```markdown
 # Research Pipeline Report
@@ -266,71 +289,60 @@ The narrative report must contain:
 - Experiments: [number of GPU experiments, total compute time]
 - Review rounds: N/4, final score: X/10
 
-## Writing Handoff
-- docs/paper/NARRATIVE_REPORT.md: generated
-- Venue: [VENUE or "not set — run /paper-writing manually"]
-- Manual figures needed: [list or "none"]
+## Paper-Readiness Gate
+- Formal runs complete: [yes/no + evidence path]
+- Evidence audit complete: [yes/no + artifact path]
+- Allowed next step: [experiment-plan/autodl-hpc/experiment-audit/paper-plan/stop]
+- Narrative report: [generated only if gate passed]
 
 ## Remaining TODOs (if any)
 - [items flagged by reviewer that weren't addressed]
 ```
 
-### Stage 5: Paper Writing (Workflow 3 — Optional)
+### Stage 5: Paper Planning / Writing (Gated Optional)
 
-**Skip this stage if `AUTO_WRITE=false` (default).** Present the `/paper-writing` command for manual use:
+This corresponds to **Stage 6: Paper Writing** in the macro lifecycle, but that
+stage remains closed until formal runs, evidence audit, and `paper-plan` gates
+pass.
 
-```
-📝 Research complete. To write the paper:
-/paper-writing "docs/paper/NARRATIVE_REPORT.md" — venue: ICLR
-```
+If Stage 4 does not pass, skip this stage entirely.
 
-**If `AUTO_WRITE=true`:**
-
-🚦 **Gate 2 — Writing Checkpoint:**
+If Stage 4 passes and `AUTO_WRITE=false` (default), stop after presenting the
+paper-planning command, not a manuscript command:
 
 ```
-📝 Research pipeline complete. Ready for Workflow 3.
-
-- Venue: [VENUE]
-- Input: docs/paper/NARRATIVE_REPORT.md
-- Manual figures required: [list or none]
-- Next step: /paper-writing "docs/paper/NARRATIVE_REPORT.md — venue: [VENUE]"
-
-Proceeding with paper writing...
+Evidence gate passed. Next allowed step:
+/paper-plan "docs/paper/NARRATIVE_REPORT.md" --venue [VENUE]
 ```
 
-Checks before proceeding:
-- If `VENUE` is missing → stop and ask. Do NOT silently use a default venue.
-- If manual figures are required → pause and list them. Wait for user to add them.
+If `AUTO_WRITE=true`, first run or request `/paper-plan`. Invoke
+`/paper-writing` only if the resulting `docs/paper/PAPER_PLAN.md` says the
+manuscript entry gate passed and the user explicitly confirms. Never proceed
+from Stage 4 directly to LaTeX drafting.
 
-Then invoke:
+Checks before any manuscript drafting:
+- If `VENUE` is missing, stop and ask. Do not silently use a default venue.
+- If formal evidence or the paper plan gate is missing, stop and write
+  `docs/project/NEXT_ACTIONS.md`.
+- If manual figures are required, pause and list them. Wait for user approval.
 
-```
-/paper-writing "docs/paper/NARRATIVE_REPORT.md" — venue: $VENUE
-```
+## Render HTML view (opt-in, only after evidence gate passes)
 
-This delegates to Workflow 3 which handles its own phases:
-`/paper-plan → /paper-figure → /paper-write → /paper-compile → /auto-paper-improvement-loop`
-
-When Workflow 3 finishes, update the pipeline report with:
-- Paper writing completion status
-- Final PDF path (`paper/main.pdf`)
-- Improvement scores (round 0 → round N)
-- Remaining issues
-
-**Output:** `paper/` directory with LaTeX source, compiled PDF, and `PAPER_IMPROVEMENT_LOG.md`.
-
-## Render HTML view (auto, when `RENDER_HTML = true`)
-
-After Stage 4 finalizes `docs/paper/NARRATIVE_REPORT.md` (before paper writing branches), invoke `/render-html` on the narrative report:
+Only after Stage 4 finalizes an evidence-audited
+`docs/paper/NARRATIVE_REPORT.md`, optionally invoke `/render-html` on the
+narrative report:
 
 ```
 /render-html "docs/paper/NARRATIVE_REPORT.md" --no-review
 ```
 
-`--no-review` is intentional: this is an internal handoff doc, not reviewer-facing — the claims it summarizes were already cross-model-reviewed in Stage 3's `/auto-review-loop`. Output: `NARRATIVE_REPORT.html` next to the MD, with embedded source SHA256.
+`--no-review` is intentional: this is an internal handoff doc, not a
+reviewer-facing final artifact. Output: `NARRATIVE_REPORT.html` next to the MD,
+with embedded source SHA256.
 
-**Non-blocking**: if `/render-html` fails (helper missing, file write error, etc.), log the failure and continue Stage 4 — the HTML view is a convenience artifact, not a pipeline prerequisite.
+**Non-blocking**: if `/render-html` fails (helper missing, file write error,
+etc.), log the failure and continue. The HTML view is a convenience artifact,
+not a paper-readiness prerequisite.
 
 Skip this step if `RENDER_HTML = false`.
 

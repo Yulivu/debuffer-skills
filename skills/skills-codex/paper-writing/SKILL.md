@@ -1,13 +1,13 @@
 ---
 name: paper-writing
-description: "Workflow 3: Full paper writing pipeline. Orchestrates paper-plan → paper-figure → figure-spec/paper-illustration/mermaid-diagram → paper-write → paper-compile → auto-paper-improvement-loop to go from a narrative report to a polished PDF. At `— effort: max | beast` (or explicit `— assurance: submission`), Phase 6 gates the Final Report on `verify_paper_audits.sh` (resolved per integration-contract §2); the PDF is labelled `submission-ready` only when the external verifier is green. Use when user says \"写论文全流程\", \"write paper pipeline\", \"从报告到PDF\", \"paper writing\", or wants the complete paper generation workflow."
+description: "Workflow 3: evidence-gated paper writing pipeline. Requires audited formal experiment evidence and an accepted paper plan before manuscript drafting. Orchestrates paper-plan → paper-figure → figure-spec/paper-illustration/mermaid-diagram → paper-write → paper-compile → auto-paper-improvement-loop only after the manuscript entry gate passes. If only smoke, pilot, toy, or validation results exist, stop and produce next actions or a gap report. Use when user says \"写论文全流程\", \"write paper pipeline\", \"从报告到PDF\", \"paper writing\", or wants complete paper generation from audited evidence."
 argument-hint: [narrative-report-path-or-topic]
 allowed-tools: Bash(*), Read, Write, Edit, Grep, Glob, Skill
 ---
 
 # Workflow 3: Paper Writing Pipeline
 
-Orchestrate a complete paper writing workflow for: **$ARGUMENTS**
+Orchestrate an evidence-gated paper writing workflow for: **$ARGUMENTS**
 
 ## Customized Pack Defaults
 
@@ -17,6 +17,9 @@ Read `../shared-references/lightweight-research-pack.md`,
 
 - **AUTO_PROCEED = false**, **HUMAN_CHECKPOINT = true**,
   **MAX_IMPROVEMENT_ROUNDS = 1**, **REVIEW_MODE = prompt-only**.
+- **MANUSCRIPT_ENTRY_GATE = required**: formal runs and evidence audit must
+  pass before creating LaTeX prose or updating `PROJECT_STATUS.md` to
+  `manuscript`.
 - **VENUE** supports `ICLR`, `AAAI`, `JMLR`, `TPAMI`, `NeurIPS`, `ICML`, and
   existing legacy venue labels. Apply the venue profile before outline and audit
   prompts.
@@ -24,8 +27,9 @@ Read `../shared-references/lightweight-research-pack.md`,
   `PAPER_GUIDE.md`, `EVIDENCE_LEDGER.md`, `EXPERIMENT_PROTOCOL.md`,
   `findings.md`, `EXPERIMENT_LOG.md`, `CLAIMS_FROM_RESULTS.md`) and existing
   `PAPER_PLAN.md` before generating or reading a large `NARRATIVE_REPORT.md`.
-- Update `PROJECT_STATUS.md` to `manuscript` when paper drafting starts and to
-  `submission` only after venue formatting and required audits/checks pass.
+- Update `PROJECT_STATUS.md` to `manuscript` only after the manuscript entry
+  gate passes and paper drafting starts; update it to `submission` only after
+  venue formatting and required audits/checks pass.
 - Create or refresh `PAPER_GUIDE.md` at the manuscript gate by compacting the
   project guide, experiment protocol, evidence ledger, and accepted paper plan.
   Do not duplicate full audit reports inside the guide.
@@ -52,10 +56,10 @@ In this hybrid pack, the pipeline itself is unchanged, but `paper-plan` and `pap
 ## Constants
 
 - **VENUE = `ICLR`** — Target venue. Options: `ICLR`, `NeurIPS`, `ICML`, `CVPR`, `ACL`, `AAAI`, `JMLR`, `TPAMI`, `ACM`, `IEEE_JOURNAL` (IEEE Transactions / Letters), `IEEE_CONF` (IEEE conferences). Affects style file, page limit, citation format.
-- **MAX_IMPROVEMENT_ROUNDS = 2** — Number of review→fix→recompile rounds in the improvement loop.
+- **MAX_IMPROVEMENT_ROUNDS = 1** — Number of review→fix→recompile rounds in the improvement loop.
 - **REVIEWER_MODEL = `gpt-5.5`** — Model used via Codex MCP for plan review, figure review, writing review, and improvement loop.
-- **AUTO_PROCEED = true** — Auto-continue between phases. Set `false` to pause and wait for user approval after each phase.
-- **HUMAN_CHECKPOINT = false** — When `true`, the improvement loop (Phase 5) pauses after each round's review to let you see the score and provide custom modification instructions. When `false` (default), the loop runs fully autonomously. Passed through to `/auto-paper-improvement-loop`.
+- **AUTO_PROCEED = false** — Pause between phases unless the user explicitly opts into auto-continue.
+- **HUMAN_CHECKPOINT = true** — Pause after each improvement review so the user can inspect the score and provide custom modification instructions. Passed through to `/auto-paper-improvement-loop`.
 - **ILLUSTRATION = `figurespec`** — Architecture/illustration generator for Phase 2b: `figurespec` (default, deterministic JSON→SVG via `/figure-spec`, best for architecture/workflow/topology), `gemini` (AI-generated via `/paper-illustration`, best for qualitative method illustrations; needs `GEMINI_API_KEY`), `mermaid` (Mermaid syntax via `/mermaid-diagram`, free, best for flowcharts), or `false` (skip Phase 2b, manual only).
 
 > Override inline: `/paper-writing "NARRATIVE_REPORT.md" — venue: NeurIPS, illustration: gemini, human checkpoint: true`
@@ -65,15 +69,44 @@ In this hybrid pack, the pipeline itself is unchanged, but `paper-plan` and `pap
 
 This pipeline accepts one of:
 
-1. **`NARRATIVE_REPORT.md`** (best) — structured research narrative with claims, experiments, results, figures
-2. **Research direction + experiment results** — the skill will help draft the narrative first
-3. **Existing `PAPER_PLAN.md`** — skip Phase 1, start from Phase 2
+1. **Accepted `docs/paper/PAPER_PLAN.md` plus audited formal evidence** — best.
+2. **`NARRATIVE_REPORT.md` plus audited formal evidence** — allowed only if the
+   entry gate passes.
+3. **Research direction + validation results** — not enough for manuscript
+   drafting; produce `docs/project/NEXT_ACTIONS.md` or `docs/paper/GAP_REPORT.md`
+   and stop.
 
 The more detailed the input (especially figure descriptions and quantitative results), the better the output.
 
 ## Pipeline
 
-### Phase 0: Assurance Setup
+### Phase 0: Manuscript Entry Gate
+
+Before assurance setup, inspect `PROJECT_STATUS.md`,
+`docs/project/BLUEPRINT_GATE.md`, `docs/paper/PAPER_PLAN.md`,
+`docs/evidence/EVIDENCE_LEDGER.md`, `CLAIMS_FROM_RESULTS.md`,
+`docs/experiments/EXPERIMENT_LOG.md`, and raw result folders when present.
+
+Proceed only if all are true:
+
+1. Formal baseline/main/required ablation runs exist for paper-level claims.
+2. Raw evidence is auditable: run folders, metrics, configs/resolved configs,
+   seeds, logs/metadata, and result summaries are named.
+3. `docs/evidence/EVIDENCE_LEDGER.md`, `CLAIMS_FROM_RESULTS.md`, or an
+   equivalent audit maps claims to raw evidence and unresolved gaps.
+4. `docs/paper/PAPER_PLAN.md` exists and its next-step block says the manuscript
+   entry gate passed, or the user explicitly asks to create the plan first and
+   the evidence gate is already passed.
+
+If any check fails, stop before Phase 1. Do not create `paper/`, LaTeX section
+files, or `docs/paper/PAPER_GUIDE.md`; do not update `PROJECT_STATUS.md` to
+`manuscript`. Write the smallest useful `docs/project/NEXT_ACTIONS.md` or
+`docs/paper/GAP_REPORT.md` naming the missing formal experiments/audits and the
+next gate.
+
+Smoke, pilot, toy, or validation runs never satisfy this gate.
+
+### Phase 0.5: Assurance Setup
 
 Before assurance setup, read `PROJECT_STATUS.md` and `PAPER_GUIDE.md` when
 present. If `PAPER_GUIDE.md` is missing but the project has stable
@@ -641,15 +674,15 @@ or directly if `assurance=draft`)
 ## Composing with Other Workflows
 
 ```
-/idea-discovery "direction"         ← Workflow 1: find ideas
-implement                           ← write code
-/run-experiment                     ← deploy experiments
-/auto-review-loop "paper topic"     ← Workflow 2: iterate research
-/paper-writing "NARRATIVE_REPORT.md"  ← Workflow 3: you are here
-                                         submit! 🎉
+/idea-discovery "direction"                  -> find/refine ideas
+/research-blueprint                          -> freeze theory, method, and experiment gates
+/autodl-hpc or /experiment-plan              -> formal runs, not local heavy compute
+/experiment-audit or evidence ledger update  -> map formal results to claims
+/paper-plan "docs/paper/NARRATIVE_REPORT.md" -> plan only after evidence gate passes
+/paper-writing "docs/paper/PAPER_PLAN.md"    -> draft only after manuscript entry gate passes
 
-Or use /research-pipeline for the Workflow 1+2 end-to-end flow,
-then /paper-writing for the final writing step.
+If the project has only smoke, pilot, toy, or validation results, stay in the
+experiment/audit phases and do not run this skill.
 ```
 
 ## Typical Timeline

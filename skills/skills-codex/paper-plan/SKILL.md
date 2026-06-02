@@ -1,6 +1,6 @@
 ---
 name: "paper-plan"
-description: "Generate a structured paper outline from review conclusions and experiment results. Use when user says \\\"\u5199\u5927\u7eb2\\\", \\\"paper outline\\\", \\\"plan the paper\\\", \\\"\u8bba\u6587\u89c4\u5212\\\", or wants to create a paper plan before writing."
+description: "Generate a structured paper outline from audited formal experiment results and review conclusions. Use when user says \\\"\u5199\u5927\u7eb2\\\", \\\"paper outline\\\", \\\"plan the paper\\\", \\\"\u8bba\u6587\u89c4\u5212\\\", or wants a paper plan after formal runs and evidence audit. If only smoke, pilot, toy, or validation results exist, produce a gap report or next actions instead of routing to manuscript drafting."
 ---
 
 # Paper Plan: From Review Conclusions to Paper Outline
@@ -28,6 +28,12 @@ Read `../shared-references/lightweight-research-pack.md`,
 - Generate a concise `docs/paper/PAPER_PLAN.md` by default: title candidates,
   abstract skeleton, claims-evidence matrix, section outline, figure/table
   inventory, missing-evidence list, and venue risks.
+- **Paper-plan entry gate**: a regular `docs/paper/PAPER_PLAN.md` requires
+  formal baseline/main/required ablation results plus
+  `docs/evidence/EVIDENCE_LEDGER.md` or `CLAIMS_FROM_RESULTS.md`. If the
+  project has only local smoke, AutoDL smoke, pilot, toy, or validation runs,
+  write `docs/project/NEXT_ACTIONS.md` or `docs/paper/GAP_REPORT.md` and stop
+  before any manuscript handoff.
 - When moving from evidence audit to outline work, update `PROJECT_STATUS.md`
   to `paper plan`. Create or refresh `docs/paper/PAPER_GUIDE.md` only when the
   manuscript gate is reached, compacting
@@ -58,6 +64,9 @@ The skill expects one or more of these in the project directory:
 
 If none exist, ask the user to describe the paper's contribution in 3-5 sentences.
 
+For regular paper planning, results must be formal and auditable. Treat
+validation-only evidence as a blocker, even if the method appears promising.
+
 ## Orchestra-Guided Writing Overlay
 
 Keep the existing workflow and outputs, but use the shared references below to improve the quality of the story and outline:
@@ -77,8 +86,25 @@ Before extracting from long narrative reports, read `PROJECT_STATUS.md`,
 legacy root paths only for old projects. If they conflict with older logs,
 prefer the newer gate artifact and surface the conflict in the missing-evidence
 list. If no blueprint exists and the project is moving from experiments into
-paper writing, run or request `research-blueprint` unless the user explicitly
-wants only a lightweight outline.
+paper-readiness planning, run or request `research-blueprint` unless the user
+explicitly wants only a lightweight provisional outline.
+
+Run the paper-plan entry gate before drafting the outline:
+
+1. Confirm `PROJECT_STATUS.md` or `docs/project/BLUEPRINT_GATE.md` places the
+   project at `evidence audit` or later, or explicitly records that formal runs
+   are complete.
+2. Confirm formal run evidence exists for paper-level claims: raw run folders,
+   metrics, configs/resolved configs, seeds, logs/metadata, and result summaries.
+3. Confirm `docs/evidence/EVIDENCE_LEDGER.md`, `CLAIMS_FROM_RESULTS.md`, or an
+   equivalent claim-to-evidence audit maps claims to raw evidence and unresolved
+   gaps.
+4. If any check fails, do not produce a normal paper plan and do not list
+   `/paper-write` or `/paper-writing` as a next step. Instead produce the
+   smallest useful `docs/project/NEXT_ACTIONS.md` or `docs/paper/GAP_REPORT.md`
+   with the missing formal experiments/audits and stop. If the user explicitly
+   asks for a provisional outline, label it `PRE_PAPER_OUTLINE` and keep its
+   next steps in experiment/audit phases only.
 
 **First check for `CLAIMS_FROM_RESULTS.md`** — if it exists, use it as the starting point for claims and merge it with any additional evidence from the narrative documents below.
 
@@ -291,12 +317,23 @@ Save the final outline to `docs/paper/PAPER_PLAN.md`:
 [from Step 6, summarized]
 
 ## Next Steps
+[Choose exactly one block.]
+
+### Manuscript entry gate PASSED
 - [ ] /paper-figure to generate all figures
 - [ ] /paper-write to draft LaTeX
 - [ ] /paper-compile to build PDF
+
+### Manuscript entry gate NOT PASSED
+- [ ] Complete missing formal runs through /autodl-hpc or /experiment-plan
+- [ ] Run /experiment-audit or complete docs/evidence/EVIDENCE_LEDGER.md
+- [ ] Rerun /paper-plan after the evidence gate passes
 ```
 
 ## Key Rules
+- **No manuscript handoff without formal evidence** — if formal runs or the
+  evidence audit are missing, stop at gap reporting and do not recommend
+  `/paper-write`, `/paper-writing`, or LaTeX drafting.
 
 - **Large file handling**: If the Write tool fails due to file size, immediately retry using Bash (`cat << 'EOF' > file`) to write in chunks. Do NOT ask the user for permission — just do it silently.
 
