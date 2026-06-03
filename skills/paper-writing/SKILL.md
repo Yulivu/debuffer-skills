@@ -56,6 +56,12 @@ In this hybrid pack, the pipeline itself is unchanged, but `paper-plan`,
 framing, prose guidance, and submission-time checks. It also benefits from
 `/figure-table-audit` and `/experiment-writeup-audit` before finalization.
 
+Default manuscript package target: an `ICDE_YU_Memory`-style modular paper
+bundle or better, with thin `main.tex`, modular section files, dedicated
+figure assets, benchmark-construction section when contribution-bearing,
+RQ-organized experiments, and separate discussion when scope/limitations
+matter.
+
 ## Constants
 
 - **VENUE = `ICLR`** — Target venue. Options: `ICLR`, `NeurIPS`, `ICML`, `CVPR`, `ACL`, `AAAI`, `JMLR`, `TPAMI`, `ACM`, `IEEE_JOURNAL` (IEEE Transactions / Letters), `IEEE_CONF` (IEEE conferences). Affects style file, page limit, citation format.

@@ -37,6 +37,10 @@ when available. Default to a lightweight, AutoDL-first shape:
   discovery, failure memory, pilot gates, or the macro state machine.
 - For external review, create `review-prompts/` rather than wiring direct API,
   agent, or SSH automation into the repository.
+- When the repo will eventually produce a paper package, prefer an
+  `ICDE_YU_Memory`-style manuscript layout or better: thin `main.tex`,
+  modular section files, dedicated figure assets, and contribution-bearing
+  benchmark/discussion sections instead of a flat monolithic manuscript.
 
 ## Workflow
 
@@ -90,6 +94,9 @@ For detailed directory rules, read `references/architecture.md`. For skill-pack-
   venue-risk checklist, and optional `review-prompts/venue_direction_review_prompt.md`.
 - `reference-paper`: add `references/` or `docs/literature/` notes, a claim map,
   and a reproduction/extension plan before writing experiment code.
+  If the reference is a strong manuscript package template, also record what is
+  worth copying at the package-architecture level: section topology, figure
+  strategy, benchmark-construction handling, and discussion placement.
 - `reference-codebase`: first audit the upstream repo, license, entrypoints,
   environment, and tests; add wrapper scripts instead of modifying upstream code
   blindly.
@@ -166,6 +173,9 @@ Use this path when a normal research project is being operated by skill workflow
 - Keep skill handoff directories where downstream skills expect them unless the
   user asks for a breaking migration: `idea-stage/`, `refine-logs/`,
   `review-stage/`, `paper/`, and `research-wiki/`.
+- Inside `paper/`, prefer a thin `main.tex`, `sections/` for prose,
+  `figures/` for final assets, `tables/` for generated fragments when useful,
+  and `appendix/` for appendix-only assets.
 - Place Markdown handoff artifacts under `docs/` when creating or refreshing
   them: `docs/project/RESEARCH_BRIEF.md`,
   `docs/experiments/EXPERIMENT_PLAN.md`, `docs/paper/NARRATIVE_REPORT.md`,

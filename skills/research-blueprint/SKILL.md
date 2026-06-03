@@ -69,6 +69,12 @@ Read `../shared-references/project-guide-protocol.md`,
 `../shared-references/autosci-lite-patterns.md`, and
 `../shared-references/venue-profiles.md` when available.
 
+When the eventual paper is likely to be a systems, memory, benchmark, or
+query-processing paper, shape the blueprint so it can later map cleanly into an
+`ICDE_YU_Memory`-style package: thin main manuscript file, modular sections,
+explicit methodology decomposition, optional benchmark-construction section,
+RQ-driven experiments, and separate discussion.
+
 ## Blueprint Standard
 
 The blueprint must be detailed, not decorative. It must answer:
@@ -87,6 +93,12 @@ The blueprint must be detailed, not decorative. It must answer:
 Prefer explicit tables, claim maps, and decision rules over broad prose.
 
 ## Required RESEARCH_BLUEPRINT.md Structure
+
+Add one more required section near the end when paper planning is foreseeable:
+
+```markdown
+## 16. 预期论文包结构
+```
 
 `docs/project/RESEARCH_BLUEPRINT.md` must start with this section before any
 background text:

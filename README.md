@@ -14,6 +14,7 @@
 
 ## 最近更新
 
+- 新增 `templates/paper/ieee_conf_modular` 与 `templates/paper/ieee_journal_modular`，提供薄 `main.tex`、分节 `sections/`、独立 `figures/` / `tables/` 的模块化论文包骨架，默认对齐 IEEE 或泛用模块化写法，而不是绑定单一 venue 私有结构。
 - 新增 `figure-table-audit` 与 `experiment-writeup-audit`，分别负责投稿级图表/表格审查，以及实验章节完整性与说服力审查。
 - 新增共享规范 `paper-writing-rules.md`，并接入 `paper-plan`、`paper-write`、`paper-compile`、`paper-writing`，把投稿前检查、匿名性、图表规范和实验写法规则统一到同一套轻量约束里。
 

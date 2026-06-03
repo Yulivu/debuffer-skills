@@ -47,6 +47,9 @@ Read `../shared-references/lightweight-research-pack.md`,
 
 ## Constants
 
+- **PAPER_PACKAGE_STYLE = `modular-thin-main`** - Prefer a thin `main.tex`
+  that only declares venue/class/packages and `\input`s modular section files.
+
 - **REVIEWER_MODEL = `gpt-5.5`** — Model used via a secondary Codex agent for outline review. Must be an OpenAI model.
 - **TARGET_VENUE = `ICLR`** — Default venue. User can override (e.g., `/paper-plan "topic" — venue: NeurIPS`). Supported: `ICLR`, `NeurIPS`, `ICML`, `CVPR`, `ACL`, `AAAI`, `JMLR`, `TPAMI`, `ACM`, `IEEE_JOURNAL` (IEEE Transactions / Letters), `IEEE_CONF` (IEEE conferences).
 - **MAX_PAGES** — Page limit. For ML conferences: main body to Conclusion end (excluding references, appendix). ICLR=9, NeurIPS=9, ICML=8. **For IEEE venues: references ARE included in page count.** IEEE journal Transactions ≈ 12-14 pages total, Letters ≈ 4-5 pages total; IEEE conference ≈ 5-8 pages total (including references).
@@ -137,6 +140,20 @@ Before committing to a structure, apply the narrative principle from `../shared-
 
 **IMPORTANT**: The section count is FLEXIBLE (5-8 sections). Choose what fits the content best. The templates below are starting points, not rigid constraints.
 
+When the paper is system-, memory-, benchmark-, or query-processing-heavy,
+prefer a `TRACE`/`ICDE_YU_Memory`-style section topology instead of forcing a
+generic method-paper order:
+
+```text
+1. Introduction
+2. Methodology / Data Model
+3. Benchmark or Dataset Construction
+4. Experiments
+5. Discussion
+6. Related Work
+7. Conclusion
+```
+
 **Empirical/Diagnostic paper:**
 ```
 1. Introduction (1.5 pages)
@@ -176,6 +193,11 @@ Theory papers should:
 ```
 
 ### Step 3: Section-by-Section Planning
+
+For future manuscript packaging, assume a modular paper bundle rather than a
+flat one-file draft: thin `main.tex`, modular section files, and dedicated
+figure/table assets. This is the default target when the user wants paper
+packages at least as structured as `ICDE_YU_Memory`.
 
 For each section, specify:
 
@@ -231,6 +253,13 @@ List every figure and table:
 
 ```markdown
 ## Figure Plan
+
+For system- or memory-style papers, require these figure-plan slots unless
+genuinely inapplicable:
+- Figure 1: offline / construction overview
+- Figure 2: online / query-time pipeline
+- one main-comparison table
+- one ablation or component-impact visualization
 
 | ID | Type | Description | Data Source | Priority |
 |----|------|-------------|-------------|----------|

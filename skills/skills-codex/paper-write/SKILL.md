@@ -40,7 +40,15 @@ These references are support material, not extra workflow phases.
 
 ### Venue-Specific Setup
 
-The skill includes conference templates in `templates/`. Select based on TARGET_VENUE:
+The skill includes modular paper-package templates under `templates/paper/`.
+Select the concrete skeleton based on `TARGET_VENUE`:
+
+- `IEEE_CONF` -> `templates/paper/ieee_conf_modular/`
+- `IEEE_JOURNAL` -> `templates/paper/ieee_journal_modular/`
+- non-IEEE venues may use the venue's official template, but should still
+  follow the same modular package conventions: thin `main.tex`, section files
+  under `paper/sections/`, dedicated `figures/` and `tables/`, and appendix
+  material isolated from the main narrative
 
 **ICLR:**
 ```latex
@@ -99,6 +107,14 @@ paper/
 
 **Section files are FLEXIBLE**: If the paper plan has 6-8 sections, create corresponding files (e.g., `4_theory.tex`, `5_experiments.tex`, `6_analysis.tex`, `7_conclusion.tex`).
 
+For IEEE-oriented modular starts, prefer copying from:
+
+- `templates/paper/ieee_conf_modular/`
+- `templates/paper/ieee_journal_modular/`
+
+Treat them as package skeletons, then swap in the target venue's official
+class/style bundle if submission instructions require a stricter venue package.
+
 ## Workflow
 
 ### Step 0: Backup and Clean
@@ -110,7 +126,9 @@ If `paper/` already exists, back up to `paper-backup-{timestamp}/` before overwr
 ### Step 1: Initialize Project
 
 1. Create `paper/` directory
-2. Copy venue template from `templates/` — the template already includes:
+2. Copy the venue template from `templates/paper/` (or the target venue's
+   official bundle while preserving the same modular layout) — the template
+   already includes:
    - All standard packages (amsmath, hyperref, cleveref, booktabs, etc.)
    - Theorem environments with `\crefname{assumption}` fix
    - Anonymous author block
@@ -148,6 +166,24 @@ Process sections in order. For each section:
 Before drafting the front matter, re-read the one-sentence contribution from `PAPER_PLAN.md`. The Abstract and Introduction should make that takeaway obvious before the reader reaches the full method.
 
 #### Section-Specific Guidelines
+
+Preferred package standard, matching `ICDE_YU_Memory` quality or better:
+- `main.tex` stays thin and declarative.
+- Section prose lives only under `paper/sections/`.
+- For system/memory papers, allow names like `2_methodology.tex`,
+  `3_benchmark_construction.tex`, `4_experiments.tex`, `5_discussion.tex`,
+  `6_related_work.tex`, `7_conclusion.tex`.
+
+For system or benchmark papers, placing Related Work after Experiments is
+allowed when the technical story reads more cleanly that way.
+
+For system-, memory-, or query-processing papers, write Methodology with
+explicit substructure instead of a single undifferentiated block. Create a
+dedicated Benchmark / Dataset Construction section when the benchmark, stress
+test, evaluation split, or representative-selection protocol is part of the
+contribution. Structure Experiments by research questions (`RQ1`, `RQ2`, ...)
+when possible, and use a dedicated Discussion section when limitations,
+trade-offs, or scope boundaries deserve independent treatment.
 
 **§0 Abstract:**
 - Use the 5-part flow from `../shared-references/writing-principles.md`: what, why hard, how, evidence, strongest result
