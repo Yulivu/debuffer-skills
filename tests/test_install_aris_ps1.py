@@ -12,6 +12,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 INSTALL_PS1 = REPO_ROOT / "tools" / "install_aris.ps1"
 RECONCILE_PS1 = REPO_ROOT / "tools" / "reconcile_debuffer_installs.ps1"
 GUI_PS1 = REPO_ROOT / "tools" / "install_debuffer_gui.ps1"
+REPO_UPDATE_PS1 = REPO_ROOT / "tools" / "update_debuffer_repo.ps1"
 
 
 def resolve_powershell() -> str | None:
@@ -195,6 +196,41 @@ def test_install_debuffer_gui_validate_only_defaults_full() -> None:
 
     assert "图形界面校验通过。" in result.stdout
     assert "默认范围：full" in result.stdout
+
+
+def test_update_debuffer_repo_ps1_dry_run(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    remote = tmp_path / "remote.git"
+    subprocess.run(["git", "init", "--bare", str(remote)], check=True, capture_output=True, text=True)
+    subprocess.run(["git", "clone", str(remote), str(repo)], check=True, capture_output=True, text=True)
+    subprocess.run(["git", "-C", str(repo), "config", "user.name", "Test User"], check=True, capture_output=True, text=True)
+    subprocess.run(["git", "-C", str(repo), "config", "user.email", "test@example.com"], check=True, capture_output=True, text=True)
+    (repo / "README.md").write_text("test\n", encoding="utf-8")
+    subprocess.run(["git", "-C", str(repo), "add", "README.md"], check=True, capture_output=True, text=True)
+    subprocess.run(["git", "-C", str(repo), "commit", "-m", "init"], check=True, capture_output=True, text=True)
+    subprocess.run(["git", "-C", str(repo), "push", "-u", "origin", "master"], check=True, capture_output=True, text=True)
+
+    result = subprocess.run(
+        [
+            PS_EXE,
+            "-NoProfile",
+            "-ExecutionPolicy",
+            "Bypass",
+            "-File",
+            str(REPO_UPDATE_PS1),
+            "-RepoRoot",
+            str(repo),
+            "-DryRun",
+        ],
+        cwd=REPO_ROOT,
+        text=True,
+        encoding="utf-8",
+        capture_output=True,
+        check=True,
+    )
+
+    assert "fetch --prune origin" in result.stdout
+    assert "pull --ff-only origin master" in result.stdout
 
 
 def test_install_aris_ps1_migrates_legacy_state_dir(tmp_path: Path) -> None:

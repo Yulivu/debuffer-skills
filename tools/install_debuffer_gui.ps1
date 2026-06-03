@@ -43,6 +43,7 @@ $Ui = @{
     Registry = T '\u5df2\u767b\u8bb0\u9879\u76ee\uff1a{0}'
     Install = T '\u5b89\u88c5/\u91cd\u8fde'
     Update = T '\u66f4\u65b0\u5168\u90e8'
+    UpdateGitHub = T '\u4ece GitHub \u66f4\u65b0'
     Discover = T '\u626b\u63cf\u65e7\u9879\u76ee'
     Open = T '\u6253\u5f00\u9879\u76ee'
     Close = T '\u5173\u95ed'
@@ -58,6 +59,7 @@ $Ui = @{
     MissingTool = T '\u7f3a\u5c11\u5fc5\u8981\u5de5\u5177\uff1a{0}'
     InstallerMissing = T '\u627e\u4e0d\u5230\u5b89\u88c5\u5668\uff1a{0}'
     UpdaterMissing = T '\u627e\u4e0d\u5230\u66f4\u65b0\u5668\uff1a{0}'
+    RepoUpdaterMissing = T '\u627e\u4e0d\u5230 GitHub \u66f4\u65b0\u5668\uff1a{0}'
     ScannerMissing = T '\u627e\u4e0d\u5230\u626b\u63cf\u5668\uff1a{0}'
     ProjectMissing = T '\u9879\u76ee\u76ee\u5f55\u4e0d\u5b58\u5728\uff1a{0}'
     ScanMissing = T '\u626b\u63cf\u76ee\u5f55\u4e0d\u5b58\u5728\uff1a{0}'
@@ -66,7 +68,9 @@ $Ui = @{
     ExitCode = T '\u547d\u4ee4\u5931\u8d25\uff0c\u9000\u51fa\u7801\uff1a{0}'
     InstallDone = T '\u5b89\u88c5/\u91cd\u8fde\u5b8c\u6210\u3002'
     UpdateDone = T '\u66f4\u65b0\u5168\u90e8\u5b8c\u6210\u3002'
+    UpdateGitHubDone = T '\u5df2\u4ece GitHub \u66f4\u65b0\u6280\u80fd\u5e93\uff0c\u5e76\u540c\u6b65\u5df2\u767b\u8bb0\u9879\u76ee\u3002'
     PreviewDone = T '\u66f4\u65b0\u9884\u89c8\u5b8c\u6210\u3002'
+    UpdateGitHubPreviewDone = T '\u5df2\u9884\u89c8 GitHub \u66f4\u65b0\u4e0e\u9879\u76ee\u540c\u6b65\u3002'
     DiscoverDone = T '\u626b\u63cf\u5b8c\u6210\u3002'
     Failed = T '\u64cd\u4f5c\u5931\u8d25'
     ValidateOk = T '\u56fe\u5f62\u754c\u9762\u6821\u9a8c\u901a\u8fc7\u3002'
@@ -260,6 +264,23 @@ function Run-RegistryUpdate {
     Invoke-Tool -RepoRoot $RepoRoot -Arguments $args -LogBox $LogBox -DoneText $done
 }
 
+function Run-GitHubUpdate {
+    param(
+        [string]$RepoRoot,
+        [bool]$PreviewOnly,
+        [System.Windows.Forms.TextBox]$LogBox
+    )
+
+    $repoUpdater = Join-Path $RepoRoot 'tools\update_debuffer_repo.ps1'
+    if (-not (Test-Path -LiteralPath $repoUpdater -PathType Leaf)) {
+        throw ($Ui.RepoUpdaterMissing -f $repoUpdater)
+    }
+    $args = @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', $repoUpdater)
+    if ($PreviewOnly) { $args += '-DryRun' }
+    Invoke-Tool -RepoRoot $RepoRoot -Arguments $args -LogBox $LogBox -DoneText ''
+    Run-RegistryUpdate -RepoRoot $RepoRoot -PreviewOnly $PreviewOnly -LogBox $LogBox
+}
+
 function Run-RegistryDiscover {
     param(
         [string]$RepoRoot,
@@ -296,7 +317,7 @@ function New-Button {
 $repoRoot = Resolve-RepoRoot -ExplicitRepo $SkillRepo
 
 if ($ValidateOnly) {
-    foreach ($required in @('tools\install_debuffer.ps1', 'tools\reconcile_debuffer_installs.ps1')) {
+    foreach ($required in @('tools\install_debuffer.ps1', 'tools\reconcile_debuffer_installs.ps1', 'tools\update_debuffer_repo.ps1')) {
         $path = Join-Path $repoRoot $required
         if (-not (Test-Path -LiteralPath $path -PathType Leaf)) {
             throw ($Ui.MissingTool -f $path)
@@ -402,11 +423,13 @@ $buttonPanel.FlowDirection = 'LeftToRight'
 $buttonPanel.WrapContents = $false
 $installButton = New-Button -Text $Ui.Install -Width 96
 $updateButton = New-Button -Text $Ui.Update -Width 96
+$updateGitHubButton = New-Button -Text $Ui.UpdateGitHub -Width 116
 $discoverButton = New-Button -Text $Ui.Discover -Width 104
 $openButton = New-Button -Text $Ui.Open -Width 88
 $closeButton = New-Button -Text $Ui.Close -Width 72
 $buttonPanel.Controls.Add($installButton)
 $buttonPanel.Controls.Add($updateButton)
+$buttonPanel.Controls.Add($updateGitHubButton)
 $buttonPanel.Controls.Add($discoverButton)
 $buttonPanel.Controls.Add($openButton)
 $buttonPanel.Controls.Add($closeButton)
@@ -431,7 +454,7 @@ function Refresh-RegistryLabel {
 
 function Set-Busy {
     param([bool]$Busy)
-    foreach ($button in @($installButton, $updateButton, $discoverButton, $projectButton, $openButton, $closeButton)) {
+    foreach ($button in @($installButton, $updateButton, $updateGitHubButton, $discoverButton, $projectButton, $openButton, $closeButton)) {
         $button.Enabled = -not $Busy
     }
     $form.Cursor = if ($Busy) { [System.Windows.Forms.Cursors]::WaitCursor } else { [System.Windows.Forms.Cursors]::Default }
@@ -477,6 +500,20 @@ $updateButton.Add_Click({
         if (-not $previewCheck.Checked) {
             [System.Windows.Forms.MessageBox]::Show($Ui.UpdateDone, $Ui.Title, [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information) | Out-Null
         }
+    } catch {
+        Show-Failure $_.Exception.Message
+    } finally {
+        Set-Busy $false
+    }
+})
+
+$updateGitHubButton.Add_Click({
+    Set-Busy $true
+    try {
+        Run-GitHubUpdate -RepoRoot $repoRoot -PreviewOnly $previewCheck.Checked -LogBox $logBox
+        Refresh-RegistryLabel
+        $doneText = if ($previewCheck.Checked) { $Ui.UpdateGitHubPreviewDone } else { $Ui.UpdateGitHubDone }
+        [System.Windows.Forms.MessageBox]::Show($doneText, $Ui.Title, [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information) | Out-Null
     } catch {
         Show-Failure $_.Exception.Message
     } finally {

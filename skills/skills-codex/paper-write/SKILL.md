@@ -30,6 +30,7 @@ If no PAPER_PLAN.md exists, ask the user to run `/paper-plan` first or provide a
 Keep the existing workflow, file layout, and defaults. Use the shared references below only when they improve writing quality:
 
 - Read `../shared-references/writing-principles.md` before drafting the Abstract, Introduction, Related Work, or when prose feels generic
+- Read `../shared-references/paper-writing-rules.md` before drafting section prose, citations, math notation, figures/tables, and experiment discussion
 - Read `../shared-references/venue-checklists.md` during the final write-up and submission-readiness pass
 - Read `../shared-references/citation-discipline.md` only when the built-in DBLP/CrossRef workflow is insufficient
 

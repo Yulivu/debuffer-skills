@@ -74,6 +74,7 @@ validation-only evidence as a blocker, even if the method appears promising.
 Keep the existing `insleep` workflow and outputs, but use the shared references below to improve the quality of the story and outline.
 
 - Read `../shared-references/writing-principles.md` when framing the one-sentence contribution, Abstract, Introduction, Related Work, or hero figure.
+- Read `../shared-references/paper-writing-rules.md` when shaping the paper story, Introduction flow, contribution list, experiment-section obligations, or submission-time structure.
 - Read `../shared-references/venue-checklists.md` before freezing the outline for a specific venue.
 - Only load these references when needed; do not paste their full contents into the working draft.
 

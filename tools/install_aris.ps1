@@ -317,7 +317,7 @@ function Test-ProfileIncludesName {
                 'run-experiment', 'monitor-experiment', 'experiment-queue',
                 'analyze-results', 'autodl-hpc', 'ablation-planner',
                 'training-check', 'system-profile', 'research-review',
-                'auto-review-loop', 'experiment-audit', 'result-to-claim',
+                'auto-review-loop', 'experiment-audit', 'experiment-writeup-audit', 'result-to-claim',
                 'paper-claim-audit', 'citation-audit', 'research-lit', 'arxiv',
                 'semantic-scholar', 'openalex', 'deepxiv', 'exa-search',
                 'alphaxiv', 'novelty-check', 'comm-lit-review', 'wiki-enrich',
@@ -328,10 +328,10 @@ function Test-ProfileIncludesName {
             return $Name -in @(
                 'paper-writing', 'paper-plan', 'paper-write', 'paper-compile',
                 'paper-figure', 'paper-illustration', 'paper-illustration-image2',
-                'figure-description', 'figure-spec', 'mermaid-diagram', 'render-html',
+                'figure-description', 'figure-spec', 'figure-table-audit', 'mermaid-diagram', 'render-html',
                 'paper-talk', 'paper-slides', 'slides-polish', 'paper-poster',
                 'proof-writer', 'proof-checker', 'formula-derivation',
-                'citation-audit', 'paper-claim-audit', 'result-to-claim',
+                'citation-audit', 'paper-claim-audit', 'experiment-writeup-audit', 'result-to-claim',
                 'kill-argument', 'auto-paper-improvement-loop',
                 'writing-systems-papers', 'rebuttal', 'resubmit-pipeline',
                 'overleaf-sync', 'overleaf-package', 'research-review', 'auto-review-loop',
@@ -340,9 +340,9 @@ function Test-ProfileIncludesName {
         }
         'review' {
             return $Name -in @(
-                'research-review', 'auto-review-loop', 'experiment-audit',
+                'research-review', 'auto-review-loop', 'experiment-audit', 'experiment-writeup-audit',
                 'result-to-claim', 'paper-claim-audit', 'citation-audit',
-                'proof-checker', 'kill-argument', 'novelty-check',
+                'figure-table-audit', 'proof-checker', 'kill-argument', 'novelty-check',
                 'research-refine', 'research-blueprint', 'auto-paper-improvement-loop', 'rebuttal',
                 'research-lit', 'arxiv', 'semantic-scholar', 'openalex',
                 'deepxiv', 'exa-search', 'alphaxiv', 'render-html'

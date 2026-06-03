@@ -1,6 +1,6 @@
 # debuffer-skills
 
-这是一个面向科研项目的轻量化 Codex skills 定制包。当前提供 **79 个 skill**，主线与 Codex mirror 均为 **79 个 skill**，完整清单见 [docs/SKILLS_CATALOG.md](docs/SKILLS_CATALOG.md)。
+这是一个面向科研项目的轻量化 Codex skills 定制包。当前提供 **81 个 skill**，主线与 Codex mirror 均为 **81 个 skill**，完整清单见 [docs/SKILLS_CATALOG.md](docs/SKILLS_CATALOG.md)。
 
 ## 当前提供
 
@@ -14,6 +14,9 @@
 
 ## 最近更新
 
+- 新增 `figure-table-audit` 与 `experiment-writeup-audit`，分别负责投稿级图表/表格审查，以及实验章节完整性与说服力审查。
+- 新增共享规范 `paper-writing-rules.md`，并接入 `paper-plan`、`paper-write`、`paper-compile`、`paper-writing`，把投稿前检查、匿名性、图表规范和实验写法规则统一到同一套轻量约束里。
+
 - `research-blueprint` 现在是正式实验、AutoDL 正式运行和论文证据准入的 gate；没有正式实验与 evidence audit 时，不会把下一步指向论文正文。
 - `docs/project/RESEARCH_BLUEPRINT.md` 开头固定包含“总体进度表”，按数据获取、预处理、协议冻结、理论/方法、local smoke、AutoDL smoke、pilot、正式实验、证据审计、论文计划、初稿和投稿材料逐步打勾。
 - `experiment-plan`、`paper-plan`、`research-pipeline`、`research-repo-architect` 已接入 blueprint gate。
@@ -21,7 +24,7 @@
 - `research-repo-architect` 增加根目录 Markdown 约束：普通科研 repo 根目录只保留 `README.md`、`PROJECT_STATUS.md` 和工具托管的 `AGENTS.md` / `CLAUDE.md`，其他 Markdown 进入 `docs/` 分类目录。
 - 共享输出记录从根目录 `MANIFEST.md` 调整为 `docs/project/OUTPUT_MANIFEST.md`；证明和公式推导默认进入 `docs/theory/`。
 - 新增 `overleaf-package`：把本地 LaTeX 论文树打成可手动上传到 Overleaf 的 zip，并生成简洁 manifest，不依赖 Overleaf Git bridge。
-- 安装 profile 已包含 `research-blueprint`，当前主线与 Codex mirror 均为 79 个 skill。
+- 安装 profile 已包含 `research-blueprint`，当前主线与 Codex mirror 均为 81 个 skill。
 
 <a id="quick-start"></a>
 
@@ -52,9 +55,9 @@ powershell -ExecutionPolicy Bypass -File tools\install_debuffer.ps1 $targetRepo 
 
 安装器会在本技能库本地维护 `.debuffer_registry/installed-projects.tsv`，记录哪些项目从这个 checkout 安装过。该登记表只用于本机批量更新，已被 Git 忽略。
 
-Windows 上可以双击根目录的 `Install Debuffer Skills.cmd` 打开中文图形界面。默认安装 `full`，主要操作只有 `安装/重连`、`更新全部`、`扫描旧项目`。
+Windows 上可以双击根目录的 `Install Debuffer Skills.cmd` 打开中文图形界面。默认安装 `full`，主要操作有 `安装/重连`、`更新全部`、`从 GitHub 更新`、`扫描旧项目`。
 
-macOS 上可以直接双击根目录的 `Install Debuffer Skills.command`，选择安装到单个 repo 或更新所有登记项目。若 Finder 提示无法执行，先在终端运行：
+macOS 上可以直接双击根目录的 `Install Debuffer Skills.command`，选择安装到单个 repo、更新所有登记项目，或先从 GitHub 拉取最新再同步所有登记项目。若 Finder 提示无法执行，先在终端运行：
 
 ```bash
 chmod +x "Install Debuffer Skills.command"
@@ -99,11 +102,23 @@ bash tools/reconcile_debuffer_installs.sh
 bash tools/reconcile_debuffer_installs.sh --apply
 ```
 
+如果希望由本仓库自动先从 GitHub 快进更新，再同步所有已登记项目：
+```bash
+bash tools/update_debuffer_repo.sh
+bash tools/reconcile_debuffer_installs.sh --apply
+```
+
 Windows PowerShell：
 
 ```powershell
 git pull
 powershell -ExecutionPolicy Bypass -File tools\reconcile_debuffer_installs.ps1
+powershell -ExecutionPolicy Bypass -File tools\reconcile_debuffer_installs.ps1 -Apply
+```
+
+如果希望由本仓库自动先从 GitHub 快进更新，再同步所有已登记项目：
+```powershell
+powershell -ExecutionPolicy Bypass -File tools\update_debuffer_repo.ps1
 powershell -ExecutionPolicy Bypass -File tools\reconcile_debuffer_installs.ps1 -Apply
 ```
 
@@ -125,7 +140,7 @@ powershell -ExecutionPolicy Bypass -File tools\reconcile_debuffer_installs.ps1 -
 - `autodl-hpc`：准备 AutoDL/HPC 运行、数据策略、preflight、smoke gate、结果传输和正式运行审批。
 - `idea-discovery` / `research-refine` / `research-blueprint` / `experiment-plan`：从方向、参考论文、代码库或初步 idea 走到严密研究蓝图和可验证实验计划。
 - `research-review` / `auto-review-loop` / `paper-claim-audit` / `citation-audit`：生成独立评审 prompt，并整理反馈为行动项。
-- `paper-writing` / `paper-write` / `paper-compile` / `overleaf-package`：把已审计证据组织成论文草稿、LaTeX、Overleaf 上传包和提交前检查。
+- `paper-writing` / `paper-write` / `paper-compile` / `figure-table-audit` / `experiment-writeup-audit` / `overleaf-package`：把已审计证据组织成论文草稿、LaTeX、图表与实验章节审查、Overleaf 上传包和提交前检查。
 - `rebuttal` / `resubmit-pipeline`：处理会议/期刊反馈、rebuttal 和换 venue 投稿。
 
 完整表见 [docs/SKILLS_CATALOG.md](docs/SKILLS_CATALOG.md)。

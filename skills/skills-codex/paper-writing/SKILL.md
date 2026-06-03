@@ -51,7 +51,10 @@ This skill chains five sub-skills into a single automated pipeline:
 
 Each phase builds on the previous one's output. The final deliverable is a polished, reviewed `paper/` directory with LaTeX source and compiled PDF.
 
-In this hybrid pack, the pipeline itself is unchanged, but `paper-plan` and `paper-write` use Orchestra-adapted shared references for stronger story framing and prose guidance.
+In this hybrid pack, the pipeline itself is unchanged, but `paper-plan`,
+`paper-write`, and `paper-compile` use shared references for stronger story
+framing, prose guidance, and submission-time checks. It also benefits from
+`/figure-table-audit` and `/experiment-writeup-audit` before finalization.
 
 ## Constants
 
@@ -324,6 +327,17 @@ Invoke `/paper-compile` to build the PDF:
 
 Shall I proceed with the improvement loop?
 ```
+
+### Phase 4.3: Figure/Table Audit
+
+Run `/figure-table-audit "paper/"` to check caption quality, reference order,
+visual readability, vector-format hygiene, and table presentation before the
+improvement loop.
+
+### Phase 4.4: Experiment Writeup Audit
+
+Run `/experiment-writeup-audit "paper/"` to judge whether the experiment
+section is missing claim-critical studies or mainly needs stronger writeup.
 
 ### Phase 4.5: Proof Verification (theory papers only)
 

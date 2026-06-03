@@ -7,6 +7,7 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd -P)"
 REPO_ROOT="$SCRIPT_DIR"
 INSTALLER="$REPO_ROOT/tools/install_debuffer_codex.sh"
 UPDATER="$REPO_ROOT/tools/reconcile_debuffer_installs.sh"
+REPO_UPDATER="$REPO_ROOT/tools/update_debuffer_repo.sh"
 
 alert() {
     local title="$1"
@@ -27,7 +28,7 @@ APPLESCRIPT
 
 choose_action() {
     osascript <<'APPLESCRIPT'
-set actionChoices to {"Install into one repo", "Update registered repos"}
+set actionChoices to {"Install into one repo", "Update registered repos", "Update from GitHub and sync repos"}
 set selectedAction to choose from list actionChoices with title "debuffer-skills" with prompt "Choose an action:" default items {"Install into one repo"} without multiple selections allowed
 if selectedAction is false then error number -128
 return item 1 of selectedAction
@@ -74,7 +75,13 @@ display dialog "Update every project registered by this debuffer-skills checkout
 APPLESCRIPT
 }
 
-if [[ ! -f "$INSTALLER" || ! -f "$UPDATER" || ! -d "$REPO_ROOT/skills/skills-codex" ]]; then
+confirm_github_update() {
+    osascript <<'APPLESCRIPT' >/dev/null
+display dialog "Pull the latest debuffer-skills from GitHub, then reconcile all registered projects?" with title "debuffer-skills" buttons {"Cancel", "Update"} default button "Update" cancel button "Cancel"
+APPLESCRIPT
+}
+
+if [[ ! -f "$INSTALLER" || ! -f "$UPDATER" || ! -f "$REPO_UPDATER" || ! -d "$REPO_ROOT/skills/skills-codex" ]]; then
     echo "This launcher must be run from the root of a debuffer-skills repo." >&2
     alert "debuffer-skills" "This launcher must be run from the root of a debuffer-skills repo."
     exit 1
@@ -104,6 +111,32 @@ if [[ "$ACTION" == "Update registered repos" ]]; then
     else
         echo "Update failed with exit code $STATUS." >&2
         alert "debuffer-skills" "Update failed with exit code $STATUS. Check the Terminal output."
+    fi
+    echo
+    read -r -p "Press Enter to close this window..."
+    exit "$STATUS"
+fi
+
+if [[ "$ACTION" == "Update from GitHub and sync repos" ]]; then
+    confirm_github_update || exit 0
+    echo "Updating debuffer-skills from GitHub..."
+    echo
+    bash "$REPO_UPDATER"
+    STATUS=$?
+    if [[ $STATUS -eq 0 ]]; then
+        echo
+        echo "Syncing registered projects..."
+        echo
+        bash "$UPDATER" --apply
+        STATUS=$?
+    fi
+    echo
+    if [[ $STATUS -eq 0 ]]; then
+        echo "GitHub update completed."
+        alert "debuffer-skills" "GitHub update completed."
+    else
+        echo "GitHub update failed with exit code $STATUS." >&2
+        alert "debuffer-skills" "GitHub update failed with exit code $STATUS. Check the Terminal output."
     fi
     echo
     read -r -p "Press Enter to close this window..."

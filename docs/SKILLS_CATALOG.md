@@ -1,6 +1,6 @@
 # Skills Catalog
 
-这个目录是 `debuffer-skills` 的紧凑技能清单。当前主线与 Codex mirror 均为 **79 skills**。
+这个目录是 `debuffer-skills` 的紧凑技能清单。当前主线与 Codex mirror 均为 **81 skills**。
 
 默认流程：本地轻量检查，AutoDL/HPC 运行准备，prompt-only 评审，紧凑项目记忆。
 
@@ -23,12 +23,14 @@
 | [`/embodiment-description`](../skills/embodiment-description/SKILL.md) | 专利 | 围绕发明点、现有技术和法域格式生成专利草案。 | 检索先有技术，结构化发明点，生成权利要求和说明书。 |
 | [`/exa-search`](../skills/exa-search/SKILL.md) | 文献与知识库 | 检索、整理和补全文献与项目知识。 | 使用本地笔记、论文库和网络检索，保留摘要和证据路径。 |
 | [`/experiment-audit`](../skills/experiment-audit/SKILL.md) | 评审与审计 | 生成 prompt-only 评审和证据审计产物。 | 写入 review-prompts/，按照独立对话反馈整理行动项。 |
+| [`/experiment-writeup-audit`](../skills/experiment-writeup-audit/SKILL.md) | 评审与审计 | 审查实验章节是否完整、有说服力，并区分缺实验还是缺写法。 | 检查实验设置、baseline、实验家族覆盖、claim 对齐和分析质量，输出紧凑修复清单。 |
 | [`/experiment-bridge`](../skills/experiment-bridge/SKILL.md) | 实验与算力 | 准备实验代码、本地轻量检查和 AutoDL/HPC 运行交接。 | 运行本地 tiny checks，写出远程命令块、数据清单和结果回传路径。 |
 | [`/experiment-plan`](../skills/experiment-plan/SKILL.md) | 想法与方法 | 把假设、方法和 venue 风险整理成可验证计划。 | 建立 claim map、实验路线、风险表和最小验证集。 |
 | [`/experiment-queue`](../skills/experiment-queue/SKILL.md) | 实验与算力 | 准备实验代码、本地轻量检查和 AutoDL/HPC 运行交接。 | 运行本地 tiny checks，写出远程命令块、数据清单和结果回传路径。 |
 | [`/feishu-notify`](../skills/feishu-notify/SKILL.md) | 辅助输出 | 生成项目本地辅助材料、通知或学习文档。 | 把输出写到目标项目，配套简短审查或通知流程。 |
 | [`/figure-description`](../skills/figure-description/SKILL.md) | 论文与图表 | 把已审计证据组织成论文、图表、演示和提交前检查。 | 连接证据矩阵、LaTeX、图表脚本和提交前 gate。 |
 | [`/figure-spec`](../skills/figure-spec/SKILL.md) | 论文与图表 | 把已审计证据组织成论文、图表、演示和提交前检查。 | 连接证据矩阵、LaTeX、图表脚本和提交前 gate。 |
+| [`/figure-table-audit`](../skills/figure-table-audit/SKILL.md) | 评审与审计 | 审查图表和表格是否达到投稿质量。 | 检查引用顺序、caption、自洽性、可读性、矢量格式和表格风格，输出紧凑问题单。 |
 | [`/formula-derivation`](../skills/formula-derivation/SKILL.md) | 想法与方法 | 把假设、方法和 venue 风险整理成可验证计划。 | 建立 claim map、实验路线、风险表和最小验证集。 |
 | [`/gemini-search`](../skills/gemini-search/SKILL.md) | 文献与知识库 | 检索、整理和补全文献与项目知识。 | 使用本地笔记、论文库和网络检索，保留摘要和证据路径。 |
 | [`/grant-proposal`](../skills/grant-proposal/SKILL.md) | 辅助输出 | 生成项目本地辅助材料、通知或学习文档。 | 把输出写到目标项目，配套简短审查或通知流程。 |

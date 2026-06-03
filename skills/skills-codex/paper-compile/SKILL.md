@@ -7,6 +7,10 @@ description: "Compile LaTeX paper to PDF, fix errors, and verify output. Use whe
 
 Compile the LaTeX paper and fix any issues: **$ARGUMENTS**
 
+Before the final submission-readiness pass, read
+`../shared-references/paper-writing-rules.md` and
+`../shared-references/venue-checklists.md`.
+
 ## Constants
 
 - **COMPILER = `latexmk`** — LaTeX build tool. Handles multi-pass compilation automatically.
@@ -204,6 +208,7 @@ This prevents confusion from leftover files when section structure changes (e.g.
 For conference submission, additional checks:
 
 - [ ] **Anonymous**: no author names, affiliations, or self-citations that reveal identity
+- [ ] **Submission metadata**: title, abstract, and venue metadata match the submission system
 - [ ] **Page limit**: main body within MAX_PAGES (to end of Conclusion)
 - [ ] **Font embedding**: all fonts embedded in PDF
   ```bash
@@ -212,6 +217,8 @@ For conference submission, additional checks:
 - [ ] **No supplementary mixed in**: appendix clearly after `\newpage\appendix`
 - [ ] **File size**: reasonable (< 50MB for most venues, < 10MB preferred)
 - [ ] **No `[VERIFY]` markers**: search the PDF text for leftover markers
+- [ ] **Anonymous code/data release**: no personal GitHub/Drive links or identity-revealing paths if the venue requires double blind
+- [ ] **Backup/version sanity**: current PDF/source version is the intended final submission snapshot
 
 ### Step 8: Output Summary
 
