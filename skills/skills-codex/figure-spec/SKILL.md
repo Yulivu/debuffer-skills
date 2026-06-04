@@ -32,6 +32,7 @@ Generate publication-quality **architecture diagrams**, **workflow pipelines**, 
 - **Shape-aware**: edge clipping works correctly for rect/rounded/circle/ellipse/diamond
 - **CJK support**: multi-line labels with proper Chinese character width estimation
 - **No external API**: runs fully local, no network, no API keys
+- **Typography discipline**: labels should match the paper body font size by default
 
 ## Tool Location
 
@@ -149,6 +150,7 @@ If validation fails, inspect the error (missing field, duplicate ID, overlap war
 Open the SVG/PDF and check:
 - **No overlaps**: nodes don't collide with each other or group boundaries
 - **Readability**: font sizes are consistent, labels aren't clipped
+- **Body-font lock**: any visible text inside the figure matches the paper body font size unless a venue-specific exception is documented
 - **Edge clarity**: arrows hit nodes at clean angles, labels near edges are legible
 - **Group alignment**: background rectangles frame their members cleanly
 - **Color distinction**: categories are visually distinct in both color and grayscale
@@ -195,6 +197,10 @@ Run `python3 "$FIGURE_RENDERER" schema` for the authoritative schema.
 | `fill`, `stroke` | | auto from palette | `#RRGGBB` |
 | `text_color` | | `#333333` | |
 | `font_size` | | 14 | Override style default |
+
+For paper figures, do not choose `font_size` ad hoc. Set it from the target
+manuscript body size first, then keep the same value across node labels, edge
+labels, and group labels unless a documented venue rule forces a deviation.
 
 ### Edges
 

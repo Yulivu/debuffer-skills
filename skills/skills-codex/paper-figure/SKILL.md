@@ -14,7 +14,7 @@ Generate all figures and tables for a paper based on: **$ARGUMENTS**
 | **Data-driven plots** | ✅ Yes | Line plots (training curves), bar charts (method comparison), scatter plots, heatmaps, box/violin plots |
 | **Comparison tables** | ✅ Yes | LaTeX tables comparing prior bounds, method features, ablation results |
 | **Multi-panel figures** | ✅ Yes | Subfigure grids combining multiple plots (e.g., 3×3 dataset × method) |
-| **Architecture/pipeline diagrams** | ❌ No — manual | Model architecture, data flow diagrams, system overviews. At best can generate a rough TikZ skeleton, but **expect to draw these yourself** using tools like draw.io, Figma, or TikZ |
+| **Architecture/pipeline diagrams** | ✅ Partial | Prefer `/figure-spec` for deterministic SVG or TikZ/PGFPlots templates for publication-ready vector structure figures |
 | **Generated image grids** | ❌ No — manual | Grids of generated samples (e.g., GAN/diffusion outputs). These come from running your model, not from this skill |
 | **Photographs / screenshots** | ❌ No — manual | Real-world images, UI screenshots, qualitative examples |
 
@@ -26,7 +26,7 @@ Generate all figures and tables for a paper based on: **$ARGUMENTS**
 - **DPI = 300** — Output resolution
 - **FORMAT = `pdf`** — Output format. Options: `pdf` (vector, best for LaTeX), `png` (raster fallback)
 - **COLOR_PALETTE = `tab10`** — Default matplotlib color cycle. Options: `tab10`, `Set2`, `colorblind` (deuteranopia-safe)
-- **FONT_SIZE = 10** — Base font size (matches typical conference body text)
+- **FONT_SIZE = 10** — Base font size. Treat this as the paper body font size and keep all visible figure text at this size unless the venue style file proves otherwise.
 - **FIG_DIR = `figures/`** — Output directory for generated figures
 - **REVIEWER_MODEL = `gpt-5.5`** — Model used via a secondary Codex agent for figure quality review.
 
@@ -58,40 +58,29 @@ Identify:
 
 ### Step 2: Set Up Plotting Environment
 
-Create a shared style configuration script:
+Create a shared style configuration script. Prefer the local template
+`templates/figure/matplotlib_publication_style.py`, which is a lightweight
+adaptation of the reusable matplotlib habits from
+`MLNLP-World/Paper-Picture-Writing-Code`.
 
 ```python
-# paper_plot_style.py — shared across all figure scripts
+# paper_plot_style.py
+from pathlib import Path
 import matplotlib.pyplot as plt
-import matplotlib
-matplotlib.rcParams.update({
-    'font.size': FONT_SIZE,
-    'font.family': 'serif',
-    'font.serif': ['Times New Roman', 'Times', 'DejaVu Serif'],
-    'axes.labelsize': FONT_SIZE,
-    'axes.titlesize': FONT_SIZE + 1,
-    'xtick.labelsize': FONT_SIZE - 1,
-    'ytick.labelsize': FONT_SIZE - 1,
-    'legend.fontsize': FONT_SIZE - 1,
-    'figure.dpi': DPI,
-    'savefig.dpi': DPI,
-    'savefig.bbox': 'tight',
-    'savefig.pad_inches': 0.05,
-    'axes.grid': False,
-    'axes.spines.top': False,
-    'axes.spines.right': False,
-    'text.usetex': False,  # set True if LaTeX is available
-    'mathtext.fontset': 'stix',
-})
+from matplotlib_publication_style import apply_paper_style, save_publication_figure
 
-# Color palette
-COLORS = plt.cm.tab10.colors  # or Set2, or colorblind-safe
+apply_paper_style(body_font_size_pt=FONT_SIZE, font_family='Times New Roman', dpi=DPI)
+COLORS = plt.cm.tab10.colors
 
 def save_fig(fig, name, fmt=FORMAT):
-    """Save figure to FIG_DIR with consistent naming."""
-    fig.savefig(f'{FIG_DIR}/{name}.{fmt}')
+    save_publication_figure(fig, Path(FIG_DIR) / f'{name}.{fmt}')
     print(f'Saved: {FIG_DIR}/{name}.{fmt}')
 ```
+
+If the target figure is better expressed in native LaTeX vector form, prefer a
+PGFPlots/TikZ source that imports `templates/figure/pgfplots_bodyfont.tex`.
+This keeps figures editable, vectorized, and aligned with the manuscript
+typography.
 
 ### Step 3: Auto-Select Figure Type
 
@@ -162,11 +151,10 @@ Method & Rate & Depends on $D$? & Multi-modal? \\
 \end{table}
 ```
 
-**Architecture/pipeline diagrams** (MANUAL — outside this skill's scope):
-- These require manual creation using draw.io, Figma, Keynote, or TikZ
-- This skill can generate a rough TikZ skeleton as a starting point, but **do not expect publication-quality results**
-- If the figure already exists in `figures/`, preserve it and generate only the LaTeX `\includegraphics` snippet
-- Flag as `[MANUAL]` in the figure plan and `latex_includes.tex`
+**Architecture/pipeline diagrams**:
+- Default to `/figure-spec` when the diagram is structured and should remain deterministic/editable.
+- Use TikZ/PGFPlots when the figure truly benefits from native LaTeX vector composition or must inherit the paper font metrics exactly.
+- If a manual figure already exists in `figures/`, preserve it and generate only the LaTeX `\includegraphics` snippet.
 
 ### Step 5: Run All Scripts
 
@@ -221,6 +209,7 @@ spawn_agent:
 Before finishing, verify each figure (from pedrohcgs/claude-code-my-workflow):
 
 - [ ] Font size readable at printed paper size (not too small)
+- [ ] **Every visible word inside the figure matches the paper body font size** unless a venue-specific exception is documented
 - [ ] Colors distinguishable in grayscale (print-friendly)
 - [ ] **No title inside figures** — titles go only in LaTeX `\caption{}` (from pedrohcgs)
 - [ ] Legend does not overlap data
@@ -252,8 +241,10 @@ figures/
 - **Every figure must be reproducible** — save the generation script alongside the output
 - **Do NOT hardcode data** — always read from JSON/CSV files
 - **Use vector format (PDF)** for all plots — PNG only as fallback
+- **Prefer template-backed plotting** — reuse `templates/figure/matplotlib_publication_style.py` or `templates/figure/pgfplots_bodyfont.tex` instead of ad hoc styles
 - **No decorative elements** — no background colors, no 3D effects, no chart junk
 - **Consistent style across all figures** — same fonts, colors, line widths
+- **Typography lock** — any text inside the figure must default to the same point size as the manuscript body text
 - **Colorblind-safe** — verify with https://davidmathlogic.com/colorblind/ if needed
 - **One script per figure** — easy to re-run individual figures when data changes
 - **No titles inside figures** — captions are in LaTeX only
@@ -276,4 +267,3 @@ figures/
 ## Acknowledgements
 
 Design pattern (type × style matrix) inspired by [baoyu-skills](https://github.com/jimliu/baoyu-skills). Publication style defaults and figure rules from [pedrohcgs/claude-code-my-workflow](https://github.com/pedrohcgs/claude-code-my-workflow). Visualization decision tree from [Imbad0202/academic-research-skills](https://github.com/Imbad0202/academic-research-skills).
-

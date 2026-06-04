@@ -1,0 +1,21 @@
+% Lightweight PGFPlots / TikZ typography block for paper figures.
+% Rule: visible text inside the figure should match the paper body font size
+% unless the target venue explicitly requires a different size.
+
+\newcommand{\PaperFigureBodyFontSize}{10}
+\newcommand{\PaperFigureBodyBaseline}{12}
+\newcommand{\PaperFigureFont}{\fontsize{\PaperFigureBodyFontSize}{\PaperFigureBodyBaseline}\selectfont}
+
+\pgfplotsset{
+  every axis/.append style={
+    font=\PaperFigureFont,
+    label style={font=\PaperFigureFont},
+    tick label style={font=\PaperFigureFont},
+    legend style={font=\PaperFigureFont},
+    title style={font=\PaperFigureFont},
+  }
+}
+
+\tikzset{
+  every node/.append style={font=\PaperFigureFont}
+}

@@ -1,6 +1,6 @@
 # Skills Catalog
 
-这个目录是 `debuffer-skills` 的紧凑技能清单。当前主线与 Codex mirror 均为 **81 skills**。
+这个目录是 `debuffer-skills` 的紧凑技能清单。当前主线与 Codex mirror 均为 **82 skills**。
 
 默认流程：本地轻量检查，AutoDL/HPC 运行准备，prompt-only 评审，紧凑项目记忆。
 
@@ -56,6 +56,7 @@
 | [`/paper-poster`](../skills/paper-poster/SKILL.md) | 论文与图表 | 把已审计证据组织成论文、图表、演示和提交前检查。 | 连接证据矩阵、LaTeX、图表脚本和提交前 gate。 |
 | [`/paper-slides`](../skills/paper-slides/SKILL.md) | 论文与图表 | 把已审计证据组织成论文、图表、演示和提交前检查。 | 连接证据矩阵、LaTeX、图表脚本和提交前 gate。 |
 | [`/paper-talk`](../skills/paper-talk/SKILL.md) | 论文与图表 | 把已审计证据组织成论文、图表、演示和提交前检查。 | 连接证据矩阵、LaTeX、图表脚本和提交前 gate。 |
+| [`/paper-visualization`](../skills/paper-visualization/SKILL.md) | 论文与图表 | 统一路由论文作图入口，并对齐图表的字体、格式和审查规则。 | 按图类型分流到 `paper-figure`、`figure-spec`、PGFPlots/TikZ 或 illustration，再回到 `figure-table-audit` 做收口。 |
 | [`/paper-write`](../skills/paper-write/SKILL.md) | 论文与图表 | 把已审计证据组织成论文、图表、演示和提交前检查。 | 连接证据矩阵、LaTeX、图表脚本和提交前 gate。 |
 | [`/paper-writing`](../skills/paper-writing/SKILL.md) | 论文与图表 | 在正式实验与 evidence audit 通过后，把已接受的 paper plan 推进为 LaTeX 正文。 | 先检查 manuscript-entry gate；未通过时只输出 gap / next actions，不生成正文。 |
 | [`/patent-novelty-check`](../skills/patent-novelty-check/SKILL.md) | 专利 | 围绕发明点、现有技术和法域格式生成专利草案。 | 检索先有技术，结构化发明点，生成权利要求和说明书。 |
