@@ -88,6 +88,13 @@ esac
 [[ -d "$UPSTREAM_DIR" ]] || die "upstream directory not found: $UPSTREAM_DIR"
 [[ -d "$LOCAL_DIR" ]] || die "local directory not found: $LOCAL_DIR"
 
+LOCAL_REALPATH="$(cd "$LOCAL_DIR" && pwd)"
+case "$LOCAL_REALPATH" in
+    "$REPO_ROOT"|"$REPO_ROOT"/*)
+        die "refusing to operate on a local skills directory inside the debuffer-skills repo (repo: $REPO_ROOT, local: $LOCAL_REALPATH)"
+        ;;
+esac
+
 MANAGED_MANIFEST=""
 if [[ -n "$PROJECT_ROOT" ]]; then
     MANAGED_MANIFEST="$PROJECT_ROOT/.debuffer_skills/installed-skills-codex.txt"

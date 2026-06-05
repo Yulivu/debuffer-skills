@@ -71,7 +71,8 @@ while [[ $# -gt 0 ]]; do
 done
 
 # ─── Resolve paths ─────────────────────────────────────────────────────────────
-REPO_SKILLS_DIR="$(cd "$(dirname "$0")/.." && pwd)/skills"
+REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+REPO_SKILLS_DIR="$REPO_ROOT/skills"
 
 case "$MODE" in
     project)
@@ -203,6 +204,17 @@ if [[ ! -d "$LOCAL_DIR" ]]; then
     echo -e "${RED}Local skills directory not found: ${LOCAL_DIR}${NC}"
     exit 1
 fi
+
+LOCAL_REALPATH="$(cd "$LOCAL_DIR" && pwd)"
+case "$LOCAL_REALPATH" in
+    "$REPO_ROOT"|"$REPO_ROOT"/*)
+        echo -e "${RED}Refusing to operate on a local skills directory inside the debuffer-skills repo:${NC}" >&2
+        echo -e "  repo:  $REPO_ROOT" >&2
+        echo -e "  local: $LOCAL_REALPATH" >&2
+        echo -e "${YELLOW}Choose an installed copy target outside the source repo.${NC}" >&2
+        exit 2
+        ;;
+esac
 
 # Counters
 NEW=0

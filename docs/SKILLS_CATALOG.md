@@ -1,6 +1,6 @@
 # Skills Catalog
 
-这个目录是 `debuffer-skills` 的紧凑技能清单。当前主线与 Codex mirror 均为 **82 skills**。
+这个目录是 `debuffer-skills` 的紧凑技能清单。当前主线与 Codex mirror 均为 **83 skills**。
 
 默认流程：本地轻量检查，AutoDL/HPC 运行准备，prompt-only 评审，紧凑项目记忆。
 
@@ -34,6 +34,7 @@
 | [`/formula-derivation`](../skills/formula-derivation/SKILL.md) | 想法与方法 | 把假设、方法和 venue 风险整理成可验证计划。 | 建立 claim map、实验路线、风险表和最小验证集。 |
 | [`/gemini-search`](../skills/gemini-search/SKILL.md) | 文献与知识库 | 检索、整理和补全文献与项目知识。 | 使用本地笔记、论文库和网络检索，保留摘要和证据路径。 |
 | [`/grant-proposal`](../skills/grant-proposal/SKILL.md) | 辅助输出 | 生成项目本地辅助材料、通知或学习文档。 | 把输出写到目标项目，配套简短审查或通知流程。 |
+| [`/image-to-vector-ppt`](../skills/image-to-vector-ppt/SKILL.md) | 论文与图表 | 把截图、PNG、JPG 等参考图重绘成可编辑的 PPT/PPTX 矢量论文图，并导出清晰 PDF。 | 用原生 PowerPoint 形状、文本框、表格和 Office Math 重建图形，再做导出与清晰度校验，避免最终可见位图底图。 |
 | [`/idea-creator`](../skills/idea-creator/SKILL.md) | 想法与方法 | 把假设、方法和 venue 风险整理成可验证计划。 | 建立 claim map、实验路线、风险表和最小验证集。 |
 | [`/idea-discovery`](../skills/idea-discovery/SKILL.md) | 流程编排 | 串联多个 skill，把方向、实验、评审和论文推进到阶段产物。 | 读取项目状态，选择下游 skill，输出紧凑记录和下一步。 |
 | [`/interview-cheatsheet`](../skills/interview-cheatsheet/SKILL.md) | 辅助输出 | 生成项目本地辅助材料、通知或学习文档。 | 把输出写到目标项目，配套简短审查或通知流程。 |

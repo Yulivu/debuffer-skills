@@ -1,6 +1,6 @@
 # debuffer-skills
 
-这是一个面向科研项目的轻量化 Codex skills 定制包。当前提供 **82 个 skill**，主线与 Codex mirror 均为 **82 个 skill**，完整清单见 [docs/SKILLS_CATALOG.md](docs/SKILLS_CATALOG.md)。
+这是一个面向科研项目的轻量化 Codex skills 定制包。当前提供 **83 个 skill**，主线与 Codex mirror 均为 **83 个 skill**，完整清单见 [docs/SKILLS_CATALOG.md](docs/SKILLS_CATALOG.md)。
 
 ## 当前提供
 
@@ -27,7 +27,7 @@
 - `research-repo-architect` 增加根目录 Markdown 约束：普通科研 repo 根目录只保留 `README.md`、`PROJECT_STATUS.md` 和工具托管的 `AGENTS.md` / `CLAUDE.md`，其他 Markdown 进入 `docs/` 分类目录。
 - 共享输出记录从根目录 `MANIFEST.md` 调整为 `docs/project/OUTPUT_MANIFEST.md`；证明和公式推导默认进入 `docs/theory/`。
 - 新增 `overleaf-package`：把本地 LaTeX 论文树打成可手动上传到 Overleaf 的 zip，并生成简洁 manifest，不依赖 Overleaf Git bridge。
-- 安装 profile 已包含 `research-blueprint`，当前主线与 Codex mirror 均为 82 个 skill。
+- 安装 profile 已包含 `research-blueprint`，当前主线与 Codex mirror 均为 83 个 skill。
 
 <a id="quick-start"></a>
 

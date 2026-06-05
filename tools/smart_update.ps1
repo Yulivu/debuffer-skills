@@ -40,6 +40,23 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
+function Test-PathWithinRepo {
+    param(
+        [Parameter(Mandatory = $true)][string]$RepoRoot,
+        [Parameter(Mandatory = $true)][string]$Candidate
+    )
+
+    $repoPath = [System.IO.Path]::GetFullPath($RepoRoot).TrimEnd('\', '/')
+    $candidatePath = [System.IO.Path]::GetFullPath($Candidate).TrimEnd('\', '/')
+
+    if ($candidatePath.Equals($repoPath, [System.StringComparison]::OrdinalIgnoreCase)) {
+        return $true
+    }
+
+    $repoWithSep = $repoPath + [System.IO.Path]::DirectorySeparatorChar
+    return $candidatePath.StartsWith($repoWithSep, [System.StringComparison]::OrdinalIgnoreCase)
+}
+
 # ─── Resolve upstream & local paths ───────────────────────────────────────────
 if ($PSCmdlet.ParameterSetName -eq 'Project') {
     if ([System.IO.Path]::IsPathRooted($TargetSubdir)) {
@@ -180,6 +197,15 @@ if (-not (Test-Path $LocalDir)) {
 if (-not (Test-Path $UpstreamDir)) {
     Write-Host "Upstream skills directory not found: $UpstreamDir" -ForegroundColor Red
     exit 1
+}
+
+$RepoRoot = Split-Path $PSScriptRoot -Parent
+if (Test-PathWithinRepo -RepoRoot $RepoRoot -Candidate $LocalDir) {
+    Write-Host "Refusing to operate on a local skills directory inside the debuffer-skills repo:" -ForegroundColor Red
+    Write-Host "  Repo:  $RepoRoot" -ForegroundColor Yellow
+    Write-Host "  Local: $LocalDir" -ForegroundColor Yellow
+    Write-Host "Choose an installed copy target outside the source repo." -ForegroundColor Yellow
+    exit 2
 }
 
 # ─── Core comparison function ──────────────────────────────────────────────────

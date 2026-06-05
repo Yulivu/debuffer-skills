@@ -542,6 +542,15 @@ def test_smart_update_codex_refuses_symlinked_skills(tmp_path: Path) -> None:
     assert "symlink-managed debuffer entry 'auto-review-loop'" in refused.stderr
 
 
+def test_smart_update_codex_refuses_repo_internal_local_target() -> None:
+    repo_local = REPO_ROOT / "skills" / "skills-codex"
+
+    refused = run(["bash", str(UPDATE_SCRIPT), "--local", str(repo_local)], check=False)
+
+    assert refused.returncode != 0
+    assert "inside the debuffer-skills repo" in refused.stderr
+
+
 def test_smart_update_codex_ignores_local_only_shared_reference_failures(tmp_path: Path) -> None:
     upstream = tmp_path / "upstream"
     make_skill(upstream / "alpha", "# alpha\n")

@@ -500,3 +500,12 @@ def test_smart_update_copilot_refuses_symlink_managed(tmp_path: Path) -> None:
 
     assert refused.returncode != 0
     assert "install_aris_copilot.sh" in refused.stderr
+
+
+def test_smart_update_copilot_refuses_repo_internal_local_target() -> None:
+    repo_local = REPO_ROOT / "skills"
+
+    refused = run(["bash", str(UPDATE_SCRIPT), "--local", str(repo_local)], check=False)
+
+    assert refused.returncode != 0
+    assert "inside the debuffer-skills repo" in refused.stderr

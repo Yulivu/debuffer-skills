@@ -118,6 +118,15 @@ UPSTREAM="$(resolve_upstream)"
 LOCAL="$(resolve_local)"
 BASELINE_FILE="$LOCAL/$BASELINE_FILE_NAME"
 
+if [[ -d "$LOCAL" ]]; then
+    LOCAL_REALPATH="$(cd "$LOCAL" && pwd)"
+    case "$LOCAL_REALPATH" in
+        "$REPO_ROOT"|"$REPO_ROOT"/*)
+            die "refusing to operate on a local skills directory inside the debuffer-skills repo (repo: $REPO_ROOT, local: $LOCAL_REALPATH)"
+            ;;
+    esac
+fi
+
 # Refuse if managed by install_aris_copilot.sh
 if [[ "$MODE" == "project" ]]; then
     local_project="$(cd "$PROJECT_PATH" 2>/dev/null && pwd)"
