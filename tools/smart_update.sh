@@ -236,7 +236,7 @@ declare -a UPSTREAM_NAMES=()
 # Check each upstream skill
 for skill_dir in "$UPSTREAM_DIR"/*/; do
     skill_name=$(basename "$skill_dir")
-    [[ "$skill_name" == "skills-codex" ]] && continue  # skip codex mirror
+    [[ "$skill_name" == "skills-codex" || "$skill_name" == "skills-codex-library" || "$skill_name" == "library" ]] && continue  # skip package/library roots
     [[ "$skill_name" == "shared-references" ]] && continue  # handled separately
 
     UPSTREAM_NAMES+=("$skill_name")
@@ -299,7 +299,7 @@ done
 # Check for local-only skills (not in upstream)
 for skill_dir in "$LOCAL_DIR"/*/; do
     skill_name=$(basename "$skill_dir")
-    [[ "$skill_name" == "shared-references" ]] && continue
+    [[ "$skill_name" == "shared-references" || "$skill_name" == "skills-codex" || "$skill_name" == "skills-codex-library" || "$skill_name" == "library" ]] && continue
     found=false
     for uname in "${UPSTREAM_NAMES[@]:-}"; do
         if [[ "$uname" == "$skill_name" ]]; then

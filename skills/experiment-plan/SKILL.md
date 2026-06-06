@@ -6,6 +6,16 @@ allowed-tools: Bash(*), Read, Write, Edit, Grep, Glob, WebSearch, WebFetch
 
 # Experiment Plan: Claim-Driven, Paper-Oriented Validation
 
+## Capability Routing
+
+This is a first-layer entry skill. Keep it loaded as the user-facing route; when a request needs a specialized capability below, resolve the debuffer repo root from `.debuffer_skills/installed-skills-codex.txt` (`repo_root`) when available, read the referenced library `SKILL.md`, then follow that skill. Do not copy the whole library skill into this file.
+
+- `/ablation-planner`: read `../library/idea-method/ablation-planner/SKILL.md`.
+- `/run-experiment`: read `../library/experiments/run-experiment/SKILL.md`.
+- `/training-check`: read `../library/experiments/training-check/SKILL.md`.
+- `/system-profile`: read `../library/experiments/system-profile/SKILL.md`.
+
+
 Refine and concretize: **$ARGUMENTS**
 
 ## Overview

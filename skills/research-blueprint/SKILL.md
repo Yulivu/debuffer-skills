@@ -5,6 +5,16 @@ description: Create or refresh a detailed stage-gate research blueprint before f
 
 # Research Blueprint
 
+## Capability Routing
+
+This is a first-layer entry skill. Keep it loaded as the user-facing route; when a request needs a specialized capability below, resolve the debuffer repo root from `.debuffer_skills/installed-skills-codex.txt` (`repo_root`) when available, read the referenced library `SKILL.md`, then follow that skill. Do not copy the whole library skill into this file.
+
+- `/formula-derivation`: read `../library/idea-method/formula-derivation/SKILL.md`.
+- `/ablation-planner`: read `../library/idea-method/ablation-planner/SKILL.md`.
+- `/research-refine`: read `../library/idea-method/research-refine/SKILL.md`.
+- `/paper-plan`: read `../library/paper/paper-plan/SKILL.md`.
+
+
 Create a detailed, carefully reasoned research design document for:
 **$ARGUMENTS**
 

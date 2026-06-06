@@ -7,6 +7,17 @@ allowed-tools: Bash(*), Read, Write, Edit, Grep, Glob, WebSearch, WebFetch, Skil
 
 # Full Research Pipeline: Idea → Experiments → Submission
 
+## Capability Routing
+
+This is a first-layer entry skill. Keep it loaded as the user-facing route; when a request needs a specialized capability below, resolve the debuffer repo root from `.debuffer_skills/installed-skills-codex.txt` (`repo_root`) when available, read the referenced library `SKILL.md`, then follow that skill. Do not copy the whole library skill into this file.
+
+- `/research-refine`: read `../library/idea-method/research-refine/SKILL.md`.
+- `/experiment-queue`: read `../library/experiments/experiment-queue/SKILL.md`.
+- `/auto-review-loop`: read `../library/review/auto-review-loop/SKILL.md`.
+- `/dse-loop`: read `../library/workflow/dse-loop/SKILL.md`.
+- `/meta-optimize`: read `../library/workflow/meta-optimize/SKILL.md`.
+
+
 > ⏱ **External cadence: non-judgmental heartbeat only.** An overnight `/loop` /
 > `CronCreate` heartbeat may wake, detect a **stalled** phase (no progress, dead
 > process, blocked on a freed resource) and **nudge** it forward — it may NEVER

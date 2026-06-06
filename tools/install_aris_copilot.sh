@@ -21,6 +21,7 @@
 #
 # Options:
 #   --aris-repo PATH       override skill repo discovery
+#   --profile NAME         full or full-flat (default: full)
 #   --dry-run              show plan, no writes
 #   --quiet                no prompts; abort on any condition that would prompt
 #   --no-doc               skip AGENTS.md managed block update
@@ -62,7 +63,7 @@ SAFE_NAME_REGEX='^[A-Za-z0-9][A-Za-z0-9._-]*$'
 # Directories to skip when scanning upstream skills/ as installable skills.
 # shared-references is handled separately as a "support" entry.
 # This pattern MUST stay in sync with smart_update_copilot.sh SKIP_DIRS_PATTERN.
-SKIP_DIRS="skills-codex|skills-codex-claude-review|skills-codex-gemini-review|shared-references"
+SKIP_DIRS="skills-codex|skills-codex-library|skills-codex-claude-review|skills-codex-gemini-review|library|shared-references"
 
 PROJECT_PATH=""
 ARIS_REPO_OVERRIDE=""
@@ -71,6 +72,7 @@ DRY_RUN=false
 QUIET=false
 NO_DOC=false
 CLEAR_STALE_LOCK=false
+PROFILE="full"
 REPLACE_LINK_NAMES=()
 
 usage() { sed -n '2,36p' "$0" | sed 's/^# \?//'; }
@@ -80,6 +82,7 @@ while [[ $# -gt 0 ]]; do
         --reconcile) ACTION="reconcile"; shift ;;
         --uninstall) ACTION="uninstall"; shift ;;
         --repo|--aris-repo) ARIS_REPO_OVERRIDE="${2:?--repo requires path}"; shift 2 ;;
+        --profile) PROFILE="${2:?--profile requires NAME}"; shift 2 ;;
         --dry-run) DRY_RUN=true; shift ;;
         --quiet) QUIET=true; shift ;;
         --no-doc) NO_DOC=true; shift ;;
@@ -98,6 +101,11 @@ while [[ $# -gt 0 ]]; do
             ;;
     esac
 done
+
+case "$PROFILE" in
+    full|full-flat) ;;
+    *) echo "error: unknown profile: $PROFILE (expected full or full-flat)" >&2; exit 1 ;;
+esac
 
 log() { $QUIET && return 0; echo "$@"; }
 warn() { echo "warning: $*" >&2; }
@@ -189,6 +197,15 @@ build_upstream_inventory() {
             printf "skill|%s|skills/%s\n" "$name" "$name" >> "$out"
         fi
     done
+
+    if [[ "$PROFILE" == "full-flat" && -d "$skills_dir/library" ]]; then
+        while IFS= read -r -d '' d; do
+            name="$(basename "$d")"
+            is_safe_name "$name" || { warn "skipping unsafe upstream library name: $name"; continue; }
+            [[ -f "$d/SKILL.md" ]] || continue
+            printf "skill|%s|skills/library/%s/%s\n" "$name" "$(basename "$(dirname "$d")")" "$name" >> "$out"
+        done < <(find "$skills_dir/library" -mindepth 2 -maxdepth 2 -type d -print0)
+    fi
 
     # Include shared-references as a support directory
     if [[ -d "$skills_dir/shared-references" ]]; then
@@ -379,6 +396,7 @@ write_manifest_tmp() {
         printf "version\t%s\n" "$MANIFEST_VERSION"
         printf "repo_root\t%s\n" "$ARIS_REPO"
         printf "project_root\t%s\n" "$PROJECT_PATH"
+        printf "profile\t%s\n" "$PROFILE"
         printf "generated\t%s\n" "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
         printf "installer\tinstall_aris_copilot.sh\n"
         printf "kind\tname\tsource_rel\ttarget_rel\tmode\n"
@@ -651,6 +669,7 @@ log "debuffer Copilot CLI Project Install"
 log "  Project:   $PROJECT_PATH"
 log "  Repo:      $ARIS_REPO"
 log "  Target:    $SKILLS_REL/"
+log "  Profile:   $PROFILE"
 log "  Action:    $ACTION$($DRY_RUN && echo ' (dry-run)')"
 log ""
 
@@ -703,7 +722,7 @@ log "Applying:"
 apply_plan "$PLAN_FILE"
 commit_manifest "$MANIFEST_TMP"
 if declare -F debuffer_registry_upsert >/dev/null 2>&1; then
-    debuffer_registry_upsert "$ARIS_REPO" "$PROJECT_PATH" "copilot" "$ARIS_DIR_NAME/$MANIFEST_NAME" "full"
+    debuffer_registry_upsert "$ARIS_REPO" "$PROJECT_PATH" "copilot" "$ARIS_DIR_NAME/$MANIFEST_NAME" "$PROFILE"
 fi
 
 INSTALLED_NAMES="$(mktemp -t aris-copilot-names.XXXX)"

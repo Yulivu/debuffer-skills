@@ -11,12 +11,37 @@ from tools.check_skills_inventory import check_inventory
 REPO_ROOT = Path(__file__).resolve().parents[1]
 MAIN_SKILLS = REPO_ROOT / "skills"
 CODEX_SKILLS = REPO_ROOT / "skills" / "skills-codex"
+MAIN_LIBRARY = REPO_ROOT / "skills" / "library"
+CODEX_LIBRARY = REPO_ROOT / "skills" / "skills-codex-library"
 CLAUDE_OVERLAY = REPO_ROOT / "skills" / "skills-codex-claude-review"
 GEMINI_OVERLAY = REPO_ROOT / "skills" / "skills-codex-gemini-review"
 
 
 def skill_names(root: Path) -> set[str]:
     return {path.parent.name for path in root.glob("*/SKILL.md")}
+
+
+def library_skill_names(root: Path) -> set[str]:
+    return {path.parent.name for path in root.glob("*/*/SKILL.md")}
+
+
+def skill_files(root: Path) -> list[Path]:
+    return sorted(root.glob("*/SKILL.md"))
+
+
+def library_skill_files(root: Path) -> list[Path]:
+    return sorted(root.glob("*/*/SKILL.md"))
+
+
+def codex_skill_path(name: str) -> Path:
+    active = CODEX_SKILLS / name / "SKILL.md"
+    if active.exists():
+        return active
+    matches = list(CODEX_LIBRARY.glob(f"*/*/SKILL.md"))
+    for path in matches:
+        if path.parent.name == name:
+            return path
+    raise AssertionError(f"Codex skill not found: {name}")
 
 
 def read(path: Path) -> str:
@@ -34,8 +59,12 @@ def has_send_input_block(text: str) -> bool:
 def test_codex_skill_set_matches_mainline() -> None:
     main_names = skill_names(MAIN_SKILLS)
     codex_names = skill_names(CODEX_SKILLS)
-    assert len(main_names) == 83
+    main_library = library_skill_names(MAIN_LIBRARY)
+    codex_library = library_skill_names(CODEX_LIBRARY)
+    assert len(main_names) == 12
+    assert len(main_names | main_library) == 83
     assert main_names == codex_names
+    assert main_library == codex_library
 
 
 def test_skill_inventory_check_passes() -> None:
@@ -54,7 +83,7 @@ def test_skill_inventory_check_is_cli_runnable() -> None:
 
 
 def test_codex_render_html_strips_bom_frontmatter() -> None:
-    script = CODEX_SKILLS / "render-html" / "scripts" / "render_html.py"
+    script = codex_skill_path("render-html").parent / "scripts" / "render_html.py"
     spec = importlib.util.spec_from_file_location("codex_render_html", script)
     assert spec is not None and spec.loader is not None
     module = importlib.util.module_from_spec(spec)
@@ -66,13 +95,13 @@ def test_codex_render_html_strips_bom_frontmatter() -> None:
 
 
 def test_codex_reviewer_contract_partition() -> None:
-    codex_names = skill_names(CODEX_SKILLS)
+    codex_names = skill_names(CODEX_SKILLS) | library_skill_names(CODEX_LIBRARY)
     single_round: set[str] = set()
     multi_round: set[str] = set()
     non_reviewer: set[str] = set()
 
     for name in codex_names:
-        text = read(CODEX_SKILLS / name / "SKILL.md")
+        text = read(codex_skill_path(name))
         spawn = has_spawn_agent_block(text)
         send = has_send_input_block(text)
         if spawn and send:
@@ -89,14 +118,14 @@ def test_codex_reviewer_contract_partition() -> None:
     assert (single_round | multi_round | non_reviewer) == codex_names
 
     for name in multi_round:
-        text = read(CODEX_SKILLS / name / "SKILL.md")
+        text = read(codex_skill_path(name))
         assert has_spawn_agent_block(text)
         assert has_send_input_block(text)
         assert re.search(r"(?m)^\s*(target|id|agent_id):\s*\[saved", text) is not None
         assert "saved" in text or "same reviewer" in text or "same agent" in text
 
     for name in non_reviewer:
-        text = read(CODEX_SKILLS / name / "SKILL.md")
+        text = read(codex_skill_path(name))
         assert not has_spawn_agent_block(text)
         assert not has_send_input_block(text)
 
@@ -140,12 +169,12 @@ def test_non_degrading_skill_rules_are_documented() -> None:
         "pixel-art": "Do not silently downgrade",
     }
     for name, needle in checks.items():
-        text = read(CODEX_SKILLS / name / "SKILL.md")
+        text = read(codex_skill_path(name))
         assert needle in text
 
 
 def test_codex_gemini_search_uses_auto_gemini_3_model() -> None:
-    text = read(CODEX_SKILLS / "gemini-search" / "SKILL.md")
+    text = read(codex_skill_path("gemini-search"))
 
     assert "DEFAULT_MODEL = auto-gemini-3" in text
     assert "model: 'auto-gemini-3'" in text
@@ -178,7 +207,7 @@ def test_codex_skill_helper_commands_use_installed_aris_repo() -> None:
     }
 
     failures: list[str] = []
-    for skill_file in CODEX_SKILLS.glob("*/SKILL.md"):
+    for skill_file in skill_files(CODEX_SKILLS) + library_skill_files(CODEX_LIBRARY):
         skill_name = skill_file.parent.name
         if skill_name in allowed_bundled_mentions or skill_name in allowed_claude_style_fallbacks:
             continue
@@ -192,9 +221,9 @@ def test_codex_skill_helper_commands_use_installed_aris_repo() -> None:
 
 def test_codex_shared_reference_links_exist() -> None:
     failures: list[str] = []
-    pattern = re.compile(r"\.\./shared-references/([A-Za-z0-9._-]+\.md)")
+    pattern = re.compile(r"(?:\.\./shared-references/|\.\./\.\./skills-codex/shared-references/)([A-Za-z0-9._-]+\.md)")
 
-    for skill_file in CODEX_SKILLS.glob("*/SKILL.md"):
+    for skill_file in skill_files(CODEX_SKILLS) + library_skill_files(CODEX_LIBRARY):
         text = read(skill_file)
         for ref_name in pattern.findall(text):
             if not (CODEX_SKILLS / "shared-references" / ref_name).exists():
@@ -269,7 +298,7 @@ def test_codex_high_risk_skills_preserve_claude_semantics() -> None:
 
     failures: list[str] = []
     for skill, terms in required_terms.items():
-        text = read(CODEX_SKILLS / skill / "SKILL.md")
+        text = read(codex_skill_path(skill))
         for term in terms:
             if term not in text:
                 failures.append(f"{skill}: missing {term}")
@@ -319,7 +348,7 @@ def test_codex_medium_risk_skills_preserve_claude_semantics() -> None:
 
     failures: list[str] = []
     for skill, terms in required_terms.items():
-        text = read(CODEX_SKILLS / skill / "SKILL.md")
+        text = read(codex_skill_path(skill))
         for term in terms:
             if term not in text:
                 failures.append(f"{skill}: missing {term}")
@@ -341,13 +370,13 @@ def test_codex_optional_helpers_are_guarded() -> None:
         ],
     }
     for skill, needles in checks.items():
-        text = read(CODEX_SKILLS / skill / "SKILL.md")
+        text = read(codex_skill_path(skill))
         for needle in needles:
             assert needle in text
 
 
 def test_codex_training_check_defaults_to_interactive_watch() -> None:
-    text = read(CODEX_SKILLS / "training-check" / "SKILL.md")
+    text = read(codex_skill_path("training-check"))
     assert "interactive watch" in text
     assert "交互式训练监控模式" in text
     assert "every 30 minutes" in text
@@ -362,10 +391,10 @@ def test_codex_training_check_defaults_to_interactive_watch() -> None:
 
 
 def test_codex_skill_instructions_use_codex_paths() -> None:
-    auto_paper = read(CODEX_SKILLS / "auto-paper-improvement-loop" / "SKILL.md")
-    paper_writing = read(CODEX_SKILLS / "paper-writing" / "SKILL.md")
-    figure_spec = read(CODEX_SKILLS / "figure-spec" / "SKILL.md")
-    meta_optimize = read(CODEX_SKILLS / "meta-optimize" / "SKILL.md")
+    auto_paper = read(codex_skill_path("auto-paper-improvement-loop"))
+    paper_writing = read(codex_skill_path("paper-writing"))
+    figure_spec = read(codex_skill_path("figure-spec"))
+    meta_optimize = read(codex_skill_path("meta-optimize"))
 
     assert "~/.codex/feishu.json" in auto_paper
     assert "~/.claude/feishu.json" not in auto_paper
@@ -382,7 +411,7 @@ def test_codex_skill_instructions_use_codex_paths() -> None:
 
 
 def test_codex_experiment_queue_points_to_bundled_helpers() -> None:
-    text = read(CODEX_SKILLS / "experiment-queue" / "SKILL.md")
+    text = read(codex_skill_path("experiment-queue"))
 
     assert "tools/experiment_queue/queue_manager.py" in text
     assert "tools/experiment_queue/build_manifest.py" in text

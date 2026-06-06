@@ -5,6 +5,16 @@ description: Prepare, validate, and gate AutoDL/HPC research experiments with Gi
 
 # AutoDL HPC
 
+## Capability Routing
+
+This is a first-layer entry skill. Keep it loaded as the user-facing route; when a request needs a specialized capability below, resolve the debuffer repo root from `.debuffer_skills/installed-skills-codex.txt` (`repo_root`) when available, read the referenced library `SKILL.md`, then follow that skill. Do not copy the whole library skill into this file.
+
+- `/system-profile`: read `../library/experiments/system-profile/SKILL.md`.
+- `/training-check`: read `../library/experiments/training-check/SKILL.md`.
+- `/run-experiment`: read `../library/experiments/run-experiment/SKILL.md`.
+- `/analyze-results`: read `../library/experiments/analyze-results/SKILL.md`.
+
+
 Use this skill for AutoDL or similar SSH GPU/HPC machines where a research repo is cloned to a target machine, validated with preflight/smoke commands, and only then allowed to run formal experiment suites.
 
 Read `references/autodl-hpc.md` before issuing commands, writing a runbook, or changing a repo's AutoDL/HPC workflow.

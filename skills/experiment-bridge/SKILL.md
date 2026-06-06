@@ -7,6 +7,18 @@ allowed-tools: Bash(*), Read, Write, Edit, Grep, Glob, Skill
 
 # Workflow 1.5: Experiment Bridge
 
+## Capability Routing
+
+This is a first-layer entry skill. Keep it loaded as the user-facing route; when a request needs a specialized capability below, resolve the debuffer repo root from `.debuffer_skills/installed-skills-codex.txt` (`repo_root`) when available, read the referenced library `SKILL.md`, then follow that skill. Do not copy the whole library skill into this file.
+
+- `/run-experiment`: read `../library/experiments/run-experiment/SKILL.md`.
+- `/experiment-queue`: read `../library/experiments/experiment-queue/SKILL.md`.
+- `/monitor-experiment`: read `../library/experiments/monitor-experiment/SKILL.md`.
+- `/qzcli`: read `../library/experiments/qzcli/SKILL.md`.
+- `/vast-gpu`: read `../library/experiments/vast-gpu/SKILL.md`.
+- `/serverless-modal`: read `../library/experiments/serverless-modal/SKILL.md`.
+
+
 Implement and deploy experiments from plan: **$ARGUMENTS**
 
 ## Customized Pack Defaults

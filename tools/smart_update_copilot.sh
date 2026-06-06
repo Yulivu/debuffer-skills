@@ -53,7 +53,7 @@ BASE_UPSTREAM="$REPO_ROOT/skills"
 # Directories to skip when scanning upstream skills/.
 # This pattern MUST stay in sync with install_aris_copilot.sh SKIP_DIRS.
 # shared-references is NOT skipped here -- it's a valid update target for copy installs.
-SKIP_DIRS_PATTERN="^(skills-codex|skills-codex-claude-review|skills-codex-gemini-review)$"
+SKIP_DIRS_PATTERN="^(skills-codex|skills-codex-library|skills-codex-claude-review|skills-codex-gemini-review|library)$"
 
 # Baseline checksum file for hash-based customization detection
 BASELINE_FILE_NAME=".debuffer-copilot-baselines.sha256"

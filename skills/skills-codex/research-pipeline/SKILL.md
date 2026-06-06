@@ -5,6 +5,17 @@ description: "Lightweight AutoDL-first research pipeline: idea discovery → blu
 
 # Full Research Pipeline: Idea → Experiments → Submission
 
+## Capability Routing
+
+This is a first-layer entry skill. Keep it loaded as the user-facing route; when a request needs a specialized capability below, resolve the debuffer repo root from `.debuffer_skills/installed-skills-codex.txt` (`repo_root`) when available, read the referenced library `SKILL.md`, then follow that skill. Do not copy the whole library skill into this file.
+
+- `/research-refine`: read `../../skills-codex-library/idea-method/research-refine/SKILL.md`.
+- `/experiment-queue`: read `../../skills-codex-library/experiments/experiment-queue/SKILL.md`.
+- `/auto-review-loop`: read `../../skills-codex-library/review/auto-review-loop/SKILL.md`.
+- `/dse-loop`: read `../../skills-codex-library/workflow/dse-loop/SKILL.md`.
+- `/meta-optimize`: read `../../skills-codex-library/workflow/meta-optimize/SKILL.md`.
+
+
 End-to-end autonomous research workflow for: **$ARGUMENTS**
 
 ## Customized Pack Defaults

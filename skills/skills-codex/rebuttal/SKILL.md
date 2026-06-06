@@ -7,6 +7,16 @@ allowed-tools: Bash(*), Read, Grep, Glob, Write, Edit, Skill
 
 # Workflow 4: Rebuttal
 
+## Capability Routing
+
+This is a first-layer entry skill. Keep it loaded as the user-facing route; when a request needs a specialized capability below, resolve the debuffer repo root from `.debuffer_skills/installed-skills-codex.txt` (`repo_root`) when available, read the referenced library `SKILL.md`, then follow that skill. Do not copy the whole library skill into this file.
+
+- `/auto-paper-improvement-loop`: read `../../skills-codex-library/review/auto-paper-improvement-loop/SKILL.md`.
+- `/kill-argument`: read `../../skills-codex-library/review/kill-argument/SKILL.md`.
+- `/paper-claim-audit`: read `../../skills-codex-library/review/paper-claim-audit/SKILL.md`.
+- `/citation-audit`: read `../../skills-codex-library/review/citation-audit/SKILL.md`.
+
+
 Prepare and maintain a grounded, venue-compliant rebuttal for: **$ARGUMENTS**
 
 ## Scope

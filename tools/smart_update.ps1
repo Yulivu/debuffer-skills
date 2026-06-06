@@ -228,7 +228,7 @@ function Compare-SkillDirs {
     # Check each upstream skill
     foreach ($skillDir in Get-ChildItem -Path $SrcDir -Directory) {
         $skillName = $skillDir.Name
-        if ($skillName -eq 'skills-codex' -or $skillName -eq 'shared-references') { continue }
+        if ($skillName -in @('skills-codex', 'skills-codex-library', 'library', 'shared-references')) { continue }
 
         [void]$result.UpstreamNames.Add($skillName)
 
@@ -278,7 +278,7 @@ function Compare-SkillDirs {
     # Check for local-only skills
     foreach ($skillDir in Get-ChildItem -Path $DstDir -Directory) {
         $skillName = $skillDir.Name
-        if ($skillName -eq 'shared-references') { continue }
+        if ($skillName -in @('skills-codex', 'skills-codex-library', 'library', 'shared-references')) { continue }
         if (-not $result.UpstreamNames.Contains($skillName)) {
             $result.LocalOnly.Add($skillName)
         }

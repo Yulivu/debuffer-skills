@@ -129,6 +129,32 @@ def test_install_copilot_creates_github_skills_symlinks(tmp_path: Path) -> None:
     assert not (project / ".github" / "skills" / "skills-codex-claude-review").exists()
 
 
+def test_install_copilot_full_flat_installs_library_skills(tmp_path: Path) -> None:
+    repo = make_minimal_aris_repo(tmp_path)
+    make_skill(repo / "skills" / "library" / "review" / "delta", "---\nname: delta\n---\n# delta\n")
+    project = tmp_path / "project"
+    project.mkdir()
+
+    run(
+        [
+            "bash",
+            str(INSTALL_SCRIPT),
+            str(project),
+            "--aris-repo",
+            str(repo),
+            "--profile",
+            "full-flat",
+            "--quiet",
+        ]
+    )
+
+    installed = {path.name for path in (project / ".github" / "skills").iterdir()}
+    assert {"alpha", "beta", "gamma", "delta", "shared-references"} <= installed
+    manifest = (project / ".debuffer_skills" / "installed-skills-copilot.txt").read_text()
+    assert "profile\tfull-flat" in manifest
+    assert "skills/library/review/delta" in manifest
+
+
 def test_install_copilot_excludes_codex_packages(tmp_path: Path) -> None:
     """Codex-specific skill mirrors must not appear in Copilot install."""
     repo = make_minimal_aris_repo(tmp_path)

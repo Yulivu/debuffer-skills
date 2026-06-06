@@ -23,7 +23,7 @@ param(
     [ValidateSet('auto', 'claude', 'codex')]
     [string]$Platform = 'auto',
 
-    [ValidateSet('core-research', 'paper', 'review', 'full')]
+    [ValidateSet('core-research', 'paper', 'review', 'full', 'full-flat')]
     [string]$Profile = 'full',
 
     [Alias('Repo')]
@@ -309,43 +309,24 @@ function Test-ProfileIncludesName {
     }
     switch ($Profile) {
         'full' { return $true }
+        'full-flat' { return $true }
         'core-research' {
             return $Name -in @(
                 'research-repo-architect', 'research-pipeline', 'idea-discovery',
-                'idea-creator', 'research-refine', 'research-blueprint',
+                'research-blueprint',
                 'experiment-plan', 'experiment-bridge',
-                'run-experiment', 'monitor-experiment', 'experiment-queue',
-                'analyze-results', 'autodl-hpc', 'ablation-planner',
-                'training-check', 'system-profile', 'research-review',
-                'auto-review-loop', 'experiment-audit', 'experiment-writeup-audit', 'result-to-claim',
-                'paper-claim-audit', 'citation-audit', 'research-lit', 'arxiv',
-                'semantic-scholar', 'openalex', 'deepxiv', 'exa-search',
-                'alphaxiv', 'novelty-check', 'comm-lit-review', 'wiki-enrich',
-                'research-wiki', 'figure-spec', 'render-html'
+                'autodl-hpc', 'research-review'
             )
         }
         'paper' {
             return $Name -in @(
-                'paper-writing', 'paper-plan', 'paper-write', 'paper-compile',
-                'paper-figure', 'paper-illustration', 'paper-illustration-image2',
-                'figure-description', 'figure-spec', 'figure-table-audit', 'mermaid-diagram', 'render-html',
-                'paper-talk', 'paper-slides', 'slides-polish', 'paper-poster',
-                'proof-writer', 'proof-checker', 'formula-derivation',
-                'citation-audit', 'paper-claim-audit', 'experiment-writeup-audit', 'result-to-claim',
-                'kill-argument', 'auto-paper-improvement-loop',
-                'writing-systems-papers', 'rebuttal', 'resubmit-pipeline',
-                'overleaf-sync', 'overleaf-package', 'research-review', 'auto-review-loop',
-                'research-refine', 'research-blueprint'
+                'paper-writing', 'paper-visualization', 'research-review',
+                'research-blueprint', 'rebuttal', 'resubmit-pipeline'
             )
         }
         'review' {
             return $Name -in @(
-                'research-review', 'auto-review-loop', 'experiment-audit', 'experiment-writeup-audit',
-                'result-to-claim', 'paper-claim-audit', 'citation-audit',
-                'figure-table-audit', 'proof-checker', 'kill-argument', 'novelty-check',
-                'research-refine', 'research-blueprint', 'auto-paper-improvement-loop', 'rebuttal',
-                'research-lit', 'arxiv', 'semantic-scholar', 'openalex',
-                'deepxiv', 'exa-search', 'alphaxiv', 'render-html'
+                'research-review', 'research-blueprint', 'rebuttal', 'resubmit-pipeline'
             )
         }
     }
@@ -391,6 +372,35 @@ function Build-Inventory {
             TargetRel = $targetRel
             ExpectedTarget = (Normalize-PathString $dir.FullName)
         })
+    }
+    if ($Config.Platform -eq 'codex' -and $Profile -eq 'full-flat') {
+        $libraryRoot = Join-Path $Config.RepoRoot 'skills\skills-codex-library'
+        if (Test-Path -LiteralPath $libraryRoot -PathType Container) {
+            foreach ($domain in Get-ChildItem -LiteralPath $libraryRoot -Directory | Sort-Object Name) {
+                foreach ($dir in Get-ChildItem -LiteralPath $domain.FullName -Directory | Sort-Object Name) {
+                    $name = $dir.Name
+                    if (-not (Test-SafeName $name)) {
+                        Write-Warning "skipping unsafe upstream library name: $name"
+                        continue
+                    }
+                    $resolved = Resolve-ReparseChain $dir.FullName
+                    if (-not (Test-PathInside $resolved $resolvedRepoRoot)) {
+                        Write-Warning "skipping upstream library link leading outside skill repo: $name -> $resolved"
+                        continue
+                    }
+                    if (-not (Test-Path -LiteralPath (Join-Path $dir.FullName 'SKILL.md') -PathType Leaf)) {
+                        continue
+                    }
+                    $entries.Add([pscustomobject]@{
+                        Kind = 'skill'
+                        Name = $name
+                        SourceRel = "skills/skills-codex-library/$($domain.Name)/$name"
+                        TargetRel = ($Config.TargetRelDisplay + '/' + $name)
+                        ExpectedTarget = (Normalize-PathString $dir.FullName)
+                    })
+                }
+            }
+        }
     }
     if ($entries.Count -eq 0) {
         Die "upstream inventory is empty: $($Config.SourceRoot)"

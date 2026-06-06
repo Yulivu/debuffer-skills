@@ -7,6 +7,18 @@ allowed-tools: Bash(*), Read, Grep, Glob, Write, Edit
 
 # Research Review via Prompt-Only External Reviewer
 
+## Capability Routing
+
+This is a first-layer entry skill. Keep it loaded as the user-facing route; when a request needs a specialized capability below, resolve the debuffer repo root from `.debuffer_skills/installed-skills-codex.txt` (`repo_root`) when available, read the referenced library `SKILL.md`, then follow that skill. Do not copy the whole library skill into this file.
+
+- `/experiment-audit`: read `../library/review/experiment-audit/SKILL.md`.
+- `/experiment-writeup-audit`: read `../library/review/experiment-writeup-audit/SKILL.md`.
+- `/paper-claim-audit`: read `../library/review/paper-claim-audit/SKILL.md`.
+- `/citation-audit`: read `../library/review/citation-audit/SKILL.md`.
+- `/proof-checker`: read `../library/review/proof-checker/SKILL.md`.
+- `/auto-review-loop`: read `../library/review/auto-review-loop/SKILL.md`.
+
+
 > 🔒 **Do not wrap this skill in `/loop`, `/schedule`, or `CronCreate`.** It is
 > verdict-bearing — it produces a cross-model review verdict, multi-round with
 > reviewer thread continuity. An external timer re-fires the verdict on

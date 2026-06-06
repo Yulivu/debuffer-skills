@@ -145,7 +145,7 @@ for entry in "${ENTRIES[@]}"; do
             command=(bash "$REPO_ROOT/tools/install_aris.sh" "$project_root" --repo "$REPO_ROOT" --reconcile --quiet)
             ;;
         copilot)
-            command=(bash "$REPO_ROOT/tools/install_aris_copilot.sh" "$project_root" --repo "$REPO_ROOT" --reconcile --quiet)
+            command=(bash "$REPO_ROOT/tools/install_aris_copilot.sh" "$project_root" --repo "$REPO_ROOT" --profile "$profile" --reconcile --quiet)
             ;;
         *)
             warn "unknown platform '$platform' for $project_root"

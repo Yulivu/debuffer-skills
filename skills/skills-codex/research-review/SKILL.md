@@ -5,6 +5,18 @@ description: "Prepare a prompt-only deep critical review package for research id
 
 # Research Review via a secondary Codex agent (xhigh reasoning)
 
+## Capability Routing
+
+This is a first-layer entry skill. Keep it loaded as the user-facing route; when a request needs a specialized capability below, resolve the debuffer repo root from `.debuffer_skills/installed-skills-codex.txt` (`repo_root`) when available, read the referenced library `SKILL.md`, then follow that skill. Do not copy the whole library skill into this file.
+
+- `/experiment-audit`: read `../../skills-codex-library/review/experiment-audit/SKILL.md`.
+- `/experiment-writeup-audit`: read `../../skills-codex-library/review/experiment-writeup-audit/SKILL.md`.
+- `/paper-claim-audit`: read `../../skills-codex-library/review/paper-claim-audit/SKILL.md`.
+- `/citation-audit`: read `../../skills-codex-library/review/citation-audit/SKILL.md`.
+- `/proof-checker`: read `../../skills-codex-library/review/proof-checker/SKILL.md`.
+- `/auto-review-loop`: read `../../skills-codex-library/review/auto-review-loop/SKILL.md`.
+
+
 Get a multi-round critical review of research work from an external LLM with maximum reasoning depth.
 
 ## Customized Pack Defaults

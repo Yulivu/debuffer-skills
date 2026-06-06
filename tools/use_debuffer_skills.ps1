@@ -20,7 +20,7 @@ param(
     [ValidateSet('auto', 'claude', 'codex')]
     [string]$Platform = 'codex',
 
-    [ValidateSet('core-research', 'paper', 'review', 'full')]
+    [ValidateSet('core-research', 'paper', 'review', 'full', 'full-flat')]
     [string]$Profile = 'full',
 
     [switch]$Reconcile,

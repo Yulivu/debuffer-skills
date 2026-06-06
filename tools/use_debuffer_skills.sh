@@ -24,7 +24,7 @@ Options:
   --project PATH          Target project. Default: this script's directory,
                           unless the script is running from inside the skill repo.
   --repo PATH             Central debuffer-skills repo.
-  --profile NAME          core-research, paper, review, or full.
+  --profile NAME          core-research, paper, review, full, or full-flat.
   --platform NAME         codex is the default. Other platforms use install_debuffer.ps1.
   --reconcile             Reconcile an existing install.
   --dry-run               Show installer plan only.
@@ -51,7 +51,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 case "$PROFILE" in
-    core-research|paper|review|full) ;;
+    core-research|paper|review|full|full-flat) ;;
     *) echo "unknown profile: $PROFILE" >&2; exit 2 ;;
 esac
 

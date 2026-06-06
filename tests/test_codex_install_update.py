@@ -307,10 +307,40 @@ def test_install_aris_codex_profile_scopes_inventory(tmp_path: Path) -> None:
     )
 
     installed = {path.name for path in (project / ".agents" / "skills").iterdir()}
-    assert installed == {"shared-references", "research-review", "auto-review-loop"}
+    assert installed == {"shared-references", "research-review"}
     manifest = (project / ".debuffer_skills" / "installed-skills-codex.txt").read_text()
     assert "profile\treview" in manifest
     assert "Profile: review" in (project / "AGENTS.md").read_text()
+
+
+def test_install_aris_codex_full_flat_installs_library_inventory(tmp_path: Path) -> None:
+    repo = tmp_path / "aris"
+    make_skill(repo / "skills" / "skills-codex" / "research-review", "# review\n")
+    make_skill(repo / "skills" / "skills-codex-library" / "review" / "auto-review-loop", "# loop\n")
+    make_skill(repo / "skills" / "skills-codex-library" / "paper" / "paper-write", "# paper\n")
+    (repo / "skills" / "skills-codex" / "shared-references").mkdir(parents=True, exist_ok=True)
+
+    project = tmp_path / "project"
+    project.mkdir()
+
+    run(
+        [
+            "bash",
+            str(INSTALL_SCRIPT),
+            str(project),
+            "--aris-repo",
+            str(repo),
+            "--profile",
+            "full-flat",
+            "--quiet",
+        ]
+    )
+
+    installed = {path.name for path in (project / ".agents" / "skills").iterdir()}
+    assert installed == {"shared-references", "research-review", "auto-review-loop", "paper-write"}
+    manifest = (project / ".debuffer_skills" / "installed-skills-codex.txt").read_text()
+    assert "profile\tfull-flat" in manifest
+    assert "skills/skills-codex-library/review/auto-review-loop" in manifest
 
 
 def test_install_aris_codex_uninstall_uses_manifest_repo_root(tmp_path: Path) -> None:

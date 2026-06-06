@@ -11,6 +11,8 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SKILLS_ROOT = REPO_ROOT / "skills"
 CODEX_ROOT = SKILLS_ROOT / "skills-codex"
+LIBRARY_ROOT = SKILLS_ROOT / "library"
+CODEX_LIBRARY_ROOT = SKILLS_ROOT / "skills-codex-library"
 CATALOG = REPO_ROOT / "docs" / "SKILLS_CATALOG.md"
 README = REPO_ROOT / "README.md"
 AGENT_GUIDE = REPO_ROOT / "AGENT_GUIDE.md"
@@ -63,10 +65,15 @@ FORBIDDEN_LIGHTWEIGHT_PATHS = (
 ACTIVE_MCP_SERVERS = {"codex-image2", "manual-review"}
 
 MAX_MAIN_PACK_FILE_BYTES = 2_000_000
+MAX_ACTIVE_SKILLS = 15
 
 
 def skill_names(root: Path) -> set[str]:
     return {path.parent.name for path in root.glob("*/SKILL.md")}
+
+
+def library_skill_names(root: Path) -> set[str]:
+    return {path.parent.name for path in root.glob("*/*/SKILL.md")}
 
 
 def allowed_tools(text: str) -> list[str]:
@@ -97,7 +104,50 @@ def read(path: Path) -> str:
 
 def catalog_names() -> set[str]:
     text = read(CATALOG)
-    return set(re.findall(r"\[`/([^`]+)`\]\(\.\./skills/[^)]+/SKILL\.md\)", text))
+    return set(re.findall(r"\[`/([^`]+)`\]\(\.\./skills/(?:library/[^/]+/)?[^)]+/SKILL\.md\)", text))
+
+
+def capability_routes(skill_file: Path) -> list[tuple[str, Path]]:
+    text = read(skill_file)
+    routes: list[tuple[str, Path]] = []
+    for match in re.finditer(r"- `/([^`/]+)`: read `([^`]+/SKILL\.md)`", text):
+        routes.append((match.group(1), skill_file.parent / match.group(2)))
+    return routes
+
+
+def check_capability_routing(
+    active_root: Path,
+    library_root: Path,
+    failures: list[str],
+) -> None:
+    routed: set[str] = set()
+    library_root_resolved = library_root.resolve()
+    for skill_file in sorted(active_root.glob("*/SKILL.md")):
+        text = read(skill_file)
+        rel = skill_file.relative_to(REPO_ROOT)
+        if "## Capability Routing" not in text:
+            failures.append(f"{rel} missing Capability Routing section")
+            continue
+        routes = capability_routes(skill_file)
+        if not routes:
+            failures.append(f"{rel} has empty Capability Routing section")
+            continue
+        for routed_name, target in routes:
+            routed.add(routed_name)
+            normalized_target = target.resolve()
+            if not normalized_target.exists():
+                failures.append(f"{rel} routes /{routed_name} to missing file: {target}")
+                continue
+            if library_root_resolved not in normalized_target.parents:
+                failures.append(f"{rel} routes /{routed_name} outside library root: {target}")
+            if normalized_target.parent.name != routed_name:
+                failures.append(
+                    f"{rel} route label /{routed_name} does not match target skill "
+                    f"{normalized_target.parent.name}: {target}"
+                )
+    missing_routed = sorted(routed - library_skill_names(library_root))
+    if missing_routed:
+        failures.append(f"Capability Routing references unknown library skills: {', '.join(missing_routed)}")
 
 
 def readme_like_paths() -> list[Path]:
@@ -145,38 +195,56 @@ def check_inventory() -> list[str]:
     failures: list[str] = []
     main = skill_names(SKILLS_ROOT)
     codex = skill_names(CODEX_ROOT)
+    library = library_skill_names(LIBRARY_ROOT)
+    codex_library = library_skill_names(CODEX_LIBRARY_ROOT)
+    all_skills = main | library
     catalog = catalog_names()
 
     missing_codex = sorted(main - codex)
     extra_codex = sorted(codex - main)
-    missing_catalog = sorted(main - catalog)
-    extra_catalog = sorted(catalog - main)
+    missing_codex_library = sorted(library - codex_library)
+    extra_codex_library = sorted(codex_library - library)
+    overlap = sorted(main & library)
+    missing_catalog = sorted(all_skills - catalog)
+    extra_catalog = sorted(catalog - all_skills)
 
     require(not missing_codex, f"missing Codex mirrors: {', '.join(missing_codex)}", failures)
     require(not extra_codex, f"unexpected Codex-only skills: {', '.join(extra_codex)}", failures)
+    require(not missing_codex_library, f"missing Codex library mirrors: {', '.join(missing_codex_library)}", failures)
+    require(not extra_codex_library, f"unexpected Codex-library-only skills: {', '.join(extra_codex_library)}", failures)
+    require(not overlap, f"skills appear in both active and library layers: {', '.join(overlap)}", failures)
+    require(len(main) <= MAX_ACTIVE_SKILLS, f"active skill layer has {len(main)} skills; expected <= {MAX_ACTIVE_SKILLS}", failures)
     require(not missing_catalog, f"missing catalog entries: {', '.join(missing_catalog)}", failures)
     require(not extra_catalog, f"catalog entries without mainline skills: {', '.join(extra_catalog)}", failures)
+    check_capability_routing(SKILLS_ROOT, LIBRARY_ROOT, failures)
+    check_capability_routing(CODEX_ROOT, CODEX_LIBRARY_ROOT, failures)
 
     catalog_text = read(CATALOG)
     readme = read(README)
     agent_guide = read(AGENT_GUIDE)
 
-    expected_count = len(main)
+    expected_count = len(all_skills)
     count_checks = [
-        (CATALOG, catalog_text, r"\*\*(?P<count>\d+) skills\*\*"),
-        (README, readme, r"当前提供 \*\*(?P<count>\d+) 个 skill\*\*"),
-        (README, readme, r"主线与 Codex mirror 均为 \*\*(?P<count>\d+) 个 skill\*\*"),
-        (AGENT_GUIDE, agent_guide, r"Full catalog.*?\*\*(?P<count>\d+) skills\*\*"),
+        (CATALOG, catalog_text, r"总能力数：\*\*(?P<count>\d+)\*\*"),
+        (README, readme, r"总能力数：\*\*(?P<count>\d+)\*\*"),
+        (AGENT_GUIDE, agent_guide, r"总能力数：\*\*(?P<count>\d+)\*\*"),
     ]
     for path, text, pattern in count_checks:
         require_count(path, text, pattern, expected_count, failures)
 
+    active_count_checks = [
+        (CATALOG, catalog_text, r"默认入口：\*\*(?P<count>\d+)\*\*"),
+        (README, readme, r"默认入口：\*\*(?P<count>\d+)\*\*"),
+        (AGENT_GUIDE, agent_guide, r"默认入口：\*\*(?P<count>\d+)\*\*"),
+    ]
+    for path, text, pattern in active_count_checks:
+        require_count(path, text, pattern, len(main), failures)
     extra_readmes = readme_like_paths()
     if extra_readmes:
         rels = ", ".join(str(path.relative_to(REPO_ROOT)) for path in extra_readmes)
         failures.append(f"unexpected README-like files; keep only root README.md: {rels}")
 
-    for skill_file in sorted(CODEX_ROOT.glob("*/SKILL.md")):
+    for skill_file in sorted(CODEX_ROOT.glob("*/SKILL.md")) + sorted(CODEX_LIBRARY_ROOT.glob("*/*/SKILL.md")):
         if skill_file.read_bytes().startswith(BOM):
             failures.append(f"{skill_file.relative_to(REPO_ROOT)} starts with UTF-8 BOM before frontmatter")
         text = read(skill_file)
@@ -256,7 +324,7 @@ def check_inventory() -> list[str]:
     # granted ONLY to skills that actually fan out, and such skills MUST cite
     # the convention doc in their body. A grant without that citation is a
     # vestigial/boilerplate grant and fails the drift check.
-    for skill_file in sorted(SKILLS_ROOT.glob("*/SKILL.md")):
+    for skill_file in sorted(SKILLS_ROOT.glob("*/SKILL.md")) + sorted(LIBRARY_ROOT.glob("*/*/SKILL.md")):
         text = read(skill_file)
         if "Agent" not in allowed_tools(text):
             continue

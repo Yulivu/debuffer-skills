@@ -7,6 +7,18 @@ allowed-tools: Bash(*), Read, Write, Edit, Grep, Glob, Skill, mcp__codex__codex,
 
 # Workflow 3: Paper Writing Pipeline
 
+## Capability Routing
+
+This is a first-layer entry skill. Keep it loaded as the user-facing route; when a request needs a specialized capability below, resolve the debuffer repo root from `.debuffer_skills/installed-skills-codex.txt` (`repo_root`) when available, read the referenced library `SKILL.md`, then follow that skill. Do not copy the whole library skill into this file.
+
+- `/paper-plan`: read `../library/paper/paper-plan/SKILL.md`.
+- `/paper-write`: read `../library/paper/paper-write/SKILL.md`.
+- `/paper-compile`: read `../library/paper/paper-compile/SKILL.md`.
+- `/overleaf-package`: read `../library/paper/overleaf-package/SKILL.md`.
+- `/paper-claim-audit`: read `../library/review/paper-claim-audit/SKILL.md`.
+- `/citation-audit`: read `../library/review/citation-audit/SKILL.md`.
+
+
 Orchestrate an evidence-gated paper writing workflow for: **$ARGUMENTS**
 
 ## Customized Pack Defaults

@@ -5,6 +5,16 @@ description: Organize research code and skill repositories into lightweight repr
 
 # Research Repo Architect
 
+## Capability Routing
+
+This is a first-layer entry skill. Keep it loaded as the user-facing route; when a request needs a specialized capability below, resolve the debuffer repo root from `.debuffer_skills/installed-skills-codex.txt` (`repo_root`) when available, read the referenced library `SKILL.md`, then follow that skill. Do not copy the whole library skill into this file.
+
+- `/system-profile`: read `../../skills-codex-library/experiments/system-profile/SKILL.md`.
+- `/training-check`: read `../../skills-codex-library/experiments/training-check/SKILL.md`.
+- `/run-experiment`: read `../../skills-codex-library/experiments/run-experiment/SKILL.md`.
+- `/overleaf-package`: read `../../skills-codex-library/paper/overleaf-package/SKILL.md`.
+
+
 Use this skill to turn research code or a skill bundle into a maintainable, reproducible repository. The base style is inspired by SpectralStore: reusable library code lives under `src/`, scripts are thin entrypoints, configs and suites describe experiments, raw runs are kept separate from curated results, and large artifacts stay out of Git.
 
 ## Customized Pack Defaults

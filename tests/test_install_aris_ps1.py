@@ -271,6 +271,28 @@ def test_install_aris_ps1_codex_profile_scopes_inventory(tmp_path: Path) -> None
     assert "Profile: `review`" in (project / "AGENTS.md").read_text(encoding="utf-8")
 
 
+def test_install_aris_ps1_codex_full_flat_installs_library_inventory(tmp_path: Path) -> None:
+    repo = make_minimal_repo(tmp_path)
+    make_skill(repo / "skills" / "skills-codex-library" / "review" / "auto-review-loop", "# loop\n")
+    make_skill(repo / "skills" / "skills-codex-library" / "paper" / "paper-write", "# paper\n")
+    project = tmp_path / "project"
+    project.mkdir()
+
+    run_ps([str(project), "-Platform", "codex", "-ArisRepo", str(repo), "-Profile", "full-flat"])
+
+    assert junction_target(project / ".agents" / "skills" / "alpha") == repo / "skills" / "skills-codex" / "alpha"
+    assert junction_target(project / ".agents" / "skills" / "auto-review-loop") == (
+        repo / "skills" / "skills-codex-library" / "review" / "auto-review-loop"
+    )
+    assert junction_target(project / ".agents" / "skills" / "paper-write") == (
+        repo / "skills" / "skills-codex-library" / "paper" / "paper-write"
+    )
+    manifest_text = (project / ".debuffer_skills" / "installed-skills-codex.txt").read_text(encoding="utf-8")
+    assert "profile\tfull-flat" in manifest_text
+    assert "skills/skills-codex-library/review/auto-review-loop" in manifest_text
+    assert "skills/skills-codex-library/paper/paper-write" in manifest_text
+
+
 def test_install_aris_ps1_claude_uses_mainline_flat_junctions(tmp_path: Path) -> None:
     repo = make_minimal_repo(tmp_path)
     project = tmp_path / "project"

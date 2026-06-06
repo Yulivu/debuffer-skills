@@ -5,6 +5,16 @@ description: "Workflow 1: Full idea discovery pipeline. Orchestrates research-li
 
 # Workflow 1: Idea Discovery Pipeline
 
+## Capability Routing
+
+This is a first-layer entry skill. Keep it loaded as the user-facing route; when a request needs a specialized capability below, resolve the debuffer repo root from `.debuffer_skills/installed-skills-codex.txt` (`repo_root`) when available, read the referenced library `SKILL.md`, then follow that skill. Do not copy the whole library skill into this file.
+
+- `/idea-creator`: read `../../skills-codex-library/idea-method/idea-creator/SKILL.md`.
+- `/research-refine`: read `../../skills-codex-library/idea-method/research-refine/SKILL.md`.
+- `/research-lit`: read `../../skills-codex-library/literature/research-lit/SKILL.md`.
+- `/novelty-check`: read `../../skills-codex-library/review/novelty-check/SKILL.md`.
+
+
 Orchestrate a complete idea discovery workflow for: **$ARGUMENTS**
 
 ## Overview

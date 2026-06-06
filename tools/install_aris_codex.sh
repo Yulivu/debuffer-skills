@@ -26,7 +26,7 @@
 #   --aris-repo PATH                 override skill repo discovery
 #   --with-claude-review-overlay     install skills-codex-claude-review on top
 #   --with-gemini-review-overlay     install skills-codex-gemini-review on top
-#   --profile NAME                   install a scoped set: core-research, paper, review, full (default: full)
+#   --profile NAME                   install a scoped set: core-research, paper, review, full, full-flat (default: full)
 #   --dry-run                        show plan, no writes
 #   --quiet                          no prompts
 #   --no-doc                         skip AGENTS.md managed block update
@@ -105,9 +105,17 @@ if [[ -f "$REGISTRY_HELPER" ]]; then
 fi
 validate_profile() {
     case "$PROFILE" in
-        core-research|paper|review|full) ;;
-        *) die "unknown profile: $PROFILE (expected core-research, paper, review, or full)" ;;
+        core-research|paper|review|full|full-flat) ;;
+        *) die "unknown profile: $PROFILE (expected core-research, paper, review, full, or full-flat)" ;;
     esac
+}
+is_active_entry_name() {
+    case "$1" in
+        research-pipeline|research-repo-architect|idea-discovery|research-blueprint|experiment-plan|experiment-bridge|autodl-hpc|research-review|paper-writing|paper-visualization|rebuttal|resubmit-pipeline)
+            return 0
+            ;;
+    esac
+    return 1
 }
 profile_includes_name() {
     local name="$1"
@@ -116,23 +124,26 @@ profile_includes_name() {
         full)
             return 0
             ;;
+        full-flat)
+            return 0
+            ;;
         core-research)
             case "$name" in
-                research-repo-architect|research-pipeline|idea-discovery|idea-creator|research-refine|research-blueprint|experiment-plan|experiment-bridge|run-experiment|monitor-experiment|experiment-queue|analyze-results|autodl-hpc|ablation-planner|training-check|system-profile|research-review|auto-review-loop|experiment-audit|experiment-writeup-audit|result-to-claim|paper-claim-audit|citation-audit|research-lit|arxiv|semantic-scholar|openalex|deepxiv|exa-search|alphaxiv|novelty-check|comm-lit-review|wiki-enrich|research-wiki|figure-spec|render-html)
+                research-repo-architect|research-pipeline|idea-discovery|research-blueprint|experiment-plan|experiment-bridge|autodl-hpc|research-review)
                     return 0
                     ;;
             esac
             ;;
         paper)
             case "$name" in
-                paper-writing|paper-plan|paper-write|paper-compile|paper-figure|paper-illustration|paper-illustration-image2|figure-description|figure-spec|figure-table-audit|mermaid-diagram|render-html|paper-talk|paper-slides|slides-polish|paper-poster|proof-writer|proof-checker|formula-derivation|citation-audit|paper-claim-audit|experiment-writeup-audit|result-to-claim|kill-argument|auto-paper-improvement-loop|writing-systems-papers|rebuttal|resubmit-pipeline|overleaf-sync|overleaf-package|research-review|auto-review-loop|research-refine|research-blueprint)
+                paper-writing|paper-visualization|research-review|research-blueprint|rebuttal|resubmit-pipeline)
                     return 0
                     ;;
             esac
             ;;
         review)
             case "$name" in
-                research-review|auto-review-loop|experiment-audit|experiment-writeup-audit|result-to-claim|paper-claim-audit|citation-audit|figure-table-audit|proof-checker|kill-argument|novelty-check|research-refine|research-blueprint|auto-paper-improvement-loop|rebuttal|research-lit|arxiv|semantic-scholar|openalex|deepxiv|exa-search|alphaxiv|render-html)
+                research-review|research-blueprint|rebuttal|resubmit-pipeline)
                     return 0
                     ;;
             esac
@@ -221,6 +232,9 @@ build_upstream_inventory() {
             [[ -d "$d" ]] || continue
             name="$(basename "$d")"
             is_safe_name "$name" || { warn "skipping unsafe upstream name: $name"; continue; }
+            if [[ "$package" != "$BASE_PACKAGE" && "$PROFILE" != "full-flat" ]] && ! is_active_entry_name "$name"; then
+                continue
+            fi
             if [[ "$name" == "shared-references" ]]; then
                 kind="support"
             elif [[ -f "$d/SKILL.md" ]]; then
@@ -232,6 +246,19 @@ build_upstream_inventory() {
             source_rel="skills/$package/$name"
             printf "%s|%s|%s\n" "$kind" "$name" "$source_rel" >> "$tmp"
         done
+        if [[ "$PROFILE" == "full-flat" && "$package" == "$BASE_PACKAGE" ]]; then
+            local library_package="${package}-library"
+            local library_dir="$repo/skills/$library_package"
+            if [[ -d "$library_dir" ]]; then
+                while IFS= read -r -d '' d; do
+                    name="$(basename "$d")"
+                    is_safe_name "$name" || { warn "skipping unsafe upstream library name: $name"; continue; }
+                    [[ -f "$d/SKILL.md" ]] || continue
+                    source_rel="skills/$library_package/$(basename "$(dirname "$d")")/$name"
+                    printf "%s|%s|%s\n" "skill" "$name" "$source_rel" >> "$tmp"
+                done < <(find "$library_dir" -mindepth 2 -maxdepth 2 -type d -print0)
+            fi
+        fi
     done < <(selected_packages)
 
     if [[ ! -s "$tmp" ]]; then

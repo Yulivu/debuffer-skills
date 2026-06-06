@@ -7,6 +7,19 @@ allowed-tools: Bash(*), Read, Write, Edit, Grep, Glob, Skill
 
 # Paper Visualization
 
+## Capability Routing
+
+This is a first-layer entry skill. Keep it loaded as the user-facing route; when a request needs a specialized capability below, resolve the debuffer repo root from `.debuffer_skills/installed-skills-codex.txt` (`repo_root`) when available, read the referenced library `SKILL.md`, then follow that skill. Do not copy the whole library skill into this file.
+
+- `/paper-figure`: read `../library/paper/paper-figure/SKILL.md`.
+- `/figure-spec`: read `../library/paper/figure-spec/SKILL.md`.
+- `/image-to-vector-ppt`: read `../library/paper/image-to-vector-ppt/SKILL.md`.
+- `/figure-table-audit`: read `../library/paper/figure-table-audit/SKILL.md`.
+- `/mermaid-diagram`: read `../library/paper/mermaid-diagram/SKILL.md`.
+- `/render-html`: read `../library/paper/render-html/SKILL.md`.
+- `/paper-illustration`: read `../library/paper/paper-illustration/SKILL.md`.
+
+
 Route paper-figure work for: **$ARGUMENTS**
 
 This is a lightweight orchestration skill. It does not replace the existing

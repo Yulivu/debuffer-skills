@@ -145,6 +145,17 @@ foreach ($entry in $entries) {
                 '-Reconcile'
             )
         }
+        'copilot' {
+            $cmd = @(
+                'bash',
+                (Join-Path $RepoRoot 'tools/install_aris_copilot.sh'),
+                $entry.ProjectRoot,
+                '--repo', $RepoRoot,
+                '--profile', $entry.Profile,
+                '--reconcile',
+                '--quiet'
+            )
+        }
         default {
             Write-Warning "unknown platform '$($entry.Platform)' for $($entry.ProjectRoot)"
             $skipped++
@@ -176,7 +187,11 @@ foreach ($entry in $entries) {
         continue
     }
 
-    & powershell @cmd
+        if ($entry.Platform -eq 'copilot') {
+            & $cmd[0] $cmd[1..($cmd.Count - 1)]
+        } else {
+            & powershell @cmd
+        }
     if ($LASTEXITCODE -eq 0) {
         $seen++
     } else {

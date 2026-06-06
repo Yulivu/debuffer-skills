@@ -5,6 +5,18 @@ description: "Lightweight experiment bridge between idea planning and review. Re
 
 # Workflow 1.5: Experiment Bridge
 
+## Capability Routing
+
+This is a first-layer entry skill. Keep it loaded as the user-facing route; when a request needs a specialized capability below, resolve the debuffer repo root from `.debuffer_skills/installed-skills-codex.txt` (`repo_root`) when available, read the referenced library `SKILL.md`, then follow that skill. Do not copy the whole library skill into this file.
+
+- `/run-experiment`: read `../../skills-codex-library/experiments/run-experiment/SKILL.md`.
+- `/experiment-queue`: read `../../skills-codex-library/experiments/experiment-queue/SKILL.md`.
+- `/monitor-experiment`: read `../../skills-codex-library/experiments/monitor-experiment/SKILL.md`.
+- `/qzcli`: read `../../skills-codex-library/experiments/qzcli/SKILL.md`.
+- `/vast-gpu`: read `../../skills-codex-library/experiments/vast-gpu/SKILL.md`.
+- `/serverless-modal`: read `../../skills-codex-library/experiments/serverless-modal/SKILL.md`.
+
+
 Implement and deploy experiments from plan: **$ARGUMENTS**
 
 ## Customized Pack Defaults

@@ -12,7 +12,7 @@ param(
     [ValidateSet('auto', 'claude', 'codex')]
     [string]$Platform = 'auto',
 
-    [ValidateSet('core-research', 'paper', 'review', 'full')]
+    [ValidateSet('core-research', 'paper', 'review', 'full', 'full-flat')]
     [string]$Profile = 'full',
 
     [Alias('Repo', 'ArisRepo')]

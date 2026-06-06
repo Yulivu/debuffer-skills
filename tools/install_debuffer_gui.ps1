@@ -10,7 +10,7 @@ param(
     [string]$ProjectPath = '',
     [ValidateSet('auto', 'claude', 'codex')]
     [string]$Platform = 'codex',
-    [ValidateSet('core-research', 'paper', 'review', 'full')]
+    [ValidateSet('core-research', 'paper', 'review', 'full', 'full-flat')]
     [string]$Profile = 'full',
     [switch]$ValidateOnly
 )
@@ -35,7 +35,8 @@ $Ui = @{
     Project = T '\u9879\u76ee\u76ee\u5f55'
     Choose = T '\u9009\u62e9'
     Scope = T '\u5b89\u88c5\u8303\u56f4'
-    Full = T '\u5168\u90e8\u6280\u80fd\uff08\u9ed8\u8ba4\uff09'
+    Full = T '\u5206\u5c42\u5b8c\u6574\uff08\u9ed8\u8ba4\uff09'
+    FullFlat = T '\u5b8c\u6574\u76f4\u8c03\u7248'
     Core = T '\u79d1\u7814\u6838\u5fc3'
     Paper = T '\u8bba\u6587\u5199\u4f5c'
     Review = T '\u8bc4\u5ba1\u5ba1\u8ba1'
@@ -49,7 +50,7 @@ $Ui = @{
     Close = T '\u5173\u95ed'
     Ready = T '\u5c31\u7eea\u3002'
     SkillRepo = T '\u6280\u80fd\u5e93\uff1a{0}'
-    DefaultScope = T '\u9ed8\u8ba4\u5b89\u88c5\u8303\u56f4\uff1a\u5168\u90e8\u6280\u80fd'
+    DefaultScope = T '\u9ed8\u8ba4\u5b89\u88c5\u8303\u56f4\uff1a\u5206\u5c42\u5b8c\u6574'
     SelectProject = T '\u8bf7\u9009\u62e9\u9879\u76ee\u76ee\u5f55\u3002'
     SelectProjectFolder = T '\u9009\u62e9\u8981\u5b89\u88c5\u6280\u80fd\u7684\u9879\u76ee\u76ee\u5f55'
     SelectScanFolder = T '\u9009\u62e9\u8981\u626b\u63cf\u7684\u4e0a\u7ea7\u76ee\u5f55'
@@ -74,7 +75,7 @@ $Ui = @{
     DiscoverDone = T '\u626b\u63cf\u5b8c\u6210\u3002'
     Failed = T '\u64cd\u4f5c\u5931\u8d25'
     ValidateOk = T '\u56fe\u5f62\u754c\u9762\u6821\u9a8c\u901a\u8fc7\u3002'
-    DefaultProfile = T '\u9ed8\u8ba4\u8303\u56f4\uff1afull'
+    DefaultProfile = T '\u9ed8\u8ba4\u8303\u56f4\uff1afull\uff08\u5206\u5c42\u5b8c\u6574\uff09'
 }
 
 function Resolve-RepoRoot {
@@ -185,6 +186,7 @@ function Get-ProfileValue {
     if ($DisplayText -eq $Ui.Core) { return 'core-research' }
     if ($DisplayText -eq $Ui.Paper) { return 'paper' }
     if ($DisplayText -eq $Ui.Review) { return 'review' }
+    if ($DisplayText -eq $Ui.FullFlat) { return 'full-flat' }
     return 'full'
 }
 
@@ -194,6 +196,7 @@ function Get-ProfileDisplay {
         'core-research' { return $Ui.Core }
         'paper' { return $Ui.Paper }
         'review' { return $Ui.Review }
+        'full-flat' { return $Ui.FullFlat }
         default { return $Ui.Full }
     }
 }
@@ -399,7 +402,7 @@ $scopeLabel.TextAlign = 'MiddleLeft'
 $scopeLabel.Width = 72
 $profileCombo = New-Object System.Windows.Forms.ComboBox
 $profileCombo.DropDownStyle = 'DropDownList'
-[void]$profileCombo.Items.AddRange([object[]]@($Ui.Full, $Ui.Core, $Ui.Paper, $Ui.Review))
+[void]$profileCombo.Items.AddRange([object[]]@($Ui.Full, $Ui.Core, $Ui.Paper, $Ui.Review, $Ui.FullFlat))
 $profileCombo.SelectedItem = Get-ProfileDisplay $Profile
 if (-not $profileCombo.SelectedItem) { $profileCombo.SelectedIndex = 0 }
 $profileCombo.Width = 160

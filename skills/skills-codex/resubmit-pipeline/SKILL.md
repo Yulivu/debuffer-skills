@@ -7,6 +7,18 @@ allowed-tools: Bash(*), Read, Write, Edit, Grep, Glob, spawn_agent
 
 # Resubmit Pipeline: Text-Only Microedit Mode
 
+## Capability Routing
+
+This is a first-layer entry skill. Keep it loaded as the user-facing route; when a request needs a specialized capability below, resolve the debuffer repo root from `.debuffer_skills/installed-skills-codex.txt` (`repo_root`) when available, read the referenced library `SKILL.md`, then follow that skill. Do not copy the whole library skill into this file.
+
+- `/paper-plan`: read `../../skills-codex-library/paper/paper-plan/SKILL.md`.
+- `/paper-write`: read `../../skills-codex-library/paper/paper-write/SKILL.md`.
+- `/paper-compile`: read `../../skills-codex-library/paper/paper-compile/SKILL.md`.
+- `/overleaf-package`: read `../../skills-codex-library/paper/overleaf-package/SKILL.md`.
+- `/experiment-writeup-audit`: read `../../skills-codex-library/review/experiment-writeup-audit/SKILL.md`.
+- `/figure-table-audit`: read `../../skills-codex-library/paper/figure-table-audit/SKILL.md`.
+
+
 Compose a polished paper into a new venue under text-only constraints: **$ARGUMENTS**
 
 ## Why This Exists
