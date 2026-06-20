@@ -1,6 +1,6 @@
 # debuffer-skills Agent Guide
 
-给第一次读取本仓库的 AI agent。人的入口看 [README.md](README.md)，完整技能目录看 [docs/SKILLS_CATALOG.md](docs/SKILLS_CATALOG.md)。总能力数：**83**。默认入口：**12**。
+给第一次读取本仓库的 AI agent。人的入口看 [README.md](README.md)，完整技能目录看 [docs/SKILLS_CATALOG.md](docs/SKILLS_CATALOG.md)。总能力数：**89**。默认入口：**12**。
 
 ## 包状态
 
@@ -49,7 +49,7 @@
 | `core-research` | 建仓、idea、实验计划、AutoDL、基础审计入口 |
 | `paper` | 论文写作、图表、rebuttal/resubmit 入口 |
 | `review` | prompt-only 评审和证据审计入口 |
-| `full-flat` | 完整直调版，安装 83 个能力 |
+| `full-flat` | 完整直调版，安装 89 个能力 |
 
 ## 修改仓库时的校验
 

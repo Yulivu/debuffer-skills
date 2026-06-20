@@ -1,7 +1,7 @@
 ---
 name: research-pipeline
 description: "Lightweight AutoDL-first research pipeline: idea discovery → blueprint → experiment planning/AutoDL gates → prompt-only review/audit → optional evidence-gated paper planning. Adapts to venue-only, reference-paper/codebase, idea-doc, existing-repo, or partial-results starts; avoids heavy local compute, defaults to concise artifacts, and prepares AutoDL/HPC gated runs. Use when user says \"全流程\", \"full pipeline\", \"从找idea到投稿\", \"end-to-end research\", or wants a complete but user-gated research lifecycle. Manuscript drafting is allowed only after formal runs and evidence audit pass."
-argument-hint: [research-direction] [— resume <run_id>]
+argument-hint: "[research-direction] [resume <run_id>]"
 allowed-tools: Bash(*), Read, Write, Edit, Grep, Glob, WebSearch, WebFetch, Skill, mcp__codex__codex, mcp__codex__codex-reply
 ---
 

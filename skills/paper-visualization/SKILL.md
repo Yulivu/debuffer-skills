@@ -18,6 +18,7 @@ This is a first-layer entry skill. Keep it loaded as the user-facing route; when
 - `/mermaid-diagram`: read `../library/paper/mermaid-diagram/SKILL.md`.
 - `/render-html`: read `../library/paper/render-html/SKILL.md`.
 - `/paper-illustration`: read `../library/paper/paper-illustration/SKILL.md`.
+- `/paper-figure-artifact-audit`: read `../library/paper/paper-figure-artifact-audit/SKILL.md`.
 
 
 Route paper-figure work for: **$ARGUMENTS**

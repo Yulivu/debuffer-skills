@@ -30,6 +30,11 @@ Research topic: $ARGUMENTS
 
 ## Data Sources
 
+For paper-writing handoff, use a published-only citation policy: arXiv may be
+used for discovery, recency, and PDF reading, but outputs intended for
+`paper-plan` or `paper-write` must prefer DOI/DBLP/Semantic Scholar formal
+venue metadata whenever a published version exists.
+
 This skill checks multiple sources **in priority order**.
 
 ### Source Selection
@@ -162,7 +167,7 @@ fi
 
 If `$ARXIV_FETCHER` is empty (D2 graceful degradation), fall back to WebSearch for arXiv (same as before).
 
-The arXiv API returns structured metadata (title, abstract, full author list, categories, dates) — richer than WebSearch snippets. Merge these results with WebSearch findings and de-duplicate.
+The arXiv API returns structured metadata (title, abstract, full author list, categories, dates) — richer than WebSearch snippets. Merge these results with WebSearch findings and de-duplicate. For any paper that may be cited in a manuscript, treat the arXiv row as a discovery record and attempt to resolve a formal DOI, DBLP, Semantic Scholar, ACL Anthology, IEEE, ACM, or official venue record before passing it downstream.
 
 **Semantic Scholar API search** (only when `semantic-scholar` is in sources):
 
@@ -194,6 +199,8 @@ Why use Semantic Scholar? Many IEEE/ACM journal papers are not on arXiv. S2 fill
 De-duplication between arXiv and S2:
 - Match by arXiv ID first (`externalIds.ArXiv`), then normalized title.
 - If a paper appears in both and S2 has venue / DOI / citation metadata, use S2 as authoritative metadata while keeping the arXiv PDF link.
+- If the S2 match has no venue, keep the arXiv version as discovery-only and
+  mark it `unpublished_preprint` rather than paper-writing-ready.
 - S2 results without `externalIds.ArXiv` are venue-only papers and should be preserved as unique value.
 
 **DeepXiv search** (only when `deepxiv` is in sources):
@@ -276,6 +283,8 @@ If `exa_search.py` or the `exa-py` SDK is unavailable, skip this source graceful
 **De-duplication against other sources**:
 - Match by URL first, then normalized title
 - If Exa returns an arXiv paper already found by other sources, prefer structured metadata from arXiv/S2
+- If Exa returns an arXiv paper that may be cited, resolve a formal venue
+  record before treating it as paper-writing-ready.
 - Exa results from non-academic domains (blogs, docs, news) are unique value not covered by other sources
 
 **Optional PDF download** (only when `ARXIV_DOWNLOAD = true`):

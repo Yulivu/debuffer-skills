@@ -1,17 +1,24 @@
 ---
 name: citation-audit
-description: "Zero-context verification that every bibliographic entry in the paper is real, correctly attributed, and used in a context the cited paper actually supports. Uses a fresh cross-model reviewer with web/DBLP/arXiv lookup to catch hallucinated authors, wrong years, fabricated venues, version mismatches, and wrong-context citations (cite present but the cited paper does not establish the claim). Use when user says \"审查引用\", \"check citations\", \"citation audit\", \"verify references\", \"引用核对\", or before submission to ensure bibliography integrity."
+description: "Zero-context verification that every bibliographic entry in the paper is real, correctly attributed, formally published when possible, and used in a context the cited paper actually supports. Uses a fresh cross-model reviewer with web/DBLP/arXiv lookup to catch hallucinated authors, wrong years, fabricated venues, arXiv preprints used despite published versions, version mismatches, and wrong-context citations. Use when user says \"审查引用\", \"check citations\", \"citation audit\", \"verify references\", \"引用核对\", or before submission to ensure bibliography integrity."
 argument-hint: "[paper-directory-or-bib-file] [--uncited] [— soft-only]"
 allowed-tools: Bash(*), Read, Grep, Glob, Edit, Write, WebSearch, WebFetch
 ---
 
 # Citation Audit
 
+> 🔒 **Do not wrap this skill in `/loop`, `/schedule`, or `CronCreate`.** It is
+> verdict-bearing — it judges bibliographic correctness. Re-running that verdict
+> on a timer adds no new signal (it changes only when the *bibliography*
+> changes). Schedule the *external wait that precedes it* — bibliography
+> finalized → then audit **once**. See
+
 Verify every `\cite{...}` in a paper against three independent layers:
 
-1. **Existence** — the cited paper actually exists at the claimed arXiv ID / DOI / venue.
+1. **Existence** — the cited paper actually exists at the claimed DOI / venue, or is explicitly accepted as an unpublished preprint exception.
 2. **Metadata correctness** — author names, year, venue, and title match canonical sources (DBLP, arXiv, ACL Anthology, Nature, OpenReview, etc.).
 3. **Context appropriateness** — the cited paper actually supports the claim it is being used to support in the manuscript.
+4. **Published-version compliance** — the final `.bib` uses a conference or journal version whenever one exists; arXiv is used only as a discovery clue or explicit unpublished-preprint exception.
 
 This skill is the fourth layer of \aris{}'s evidence-and-claim assurance, complementing `experiment-audit` (code), `result-to-claim` (science verdict), and `paper-claim-audit` (numerical claims). Together they form a bottom-up integrity stack from raw evaluation code to manuscript bibliography.
 
@@ -33,18 +40,19 @@ The dangerous citation problems are **not** wildly fake citations — those are 
 - **Title drift**: arXiv v1 vs v3 with different titles silently merged.
 - **Venue confusion**: arXiv preprint cited but the official venue is now CVPR/ICML/NeurIPS — using the wrong record.
 - **Year mismatch**: arXiv 2023 preprint with 2024 conference acceptance, year reported inconsistently.
+- **Preprint leakage**: final bibliography keeps `archivePrefix = {arXiv}` or an arXiv DOI even though DBLP/CrossRef/S2/OpenAlex shows a formal venue.
 - **Phantom DOIs**: DOI looks real but does not resolve.
 - **Self-citation drift**: your own prior work cited with year off by one.
 
 ## Constants
 
 - **REVIEWER_MODEL = `gpt-5.5`** — Used via Codex MCP. Default for cross-model review with web access.
-- **CONTEXT_POLICY = `fresh`** — Each audit run uses a new reviewer thread (REVIEWER_BIAS_GUARD). Continue only with `send_input` when explicitly resuming the same audit.
-- **WEB_SEARCH = required** — The reviewer must perform real web/DBLP/arXiv lookups, not pattern-match from memory.
+- **CONTEXT_POLICY = `fresh`** — Each audit run uses a new reviewer thread (REVIEWER_BIAS_GUARD). Never `continuation reply`.
+- **WEB_SEARCH = required** — The reviewer must perform real web/DBLP/arXiv lookups, not pattern-match from memory. arXiv may be used to identify a paper, but the final verdict must prefer formal publication metadata when it exists.
 - **OUTPUT = `CITATION_AUDIT.md`** — Human-readable per-entry verdict report.
 - **STATE = `CITATION_AUDIT.json`** — Machine-readable verdict ledger consumable by downstream tools.
 - **SOFT_ONLY = `false`** — When true (set via `— soft-only` / `— soft_only` flag), the audit runs all three layers normally but **forbids any `.bib` file mutation**. Findings that would otherwise mutate the bib (FIX / REPLACE / REMOVE) are translated into per-occurrence sentence-rewrite proposals against the citing `*.tex` files. Used by `/resubmit-pipeline` Phase 1 to honor the user's hard "freeze the bib" constraint.
-- **RENDER_HTML = true** — When `true` (default), auto-render `CITATION_AUDIT.md` to HTML after writing the report. Uses **full review gate** (audit-class artifact). Set `false` to skip, or pass `— render html: false`. **Non-blocking**: failures don't invalidate the audit verdict.
+- **RENDER_HTML = true** — When `true` (default), auto-render `CITATION_AUDIT.md` to HTML after writing the report. Uses **full Codex review gate** (audit-class artifact — render-fidelity check matches the skill's cross-model audit invariant). Set `false` to skip, or pass `— render html: false`.
 
 ## Workflow
 
@@ -75,14 +83,17 @@ Save the extracted contexts to `paper/.debuffer_skills/citation-audit/contexts.t
 
 ### Step 3: Send each entry to fresh cross-model reviewer
 
-For each **cited** bib entry — i.e., each key in `cited_keys` with at least one extracted citation context — launch a fresh Codex reviewer agent. Do not reuse the same reviewer across entries. Do **not** spawn an agent for entries in `bib_keys \ cited_keys`; those are detect-only and surface only when `--uncited` is explicitly enabled (see "Uncited Entry Detection" below).
+For each **cited** bib entry — i.e., each key in `cited_keys` with at least one extracted citation context — invoke `a fresh external reviewer thread` (NOT `continuation reply` — fresh thread per entry, or batch with explicit per-entry isolation). Do **not** send entries in `bib_keys \ cited_keys` to the reviewer; those are detect-only and surface only when `--uncited` is explicitly enabled (see "Uncited Entry Detection" below).
 
 ```
-spawn_agent:
+a fresh external reviewer thread:
   model: gpt-5.5
-  reasoning_effort: xhigh
-  message: |
-    You are auditing a bibliographic entry. Use web/DBLP/arXiv search.
+  config: {"model_reasoning_effort": "xhigh"}
+  sandbox: read-only
+  prompt: |
+    You are auditing a bibliographic entry. Use web/DBLP/arXiv search. Treat
+    arXiv as a discovery source, then resolve to the published conference or
+    journal version whenever one exists.
 
     ## Bib entry
     @article{key2024example,
@@ -93,12 +104,17 @@ spawn_agent:
     [paste extracted contexts]
 
     For this entry, verify:
-    1. EXISTENCE: does this paper exist at the claimed arXiv ID / DOI / venue?
+    1. EXISTENCE: does this paper exist at the claimed DOI / venue, or is it
+       truly unpublished with no formal venue?
        Output: YES / NO / UNCERTAIN, with the verifying URL.
     2. METADATA: are author names, year, venue, title correct?
        For each, output: correct / wrong: should be ... / typo: ...
     3. CONTEXT: for each use, does the cited paper actually support the surrounding claim?
        Output per-use: SUPPORTS / WEAK / WRONG, with one-sentence reasoning.
+    4. PUBLISHED VERSION: if the entry is arXiv/preprint metadata, is there a
+       formal conference or journal record? If yes, verdict must be FIX or
+       REPLACE unless the prompt explicitly says the user accepted an
+       unpublished-preprint exception.
 
     VERDICT: KEEP / FIX / REPLACE / REMOVE
     - KEEP: entry is clean, all uses are appropriate
@@ -236,7 +252,7 @@ Confirm:
 
 **Default**: disabled. Existing users see no behavior change — only `\cite{...}` keys are audited, and bib entries with no `\cite` reference in the manuscript are silently ignored.
 
-**Opt-in**: pass `--uncited` on invocation. The skill then performs a set-diff after Step 2 and reports bib entries that appear in any audited bib file(s) but are not cited anywhere in the paper. Detect-only — uncited entries are **not** sent to the reviewer agent, so there is no extra reviewer/web-lookup cost.
+**Opt-in**: pass `--uncited` on invocation. The skill then performs a set-diff after Step 2 and reports bib entries that appear in any audited bib file(s) but are not cited anywhere in the paper. Detect-only — uncited entries are **not** sent to the cross-model reviewer, so there is no extra reviewer/web-lookup cost.
 
 ### Why opt-in
 This skill's headline output is the three-axis audit on cited entries. Surfacing uncited bib entries by default would (a) change long-form output for every existing run, and (b) noise up the verdict for users who intentionally maintain a superset bib file (e.g., shared lab bib, in-progress section reorder where the cite has been removed but the entry intentionally retained). The flag preserves zero behavior change for existing callers.
@@ -272,6 +288,9 @@ If the bib file cannot be read well enough to audit even the cited entries, fall
 - **Fresh reviewer thread per audit run** — never reuse prior review context
 - **Web access required** — the reviewer must do real lookups, not memory pattern-match
 - **Wrong-context > metadata** — a real paper used to support a wrong claim is more dangerous than a typo in author name
+- **Published version required by default** — arXiv entries in the final `.bib`
+  are FIX/REPLACE findings when a formal venue version exists; only explicit
+  unpublished-preprint exceptions may remain.
 - **REPLACE/REMOVE require human approval** — never auto-modify content claims
 - **Always emit, never block** — this skill always writes `CITATION_AUDIT.json` with a verdict; the decision to block finalization lives in `paper-writing` Phase 6 + `verify_paper_audits.sh`, driven by the `assurance` level. See "Submission Artifact Emission" below.
 - **Run once per submission** — the audit is wall-clock expensive (web lookups for each entry); not for every save
@@ -291,14 +310,19 @@ Together: code → result → numerical claim → cited claim. Each layer has cr
 
 ## Known Limitations
 
-- **DBLP coverage gap**: very recent papers (< 2 weeks) may not yet be in DBLP. Reviewer should fall back to arXiv.
-- **Pre-print vs published**: when both exist, reviewer should prefer the published venue (ICML 2024 over arXiv 2401.xxxxx) but flag both.
+- **DBLP coverage gap**: very recent papers may not yet be in DBLP. Reviewer
+  should use arXiv only to identify the paper, then try CrossRef, Semantic
+  Scholar, OpenAlex, official venue pages, ACL Anthology, IEEE, or ACM before
+  accepting an unpublished-preprint exception.
+- **Preprint vs published**: when both exist, the published venue record is the
+  expected final entry (ICML 2024 over arXiv 2401.xxxxx). Keeping arXiv is a
+  FIX/REPLACE finding unless explicitly accepted as an exception.
 - **Anthology vs OpenReview**: NeurIPS/ICLR papers have OpenReview entries before official proceedings; both are valid sources.
 - **Multi-author truncation**: bib entries with 6+ authors using `and others` are conventional and not flagged unless the truncation hides a co-author the user explicitly cares about.
 
 ## Review Tracing
 
-After each reviewer agent call, save the trace following `shared-references/review-tracing.md` (Policy C — forensic; never silently skip). Use `save_trace.sh` (resolved per the chain in `shared-references/integration-contract.md` §2) or write files directly to `.debuffer_skills/traces/citation-audit/<date>_run<NN>/`. Respect the `--- trace:` parameter (default: `full`).
+After each `a fresh external reviewer thread` reviewer call, save the trace following `shared-references/review-tracing.md` (Policy C — forensic; never silently skip). Use `save_trace.sh` (resolved per the chain in `shared-references/integration-contract.md` §2) or write files directly to `.debuffer_skills/traces/citation-audit/<date>_run<NN>/`. Respect the `--- trace:` parameter (default: `full`).
 
 ## Output Contract
 
@@ -307,7 +331,7 @@ After each reviewer agent call, save the trace following `shared-references/revi
 - `.debuffer_skills/traces/citation-audit/<date>_runNN/` (per-entry review traces)
 - Optional: applied fixes to `references.bib` + `sec/*.tex` (with `--apply` flag)
 - Optional: `details.uncited_entries` field in JSON + `## Uncited Entries (opt-in)` MD section (with `--uncited` flag; field absent and section omitted when flag is unset)
-- `CITATION_AUDIT.html` (when `RENDER_HTML = true`, default) — auto-rendered single-file HTML view via `/render-html "CITATION_AUDIT.md" --json "CITATION_AUDIT.json"`. Full review gate. Sidecar `.review.json` carries render-fidelity verdict. **Non-blocking**: failures are logged and the audit MD + JSON remain the canonical outputs.
+- `CITATION_AUDIT.html` (when `RENDER_HTML = true`, default) — auto-rendered single-file HTML view via `/render-html "CITATION_AUDIT.md" --json "CITATION_AUDIT.json"`. Full review gate. Sidecar `.review.json` carries render-fidelity verdict. **Non-blocking**: if `/render-html` fails (helper missing, Codex MCP unavailable, file write error), log the failure and treat the audit as complete — the JSON + MD ledger are the canonical outputs.
 
 ## Optional: Soft-Only Mode (— soft-only)
 
@@ -326,7 +350,7 @@ The audit semantics are **unchanged**: existence + metadata + context-appropriat
 | `KEEP` | `keep_unchanged` | No action. Cite + sentence are both fine. |
 | `FIX` (metadata wrong) | `keep_metadata_drift_acknowledged` | Bib stays as-is. Flag for human review at submission time. Append note: "metadata drift detected but not fixed under --soft-only". |
 | `REPLACE` (wrong-context cite) | `soften_citing_sentence` | Per-occurrence sentence-rewrite proposal. For each `\cite{X}` in the body, locate the surrounding sentence and propose a softened version that does not claim what `X` actually establishes. |
-| `REMOVE` (cite refers to nonexistent paper — i.e., hallucinated citation) | `drop_cite_in_body_only` | The bib entry is left untouched (per the `--soft-only` invariant), but **the inline `\cite{X}` references in the body MUST be removed and the surrounding sentence rewritten** so it no longer relies on a nonexistent paper. Two sub-strategies: (a) drop the inline `\cite{X}` entirely and rephrase the sentence; (b) re-attribute to a different in-bib source that genuinely supports the claim. **Never** leave a `\cite{X}` to a hallucinated paper in the body. The bib entry itself stays (uncited entries are harmless and surfaced separately by uncited-detection). |
+| `REMOVE` (cite refers to nonexistent paper — i.e., hallucinated citation) | `drop_cite_in_body_only` | The bib entry is left untouched (per the `--soft-only` invariant), but **the inline `\cite{X}` references in the body MUST be removed and the surrounding sentence rewritten** so it no longer relies on a nonexistent paper. Two sub-strategies the rewriter may use: (a) drop the inline `\cite{X}` entirely and rephrase the sentence to remove the load-bearing claim, OR (b) re-attribute to a different in-bib source that genuinely supports the claim. **Never** leave a `\cite{X}` to a hallucinated paper in the body — that is a worse failure mode than removing the cite, because reviewers will check the reference and find nothing. The bib entry itself stays (it's harmless once not cited; the verifier's uncited-detection at submission time will surface it for cleanup outside this audit). |
 
 ### Augmented JSON schema (under `--soft-only`)
 
@@ -468,16 +492,16 @@ any file outside the paper dir.
 | No `.bib` file or no `\cite{...}` usage                        | `NOT_APPLICABLE` | `no_citations`        |
 | `.bib` file referenced but unreadable / missing                | `BLOCKED`        | `bib_unreadable`      |
 | Every entry KEEP, all three axes green                         | `PASS`           | `all_entries_keep`    |
-| Only FIX verdicts (metadata drift, no context errors)          | `WARN`           | `metadata_drift`      |
-| Any REPLACE or REMOVE (wrong-context or hallucinated entry)    | `FAIL`           | `wrong_context`       |
+| Only FIX verdicts (metadata drift, published-version drift, no context errors) | `WARN` | `metadata_or_version_drift` |
+| Any REPLACE or REMOVE (wrong-context, hallucinated entry, or arXiv-only entry when a formal version exists but cannot be safely fixed in place) | `FAIL` | `wrong_context` |
 | Web lookups timed out / reviewer invocation failed             | `ERROR`          | `reviewer_error`      |
 
 The `--uncited` flag does **not** appear in this table: uncited entries are advisory only and never alter the top-level verdict or reason_code. They surface exclusively through `details.uncited_entries` and the optional MD section.
 
 ### Thread independence
 
-Every invocation uses a fresh reviewer agent. Never reuse `send_input` across
-different bibliography entries. Do not accept prior audit outputs (PROOF_AUDIT,
+Every invocation uses a fresh `a fresh external reviewer thread` thread. Never
+`continuation reply`. Do not accept prior audit outputs (PROOF_AUDIT,
 PAPER_CLAIM_AUDIT, EXPERIMENT_LOG) as input — the fresh thread preserves
 reviewer independence per `shared-references/reviewer-independence.md`.
 

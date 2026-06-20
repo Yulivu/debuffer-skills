@@ -1,7 +1,7 @@
 ---
 name: overleaf-package
 description: "Package a local LaTeX paper tree into an Overleaf-uploadable zip without using the Overleaf Git bridge. Use when the user wants to move a local paper to Overleaf by manual upload, needs an uploadable archive for collaborators, or wants a pre-upload audit of missing figures, bib files, and local-only build junk."
-argument-hint: [paper-dir-or-main.tex] [--output-dir dist] [--name <archive-name>]
+argument-hint: "[paper-dir-or-main.tex] [--output-dir dist] [--name <archive-name>]"
 allowed-tools: Bash(*), Read, Grep, Glob, Edit, Write
 ---
 

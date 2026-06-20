@@ -1,6 +1,6 @@
 ---
 name: citation-audit
-description: "Zero-context verification that every bibliographic entry in the paper is real, correctly attributed, and used in a context the cited paper actually supports. Uses a fresh cross-model reviewer with web/DBLP/arXiv lookup to catch hallucinated authors, wrong years, fabricated venues, version mismatches, and wrong-context citations (cite present but the cited paper does not establish the claim). Use when user says \"审查引用\", \"check citations\", \"citation audit\", \"verify references\", \"引用核对\", or before submission to ensure bibliography integrity."
+description: "Zero-context verification that every bibliographic entry in the paper is real, correctly attributed, formally published when possible, and used in a context the cited paper actually supports. Uses a fresh cross-model reviewer with web/DBLP/arXiv lookup to catch hallucinated authors, wrong years, fabricated venues, arXiv preprints used despite published versions, version mismatches, and wrong-context citations. Use when user says \"审查引用\", \"check citations\", \"citation audit\", \"verify references\", \"引用核对\", or before submission to ensure bibliography integrity."
 argument-hint: "[paper-directory-or-bib-file] [--uncited] [— soft-only]"
 allowed-tools: Bash(*), Read, Grep, Glob, Edit, Write, mcp__codex__codex, WebSearch, WebFetch
 ---
@@ -16,9 +16,10 @@ allowed-tools: Bash(*), Read, Grep, Glob, Edit, Write, mcp__codex__codex, WebSea
 
 Verify every `\cite{...}` in a paper against three independent layers:
 
-1. **Existence** — the cited paper actually exists at the claimed arXiv ID / DOI / venue.
+1. **Existence** — the cited paper actually exists at the claimed DOI / venue, or is explicitly accepted as an unpublished preprint exception.
 2. **Metadata correctness** — author names, year, venue, and title match canonical sources (DBLP, arXiv, ACL Anthology, Nature, OpenReview, etc.).
 3. **Context appropriateness** — the cited paper actually supports the claim it is being used to support in the manuscript.
+4. **Published-version compliance** — the final `.bib` uses a conference or journal version whenever one exists; arXiv is used only as a discovery clue or explicit unpublished-preprint exception.
 
 This skill is the fourth layer of \aris{}'s evidence-and-claim assurance, complementing `experiment-audit` (code), `result-to-claim` (science verdict), and `paper-claim-audit` (numerical claims). Together they form a bottom-up integrity stack from raw evaluation code to manuscript bibliography.
 
@@ -40,6 +41,7 @@ The dangerous citation problems are **not** wildly fake citations — those are 
 - **Title drift**: arXiv v1 vs v3 with different titles silently merged.
 - **Venue confusion**: arXiv preprint cited but the official venue is now CVPR/ICML/NeurIPS — using the wrong record.
 - **Year mismatch**: arXiv 2023 preprint with 2024 conference acceptance, year reported inconsistently.
+- **Preprint leakage**: final bibliography keeps `archivePrefix = {arXiv}` or an arXiv DOI even though DBLP/CrossRef/S2/OpenAlex shows a formal venue.
 - **Phantom DOIs**: DOI looks real but does not resolve.
 - **Self-citation drift**: your own prior work cited with year off by one.
 
@@ -47,7 +49,7 @@ The dangerous citation problems are **not** wildly fake citations — those are 
 
 - **REVIEWER_MODEL = `gpt-5.5`** — Used via Codex MCP. Default for cross-model review with web access.
 - **CONTEXT_POLICY = `fresh`** — Each audit run uses a new reviewer thread (REVIEWER_BIAS_GUARD). Never `codex-reply`.
-- **WEB_SEARCH = required** — The reviewer must perform real web/DBLP/arXiv lookups, not pattern-match from memory.
+- **WEB_SEARCH = required** — The reviewer must perform real web/DBLP/arXiv lookups, not pattern-match from memory. arXiv may be used to identify a paper, but the final verdict must prefer formal publication metadata when it exists.
 - **OUTPUT = `CITATION_AUDIT.md`** — Human-readable per-entry verdict report.
 - **STATE = `CITATION_AUDIT.json`** — Machine-readable verdict ledger consumable by downstream tools.
 - **SOFT_ONLY = `false`** — When true (set via `— soft-only` / `— soft_only` flag), the audit runs all three layers normally but **forbids any `.bib` file mutation**. Findings that would otherwise mutate the bib (FIX / REPLACE / REMOVE) are translated into per-occurrence sentence-rewrite proposals against the citing `*.tex` files. Used by `/resubmit-pipeline` Phase 1 to honor the user's hard "freeze the bib" constraint.
@@ -90,7 +92,9 @@ mcp__codex__codex:
   config: {"model_reasoning_effort": "xhigh"}
   sandbox: read-only
   prompt: |
-    You are auditing a bibliographic entry. Use web/DBLP/arXiv search.
+    You are auditing a bibliographic entry. Use web/DBLP/arXiv search. Treat
+    arXiv as a discovery source, then resolve to the published conference or
+    journal version whenever one exists.
 
     ## Bib entry
     @article{key2024example,
@@ -101,12 +105,17 @@ mcp__codex__codex:
     [paste extracted contexts]
 
     For this entry, verify:
-    1. EXISTENCE: does this paper exist at the claimed arXiv ID / DOI / venue?
+    1. EXISTENCE: does this paper exist at the claimed DOI / venue, or is it
+       truly unpublished with no formal venue?
        Output: YES / NO / UNCERTAIN, with the verifying URL.
     2. METADATA: are author names, year, venue, title correct?
        For each, output: correct / wrong: should be ... / typo: ...
     3. CONTEXT: for each use, does the cited paper actually support the surrounding claim?
        Output per-use: SUPPORTS / WEAK / WRONG, with one-sentence reasoning.
+    4. PUBLISHED VERSION: if the entry is arXiv/preprint metadata, is there a
+       formal conference or journal record? If yes, verdict must be FIX or
+       REPLACE unless the prompt explicitly says the user accepted an
+       unpublished-preprint exception.
 
     VERDICT: KEEP / FIX / REPLACE / REMOVE
     - KEEP: entry is clean, all uses are appropriate
@@ -280,6 +289,9 @@ If the bib file cannot be read well enough to audit even the cited entries, fall
 - **Fresh reviewer thread per audit run** — never reuse prior review context
 - **Web access required** — the reviewer must do real lookups, not memory pattern-match
 - **Wrong-context > metadata** — a real paper used to support a wrong claim is more dangerous than a typo in author name
+- **Published version required by default** — arXiv entries in the final `.bib`
+  are FIX/REPLACE findings when a formal venue version exists; only explicit
+  unpublished-preprint exceptions may remain.
 - **REPLACE/REMOVE require human approval** — never auto-modify content claims
 - **Always emit, never block** — this skill always writes `CITATION_AUDIT.json` with a verdict; the decision to block finalization lives in `paper-writing` Phase 6 + `verify_paper_audits.sh`, driven by the `assurance` level. See "Submission Artifact Emission" below.
 - **Run once per submission** — the audit is wall-clock expensive (web lookups for each entry); not for every save
@@ -299,8 +311,13 @@ Together: code → result → numerical claim → cited claim. Each layer has cr
 
 ## Known Limitations
 
-- **DBLP coverage gap**: very recent papers (< 2 weeks) may not yet be in DBLP. Reviewer should fall back to arXiv.
-- **Pre-print vs published**: when both exist, reviewer should prefer the published venue (ICML 2024 over arXiv 2401.xxxxx) but flag both.
+- **DBLP coverage gap**: very recent papers may not yet be in DBLP. Reviewer
+  should use arXiv only to identify the paper, then try CrossRef, Semantic
+  Scholar, OpenAlex, official venue pages, ACL Anthology, IEEE, or ACM before
+  accepting an unpublished-preprint exception.
+- **Preprint vs published**: when both exist, the published venue record is the
+  expected final entry (ICML 2024 over arXiv 2401.xxxxx). Keeping arXiv is a
+  FIX/REPLACE finding unless explicitly accepted as an exception.
 - **Anthology vs OpenReview**: NeurIPS/ICLR papers have OpenReview entries before official proceedings; both are valid sources.
 - **Multi-author truncation**: bib entries with 6+ authors using `and others` are conventional and not flagged unless the truncation hides a co-author the user explicitly cares about.
 
@@ -476,8 +493,8 @@ any file outside the paper dir.
 | No `.bib` file or no `\cite{...}` usage                        | `NOT_APPLICABLE` | `no_citations`        |
 | `.bib` file referenced but unreadable / missing                | `BLOCKED`        | `bib_unreadable`      |
 | Every entry KEEP, all three axes green                         | `PASS`           | `all_entries_keep`    |
-| Only FIX verdicts (metadata drift, no context errors)          | `WARN`           | `metadata_drift`      |
-| Any REPLACE or REMOVE (wrong-context or hallucinated entry)    | `FAIL`           | `wrong_context`       |
+| Only FIX verdicts (metadata drift, published-version drift, no context errors) | `WARN` | `metadata_or_version_drift` |
+| Any REPLACE or REMOVE (wrong-context, hallucinated entry, or arXiv-only entry when a formal version exists but cannot be safely fixed in place) | `FAIL` | `wrong_context` |
 | Web lookups timed out / reviewer invocation failed             | `ERROR`          | `reviewer_error`      |
 
 The `--uncited` flag does **not** appear in this table: uncited entries are advisory only and never alter the top-level verdict or reason_code. They surface exclusively through `details.uncited_entries` and the optional MD section.

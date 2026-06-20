@@ -1,7 +1,7 @@
 ---
 name: paper-writing
 description: "Workflow 3: evidence-gated paper writing pipeline. Requires audited formal experiment evidence and an accepted paper plan before manuscript drafting. Orchestrates paper-plan → paper-figure → figure-spec/paper-illustration/mermaid-diagram → paper-write → paper-compile → auto-paper-improvement-loop only after the manuscript entry gate passes. If only smoke, pilot, toy, or validation results exist, stop and produce next actions or a gap report. Use when user says \"写论文全流程\", \"write paper pipeline\", \"从报告到PDF\", \"paper writing\", or wants complete paper generation from audited evidence."
-argument-hint: [narrative-report-path-or-topic]
+argument-hint: "[narrative-report-path-or-topic] [— style-ref: <source>]"
 allowed-tools: Bash(*), Read, Write, Edit, Grep, Glob, Skill
 ---
 
@@ -11,12 +11,18 @@ allowed-tools: Bash(*), Read, Write, Edit, Grep, Glob, Skill
 
 This is a first-layer entry skill. Keep it loaded as the user-facing route; when a request needs a specialized capability below, resolve the debuffer repo root from `.debuffer_skills/installed-skills-codex.txt` (`repo_root`) when available, read the referenced library `SKILL.md`, then follow that skill. Do not copy the whole library skill into this file.
 
+For unmanaged flat symlink installs, `.agents/skills/paper-writing` is the
+expected skill symlink location.
+
 - `/paper-plan`: read `../../skills-codex-library/paper/paper-plan/SKILL.md`.
 - `/paper-write`: read `../../skills-codex-library/paper/paper-write/SKILL.md`.
 - `/paper-compile`: read `../../skills-codex-library/paper/paper-compile/SKILL.md`.
 - `/overleaf-package`: read `../../skills-codex-library/paper/overleaf-package/SKILL.md`.
+- `/artifact-package-splitter`: read `../../skills-codex-library/paper/artifact-package-splitter/SKILL.md`.
 - `/paper-claim-audit`: read `../../skills-codex-library/review/paper-claim-audit/SKILL.md`.
 - `/citation-audit`: read `../../skills-codex-library/review/citation-audit/SKILL.md`.
+- `/paper-math-consistency-audit`: read `../../skills-codex-library/review/paper-math-consistency-audit/SKILL.md`.
+- `/final-experiment-curator`: read `../../skills-codex-library/review/final-experiment-curator/SKILL.md`.
 
 
 Orchestrate an evidence-gated paper writing workflow for: **$ARGUMENTS**
@@ -25,7 +31,9 @@ Orchestrate an evidence-gated paper writing workflow for: **$ARGUMENTS**
 
 Read `../shared-references/lightweight-research-pack.md`,
 `../shared-references/project-guide-protocol.md`, and
-`../shared-references/venue-profiles.md` before starting. Defaults:
+`../shared-references/venue-profiles.md`, plus
+`../shared-references/icde-yu-memory-paper-structure.md` before starting.
+Defaults:
 
 - **AUTO_PROCEED = false**, **HUMAN_CHECKPOINT = true**,
   **MAX_IMPROVEMENT_ROUNDS = 1**, **REVIEW_MODE = prompt-only**.
@@ -45,7 +53,7 @@ Read `../shared-references/lightweight-research-pack.md`,
 - Create or refresh `PAPER_GUIDE.md` at the manuscript gate by compacting the
   project guide, experiment protocol, evidence ledger, and accepted paper plan.
   Do not duplicate full audit reports inside the guide.
-- Do not call reviewer agents by default. Generate prompts under
+- Do not call reviewer MCP/API backends by default. Generate prompts under
   `review-prompts/` for paper-plan, claim, citation, and improvement review, then
   wait for pasted feedback from a separate conversation.
 - The final pipeline report should be concise. Keep detailed audit outputs in
@@ -68,11 +76,13 @@ In this hybrid pack, the pipeline itself is unchanged, but `paper-plan`,
 framing, prose guidance, and submission-time checks. It also benefits from
 `/figure-table-audit` and `/experiment-writeup-audit` before finalization.
 
-Default manuscript package target: an `ICDE_YU_Memory`-style modular paper
-bundle or better, with thin `main.tex`, modular section files, dedicated
-figure assets, benchmark-construction section when contribution-bearing,
-RQ-organized experiments, and separate discussion when scope/limitations
-matter.
+Default manuscript package target: the `ICDE_YU_Memory` modular Overleaf
+style or better. For new IEEE/Overleaf starts, prefer thin `main.tex`,
+`Content/` section files, `Figure/` assets, and `IEEE.bib`; preserve an
+existing `sections/` / `figures/` / `references.bib` convention only for
+existing projects or non-IEEE templates. Use the shared reference above for
+section topology, RQ-organized experiments, benchmark-construction sections,
+and discussion/related-work placement.
 
 ## Constants
 
@@ -81,7 +91,7 @@ matter.
 - **REVIEWER_MODEL = `gpt-5.5`** — Model used via Codex MCP for plan review, figure review, writing review, and improvement loop.
 - **AUTO_PROCEED = false** — Pause between phases unless the user explicitly opts into auto-continue.
 - **HUMAN_CHECKPOINT = true** — Pause after each improvement review so the user can inspect the score and provide custom modification instructions. Passed through to `/auto-paper-improvement-loop`.
-- **ILLUSTRATION = `figurespec`** — Architecture/illustration generator for Phase 2b: `figurespec` (default, deterministic JSON→SVG via `/figure-spec`, best for architecture/workflow/topology), `gemini` (AI-generated via `/paper-illustration`, best for qualitative method illustrations; needs `GEMINI_API_KEY`), `mermaid` (Mermaid syntax via `/mermaid-diagram`, free, best for flowcharts), or `false` (skip Phase 2b, manual only).
+- **ILLUSTRATION = `figurespec`** — Architecture/illustration generator for Phase 2b: `figurespec` (default, deterministic JSON→SVG via `/figure-spec`, best for architecture/workflow/topology), `gemini` (AI-generated via `/paper-illustration`, best for qualitative method illustrations; needs `GEMINI_API_KEY`), `codex-image2` (AI-generated via `/paper-illustration-image2` through the local Codex native image bridge — no external API key, uses your ChatGPT Plus/Pro quota; experimental), `mermaid` (Mermaid syntax via `/mermaid-diagram`, free, best for flowcharts), or `false` (skip Phase 2b, manual only).
 
 > Override inline: `/paper-writing "NARRATIVE_REPORT.md" — venue: NeurIPS, illustration: gemini, human checkpoint: true`
 > IEEE example: `/paper-writing "NARRATIVE_REPORT.md" — venue: IEEE_JOURNAL`
@@ -98,6 +108,52 @@ This pipeline accepts one of:
    and stop.
 
 The more detailed the input (especially figure descriptions and quantitative results), the better the output.
+
+## Optional: Style reference (`— style-ref: <source>`, opt-in)
+
+Lets the user steer **structural** style (section ordering, theorem density, sentence cadence, figure density, bibliography style) of the generated paper toward a reference paper they admire. **Default OFF — when the user does not pass `— style-ref`, do nothing differently from before.**
+
+When `— style-ref: <source>` is in `$ARGUMENTS`, run the helper FIRST, before Phase 1 (paper-plan):
+
+```bash
+# Resolve $STYLE_HELPER via the canonical strict-safe chain (see
+# shared-references/integration-contract.md §2). Policy A — gate:
+# unresolved helper means --style-ref cannot be satisfied, so abort.
+cd "$(git rev-parse --show-toplevel 2>/dev/null || pwd)" || exit 1
+if [ -z "${ARIS_REPO:-}" ] && [ -f .debuffer_skills/installed-skills.txt ]; then
+    ARIS_REPO=$(awk -F'\t' '$1=="repo_root"{print $2; exit}' .debuffer_skills/installed-skills.txt 2>/dev/null) || true
+fi
+STYLE_HELPER=".debuffer_skills/tools/extract_paper_style.py"
+[ -f "$STYLE_HELPER" ] || STYLE_HELPER="tools/extract_paper_style.py"
+[ -f "$STYLE_HELPER" ] || { [ -n "${ARIS_REPO:-}" ] && STYLE_HELPER="$ARIS_REPO/tools/extract_paper_style.py"; }
+[ -f "$STYLE_HELPER" ] || {
+  echo "ERROR: extract_paper_style.py not resolved at .debuffer_skills/tools/, tools/, or \$ARIS_REPO/tools/." >&2
+  echo "       Fix: resolve the verifier from the installed debuffer skills repo or rerun the installer." >&2
+  echo "       --style-ref cannot be satisfied; aborting." >&2
+  exit 1
+}
+STYLE_STATUS=0
+CACHE=$(python3 "$STYLE_HELPER" --source "<source>") || STYLE_STATUS=$?
+case "$STYLE_STATUS" in
+  0) ;;                                       # share $CACHE/style_profile.md with downstream WRITER phases only
+  2) echo "warning: style-ref skipped (missing optional dep)" >&2 ;;
+  3) echo "error: --style-ref source failed; aborting pipeline" >&2 ; exit 1 ;;
+  *) echo "error: helper failed unexpectedly; aborting pipeline" >&2 ; exit 1 ;;
+esac
+```
+
+Then forward `— style-ref: <source>` only to the **writer-side** sub-skills:
+- `/paper-plan` (Phase 1) — outline structure
+- `/paper-write` (Phase 3) — section-by-section prose
+- `/paper-illustration` (Phase 2b) — figure structural matching, optional
+
+Sources accepted: local TeX dir / file, local PDF, arXiv id, http(s) URL. Overleaf URLs/IDs are rejected — clone via `/overleaf-sync setup <id>` first and pass the local clone path.
+
+**Strict rules** (full contract in `tools/extract_paper_style.py` docstring):
+
+- Use `style_profile.md` as **structural** guidance only. Match section-count tendency, theorem density, caption-length distribution, sentence cadence, math display ratio, citation style.
+- **Never copy prose, claims, examples, or terminology** from anything reachable through the cache.
+- **Never pass `— style-ref` (or the cache contents) to reviewer / auditor sub-skills** — Phase 4.5 (`/proof-checker`), Phase 4.6 / 5.7 (`/paper-math-consistency-audit`), Phase 4.7 / 5.5 (`/paper-claim-audit`), Phase 5 (`/auto-paper-improvement-loop` reviewer), Phase 5.8 (`/citation-audit`) MUST run on the artifact alone. Cross-model review independence (`../shared-references/reviewer-independence.md`).
 
 ## Pipeline
 
@@ -156,14 +212,16 @@ echo "<resolved-level>" > paper/.debuffer_skills/assurance.txt   # draft or subm
 **What each level does downstream:**
 
 - **`draft`** — Existing behavior. Audits run only when their content detector
-  matches (Phase 4.5 / 4.7 / 5.5 / 5.8). Missing artifacts are non-blocking.
+  matches (Phase 4.5 / 4.6 / 4.7 / 5.5 / 5.7 / 5.8). Missing artifacts are non-blocking.
   Silent-skip allowed.
-- **`submission`** — The three mandatory audits (proof-checker,
-  paper-claim-audit, citation-audit) are treated as load-bearing gates. Each
+- **`submission`** — The mandatory audits (proof-checker,
+  paper-math-consistency-audit, paper-claim-audit, kill-argument, and
+  citation-audit) are treated as load-bearing gates. Each
   sub-audit must emit its JSON artifact (PASS / WARN / FAIL / NOT_APPLICABLE /
   BLOCKED / ERROR) — never silent-skip. Phase 6 runs
   `verify_paper_audits.sh` (canonical name; resolved per
-  `shared-references/integration-contract.md` §2); a non-zero exit blocks the Final Report.
+  [`shared-references/integration-contract.md`](../shared-references/integration-contract.md) §2);
+  a non-zero exit blocks the Final Report.
 
 **Escape hatch:** a user wanting the old "beast = depth-only, no audit gate"
 can pass `— effort: beast, assurance: draft` explicitly. Legal but
@@ -184,6 +242,8 @@ Invoke `/paper-plan` to create the structural outline:
 ```
 /paper-plan "$ARGUMENTS"
 ```
+
+If `— style-ref: <source>` was passed in `$ARGUMENTS` and the helper succeeded above, append `— style-ref: <source>` to the invocation: `/paper-plan "<topic> — style-ref: <source>"`. (Writer-side phase — forwarding is allowed; reviewer/auditor phases below must not see the style ref.)
 
 **What this does:**
 - Parse NARRATIVE_REPORT.md for claims, evidence, and figure descriptions
@@ -211,6 +271,8 @@ Shall I proceed with figure generation?
 - **User requests changes** → adjust plan and re-present.
 
 ### Phase 2: Figure Generation
+
+If `— style-ref: <source>` was passed in `$ARGUMENTS` and the helper succeeded above, append `— style-ref: <source>` to every writer-side sub-skill invocation in this pipeline (Phases 1, 2b, 3, 5). Do **not** append it to reviewer/auditor invocations (Phases 4.5, 4.7, 5.5, 5.8).
 
 Invoke `/paper-figure` to generate data-driven plots and tables:
 
@@ -244,6 +306,8 @@ If the paper plan includes architecture diagrams, pipeline figures, audit cascad
 - Output: `figures/*.svg` + `figures/*.pdf` (via rsvg-convert) + `figures/specs/*.json`
 - No external API, runs fully local
 
+If `— style-ref: <source>` was passed and the helper succeeded above, append `— style-ref: <source>` to the invocation below as well.
+
 **When `illustration: gemini`** — invoke `/paper-illustration`:
 ```
 /paper-illustration "[method description from PAPER_PLAN.md or NARRATIVE_REPORT.md]"
@@ -262,11 +326,22 @@ If the paper plan includes architecture diagrams, pipeline figures, audit cascad
 - Output: `figures/*.mmd` + `figures/*.png`
 - Free, no API key needed
 
+**When `illustration: codex-image2`** — invoke `/paper-illustration-image2`:
+```
+/paper-illustration-image2 "[method description from PAPER_PLAN.md or NARRATIVE_REPORT.md]"
+```
+- Claude plans → Codex native image generation renders → Claude reviews (same multi-stage workflow as `gemini`, different renderer)
+- Best for: users who want a GPT-image-style renderer without needing `GEMINI_API_KEY`; uses your existing Codex / ChatGPT Plus/Pro quota
+- Output: `figures/ai_generated/figure_final.png` + `latex_include.tex` + `review_log.json` (emitted via the `/paper-illustration-image2` SKILL's `finalize` step, which delegates to the canonical `paper_illustration_image2.py` helper resolved per [integration-contract §2](../shared-references/integration-contract.md#2-canonical-helper--one-implementation-not-copy-pasted))
+- **Prerequisites** (beyond debuffer's standard Claude Code + Codex coexistence): the local Codex app-server must be signed in (`codex debug app-server send-message-v2 "ping"` succeeds), and the dedicated MCP bridge must be registered once with `claude mcp add codex-image2 -s user -- python3 ~/.claude/mcp-servers/codex-image2/server.py` after copying `mcp-servers/codex-image2/server.py` there. Delegate the preflight to `/paper-illustration-image2` (which resolves the helper via the canonical chain), or invoke the helper directly via the shim at `tools/paper_illustration_image2.py preflight --workspace .` to confirm before relying on this path.
+- **Experimental**: this renderer shells through the Codex debug app-server, which Codex documents as an unstable surface. Prefer `figurespec` or `gemini` for production submission flows until `codex-image2` stabilizes.
+
 **When `illustration: false`** — skip entirely. All non-data figures must be created manually (draw.io, Figma, TikZ) and placed in `figures/` before Phase 3.
 
 **Choosing the right mode:**
 - Formal architecture / workflow / topology figures → `figurespec` (default)
-- Method concept illustrations with natural style → `gemini`
+- Method concept illustrations with natural style, have `GEMINI_API_KEY` → `gemini`
+- Method concept illustrations, prefer ChatGPT Plus/Pro quota over Gemini key → `codex-image2`
 - Quick flowchart / state machine → `mermaid`
 - Full manual control → `false`
 
@@ -292,6 +367,8 @@ Invoke `/paper-write` to generate section-by-section LaTeX:
 ```
 /paper-write "PAPER_PLAN.md"
 ```
+
+If `— style-ref: <source>` was passed in `$ARGUMENTS` and the helper succeeded above, append `— style-ref: <source>` to the invocation: `/paper-write "PAPER_PLAN.md — style-ref: <source>"`.
 
 **What this does:**
 - Write each section following the plan, with proper LaTeX formatting
@@ -378,6 +455,27 @@ else:
     skip — no proofs, no action
 ```
 
+### Phase 4.6: Math Consistency Audit
+
+Run `/paper-math-consistency-audit "paper/"` after the first successful
+compile and before the improvement loop whenever the manuscript has formulas,
+project-specific notation, `math_commands.tex`, equation labels, theorem-like
+statements, or appendix derivations.
+
+```
+if paper contains math macros, equation environments, labels/refs, or theorem-like blocks:
+    Run /paper-math-consistency-audit "paper/"
+    Check symbol definitions, macro conflicts, equation labels, notation drift,
+    appendix restatements, and long-conversation formula consistency.
+
+    If FAIL:
+        Fix CRITICAL notation/formula conflicts before improvement loop
+    If WARN:
+        Queue findings into the improvement loop
+else:
+    skip in draft mode; under assurance=submission the audit emits NOT_APPLICABLE
+```
+
 ### Phase 4.7: Paper Claim Audit
 
 **Skip if no result files exist (e.g., survey/position papers with no experiments).**
@@ -404,6 +502,8 @@ Invoke `/auto-paper-improvement-loop` to polish the paper:
 ```
 /auto-paper-improvement-loop "paper/"
 ```
+
+If `— style-ref: <source>` was passed in `$ARGUMENTS` and the helper succeeded above, append `— style-ref: <source>` to the invocation: `/auto-paper-improvement-loop "paper/ — style-ref: <source>"`. The improvement loop's reviewer sub-agent will still NOT see the style ref (the loop's own SKILL forbids it); only the fix-implementation phase consumes it.
 
 **What this does (2 rounds):**
 
@@ -452,6 +552,46 @@ fi
 ```
 
 **Empirical motivation:** in a real submission run, the final paper claimed a narrower experiment grid than the raw JSON actually contained, and a tolerance value was rounded down past the actual relative error. Both were caught only after manual `paper-claim-audit` invocation in the final round; the improvement loop did not detect them.
+
+### Phase 5.6: Kill-Argument Adversarial Review (theory / scope-heavy papers)
+
+After Phase 5.5 (claim audit) passes, run `/kill-argument` whenever the paper is theory-heavy or makes explicit scope/generality claims in the title or abstract. This is a final adversarial check that complements the claim/citation/proof audits: those verify *local correctness* (numbers match, cites resolve, theorems prove); kill-argument tests *headline-level* survival — whether the paper as a whole answers the worst rejection paragraph a senior area chair would write.
+
+```bash
+THEORY_ENV_COUNT=$(rg -c '\\begin\{(theorem|lemma|proposition|corollary)\}' paper/main.tex paper/sections 2>/dev/null | awk -F: '{s+=$2} END {print s+0}')
+SCOPE_HINT=$(rg -i 'general(ization)?|broad|universal|across|any [A-Za-z]+ model|holds for' paper/sections/0*abstract* 2>/dev/null | head -1)
+
+if [ "$THEORY_ENV_COUNT" -ge 5 ] || [ -n "$SCOPE_HINT" ]; then
+    /kill-argument "paper/"
+    KILL_VERDICT=$(jq -r '.verdict' paper/KILL_ARGUMENT.json)
+    KILL_REASON=$(jq -r '.reason_code' paper/KILL_ARGUMENT.json)
+fi
+```
+
+**Gating** (depends on the resolved `assurance` level from Phase 0):
+
+| Assurance level | THEORY/SCOPE detected | Behavior |
+|---|---|---|
+| `submission` | yes | **MANDATORY**. `FAIL` blocks the final report; `WARN` requires explicit user acknowledgment; `BLOCKED`/`ERROR` blocks the final report (cannot ship without an adversarial pass). |
+| `submission` | no | Skip — `KILL_ARGUMENT.json` is written with `verdict: NOT_APPLICABLE, reason_code: not_theory_or_scope_paper` so the submission verifier sees a record. |
+| `internal` / `draft` | yes | **Advisory**. Run if the user passed `— kill-argument: true`; otherwise skip. `WARN`/`FAIL` is logged but does not block. |
+| `internal` / `draft` | no | Skip. |
+
+`/kill-argument` itself never edits the paper; it writes `KILL_ARGUMENT.{md,json}`. If `still_unresolved critical` points are surfaced, queue them for the next `/auto-paper-improvement-loop` round (Step 5.5 of that skill auto-merges the findings into its fix list).
+
+**Why this is the right place:** Phase 5 (loop) optimizes for score, Phase 5.5 (claim audit) verifies numbers, Phase 5.8 (citation audit) verifies cites — none of these catches the case where every local component is correct but the paper still oversells what it actually proves. Kill-argument is the dedicated headline-scope check.
+
+### Phase 5.7: Final Math Consistency Audit (submission gate)
+
+After the final claim/scope fixes and before `/citation-audit`, rerun
+`/paper-math-consistency-audit "paper/"` whenever the paper contains formulas,
+labels, notation macros, or theorem-like blocks. This catches drift introduced
+by late edits, especially across `math_commands.tex`, `Content/` or
+`sections/`, and appendix files.
+
+Under `assurance=submission`, this audit must always emit
+`paper/MATH_CONSISTENCY_AUDIT.json`; detector-negative papers emit
+`NOT_APPLICABLE`. `FAIL`, `BLOCKED`, or `ERROR` blocks the Final Report.
 
 ### Phase 5.8: Citation Audit (submission gate)
 
@@ -534,22 +674,24 @@ skipping audits while claiming to have run them.
 ```
 📋 Submission audits required before Final Report:
    [ ] 1. /proof-checker        → paper/PROOF_AUDIT.json
-   [ ] 2. /paper-claim-audit    → paper/PAPER_CLAIM_AUDIT.json
-   [ ] 3. /citation-audit       → paper/CITATION_AUDIT.json
-   [ ] 4. Resolve $AUDIT_VERIFIER per integration-contract §2 (Policy A),
+   [ ] 2. /paper-math-consistency-audit → paper/MATH_CONSISTENCY_AUDIT.json
+   [ ] 3. /paper-claim-audit    → paper/PAPER_CLAIM_AUDIT.json
+   [ ] 4. /kill-argument        → paper/KILL_ARGUMENT.json
+   [ ] 5. /citation-audit       → paper/CITATION_AUDIT.json
+   [ ] 6. Resolve $AUDIT_VERIFIER per integration-contract.md §2 (Policy A),
           then: bash "$AUDIT_VERIFIER" paper/ --assurance submission
-   [ ] 5. Block Final Report iff verifier exit code != 0
+   [ ] 7. Block Final Report iff verifier exit code != 0
 ```
 
-> `<SKILL_REPO>` placeholder — replace with the absolute path to your debuffer
-> clone (e.g. `~/Desktop/debuffer-skills`). In a Codex
-> project install, derive it from `.debuffer_skills/installed-skills-codex.txt`:
-> `SKILL_REPO="$(awk -F '\t' '$1=="repo_root"{print $2; exit}' .debuffer_skills/installed-skills-codex.txt)"`.
-> For an unmanaged flat symlink install, use the skill directory symlink:
-> `SKILL_REPO="$(cd "$(readlink .agents/skills/paper-writing)/../../.." && pwd)"`.
-> The path is stable across runs; store it in a shell variable if you prefer.
+> The resolver in "Running the verifier" below tries
+> `.debuffer_skills/tools/verify_paper_audits.sh` (created by `install_aris.sh`),
+> then `tools/verify_paper_audits.sh` (in-repo run), then
+> `$ARIS_REPO/tools/verify_paper_audits.sh` (env-var-set path). The
+> chain always tries layers 1 → 2 → 3 in order; setting
+> `export ARIS_REPO=~/…` only ensures layer 3 has a valid target if
+> layers 1 and 2 are absent.
 
-#### Invoking the three audits
+#### Invoking the mandatory audits
 
 Each sub-audit runs in a **fresh Codex thread** (never a continuation reply,
 never pass prior audit output as context — this preserves reviewer
@@ -564,32 +706,38 @@ Order:
 
 1. `/proof-checker "paper/"` → writes `paper/PROOF_AUDIT.json` (emits
    `NOT_APPLICABLE` if the paper contains no theorems / lemmas / proofs)
-2. `/paper-claim-audit "paper/"` → writes `paper/PAPER_CLAIM_AUDIT.json`
+2. `/paper-math-consistency-audit "paper/"` → writes
+   `paper/MATH_CONSISTENCY_AUDIT.json` (emits `NOT_APPLICABLE` if the paper
+   contains no math macros, equations, labels, or theorem-like blocks)
+3. `/paper-claim-audit "paper/"` → writes `paper/PAPER_CLAIM_AUDIT.json`
    (emits `NOT_APPLICABLE` if the paper has no numeric claims; emits
    `BLOCKED` if numeric claims exist but raw result files are missing)
-3. `/citation-audit "paper/"` → writes `paper/CITATION_AUDIT.json`
+4. `/kill-argument "paper/"` → writes `paper/KILL_ARGUMENT.json`
+   (emits `NOT_APPLICABLE` if the paper is not theory/scope-heavy)
+5. `/citation-audit "paper/"` → writes `paper/CITATION_AUDIT.json`
    (emits `NOT_APPLICABLE` if no `.bib` file or no `\cite{...}` usage)
 
 #### Running the verifier
 
 Resolve `$AUDIT_VERIFIER` via the canonical strict-safe chain (see
-[`shared-references/integration-contract.md`](../shared-references/integration-contract.md) §2,
-Policy A — gate). Under `assurance: submission` the verifier is
+[`shared-references/integration-contract.md`](../shared-references/integration-contract.md)
+§2, Policy A — gate). Under `assurance: submission` the verifier is
 load-bearing: if the helper is unresolved the SKILL aborts the Final
 Report rather than producing an unverified `submission-ready` claim.
 
 ```bash
-# Resolve the audit verifier (Policy A — gate; Codex-side chain).
-if [ -z "${SKILL_REPO:-}" ] && [ -f .debuffer_skills/installed-skills-codex.txt ]; then
-    SKILL_REPO=$(awk -F'\t' '$1=="repo_root"{print $2; exit}' .debuffer_skills/installed-skills-codex.txt 2>/dev/null) || true
+# Resolve the audit verifier (Policy A — gate).
+cd "$(git rev-parse --show-toplevel 2>/dev/null || pwd)" || exit 1
+if [ -z "${ARIS_REPO:-}" ] && [ -f .debuffer_skills/installed-skills.txt ]; then
+    ARIS_REPO=$(awk -F'\t' '$1=="repo_root"{print $2; exit}' .debuffer_skills/installed-skills.txt 2>/dev/null) || true
 fi
-AUDIT_VERIFIER=""
-[ -n "${SKILL_REPO:-}" ] && [ -f "$SKILL_REPO/tools/verify_paper_audits.sh" ] && AUDIT_VERIFIER="$SKILL_REPO/tools/verify_paper_audits.sh"
-[ -z "$AUDIT_VERIFIER" ] && [ -f tools/verify_paper_audits.sh ] && AUDIT_VERIFIER="tools/verify_paper_audits.sh"
-[ -z "$AUDIT_VERIFIER" ] && [ -f ~/.codex/skills/paper-writing/verify_paper_audits.sh ] && AUDIT_VERIFIER="$HOME/.codex/skills/paper-writing/verify_paper_audits.sh"
-[ -z "$AUDIT_VERIFIER" ] && {
-  echo "ERROR: verify_paper_audits.sh not resolved at \$SKILL_REPO/tools/, tools/, or ~/.codex/skills/paper-writing/." >&2
+AUDIT_VERIFIER=".debuffer_skills/tools/verify_paper_audits.sh"
+[ -f "$AUDIT_VERIFIER" ] || AUDIT_VERIFIER="tools/verify_paper_audits.sh"
+[ -f "$AUDIT_VERIFIER" ] || { [ -n "${ARIS_REPO:-}" ] && AUDIT_VERIFIER="$ARIS_REPO/tools/verify_paper_audits.sh"; }
+[ -f "$AUDIT_VERIFIER" ] || {
+  echo "ERROR: verify_paper_audits.sh not resolved at .debuffer_skills/tools/, tools/, or \$ARIS_REPO/tools/." >&2
   echo "       assurance=submission requires the verifier; aborting Final Report." >&2
+  echo "       Fix: resolve the verifier from the installed debuffer skills repo or rerun the installer." >&2
   exit 1
 }
 
@@ -613,14 +761,14 @@ before claiming green.
 #### Optional hardening (not default)
 
 Teams that want hook-level enforcement — i.e., the harness physically
-prevents a Stop event while the verifier is red — can register an equivalent
-Codex stop hook if their local Codex runtime supports hooks:
+prevents a Stop event while the verifier is red — can register a Stop hook
+in the local Codex runtime hook configuration:
 
 ```json
 {
   "hooks": {
     "Stop": [
-      {"command": "bash <SKILL_REPO>/tools/verify_paper_audits.sh paper/ --assurance submission"}
+      {"command": "bash <ARIS_REPO>/tools/verify_paper_audits.sh paper/ --assurance submission"}
     ]
   }
 }
@@ -654,6 +802,7 @@ or directly if `assurance=draft`)
 | 4. Compilation | ✅ | paper/main.pdf ([X] pages) |
 | 5. Improvement | ✅ | [score0]/10 → [score2]/10 |
 | 4.5 Proof Audit | [PASS\|WARN\|FAIL\|NOT_APPLICABLE\|BLOCKED\|ERROR] | PROOF_AUDIT.{md,json} |
+| 5.7 Math Consistency Audit | [PASS\|WARN\|FAIL\|NOT_APPLICABLE\|BLOCKED\|ERROR] | MATH_CONSISTENCY_AUDIT.{md,json} |
 | 5.5 Paper Claim Audit | [PASS\|WARN\|FAIL\|NOT_APPLICABLE\|BLOCKED\|ERROR] | PAPER_CLAIM_AUDIT.{md,json} |
 | 5.8 Citation Audit | [PASS\|WARN\|FAIL\|NOT_APPLICABLE\|BLOCKED\|ERROR] | CITATION_AUDIT.{md,json} |
 | 6.0 Assurance Verifier | [OK\|STALE\|BLOCKING_VERDICT\|HAS_ISSUES\|SCHEMA_INVALID\|MISSING] per audit; exit [0\|1] overall (N/A if draft) | .debuffer_skills/audit-verifier-report.json |
@@ -672,6 +821,7 @@ or directly if `assurance=draft`)
 - paper/main_round2.pdf — After round 2
 - paper/PAPER_IMPROVEMENT_LOG.md — Full review log
 - paper/PROOF_AUDIT.{md,json} — Proof-obligation verification (always emitted at `assurance=submission`; `NOT_APPLICABLE` when no theorems)
+- paper/MATH_CONSISTENCY_AUDIT.{md,json} — Formula, notation, macro, label, and appendix restatement consistency (always emitted at `assurance=submission`; `NOT_APPLICABLE` when no math-like content)
 - paper/PAPER_CLAIM_AUDIT.{md,json} — Numerical claim verification (always emitted at `assurance=submission`; `NOT_APPLICABLE` when no numeric claims; omitted in `draft` mode if Phase 5.5 detector was negative)
 - paper/CITATION_AUDIT.{md,json} — Bibliography verification (always emitted at `assurance=submission`; `NOT_APPLICABLE` when no `.bib` or no `\cite{...}`; omitted in `draft` mode if Phase 5.8 detector was negative)
 - paper/.debuffer_skills/audit-verifier-report.json — External verifier report (submission only)

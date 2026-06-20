@@ -57,6 +57,11 @@ The more serious consequences include:
 
 **Never generate citations from memory.**
 
+**Final bibliographies are published-version first.** Use arXiv to discover
+papers, inspect preprint text, or map an arXiv ID to a DOI/venue record. Do not
+put an arXiv-only entry into the final `.bib` unless no conference or journal
+version exists and the user explicitly accepts that exception.
+
 If a citation cannot be verified programmatically or from trusted project materials:
 
 - mark it explicitly as unresolved,
@@ -72,7 +77,7 @@ If a citation cannot be verified programmatically or from trusted project materi
 | DBLP | CS/ML conference papers, BibTeX retrieval | Strong structure, strong venue metadata | Some preprints are better covered by arXiv |
 | CrossRef | DOI lookup, BibTeX content negotiation | Official metadata source, ideal when DOI exists | Quality depends on DOI registration |
 | Semantic Scholar | Paper search, citation graph, abstract lookup | Good discovery experience for ML literature | Free access may be rate limited |
-| arXiv | Preprint lookup | Strong coverage for ML preprints | Not a substitute for formal publication metadata |
+| arXiv | Preprint lookup and discovery | Strong coverage for ML preprints | Discovery only for final writing; not acceptable as final metadata when a formal version exists |
 | OpenAlex | Open metadata graph, cross-checking | Broad coverage and useful as a second source | Structure may differ from DBLP conventions |
 
 ### How to Choose
@@ -82,7 +87,7 @@ Common decision logic:
 ```text
 Need to search ML papers -> Semantic Scholar / DBLP
 Already have a DOI -> CrossRef content negotiation
-Only have an arXiv clue -> arXiv + CrossRef / Semantic Scholar for cross-checking
+Only have an arXiv clue -> arXiv + CrossRef / Semantic Scholar for published-version resolution
 Need a second verification source -> OpenAlex / Semantic Scholar / arXiv
 ```
 
@@ -414,19 +419,21 @@ Rules:
 - remove abandoned keys,
 - and choose explicitly between preprint and published versions when both exist.
 
-### When to Prefer the Published Version
+### Published-Version Policy
 
-Prefer the formal published version when:
+Prefer the formal published version by default when:
 
 - a conference or journal version clearly exists,
 - you need stable venue information for related work,
 - page / volume / publisher metadata matters for submission quality.
 
-Keeping the arXiv version can still be appropriate when:
+Keeping an arXiv entry in the final `.bib` is only appropriate when:
 
 - the work is not formally published yet,
-- the community primarily cites the preprint,
-- or the specific version matters for the content you are citing.
+- the exact preprint version is the cited object and the user accepts the
+  exception,
+- and the paper is marked clearly as an unpublished preprint rather than a
+  conference or journal publication.
 
 ## Common Entry Templates
 
@@ -457,7 +464,11 @@ Keeping the arXiv version can still be appropriate when:
 }
 ```
 
-### arXiv Preprint
+### arXiv Preprint (Exception Only)
+
+Use this form only for an explicit unpublished-preprint exception. Do not use it
+when DBLP, CrossRef, Semantic Scholar, OpenAlex, ACL Anthology, IEEE, ACM, or
+the venue site can resolve a formal publication record.
 
 ```bibtex
 @misc{brown_2020_language,
@@ -545,9 +556,9 @@ Do not leave two nearly identical entries in the final bibliography.
 Before treating a citation as complete, verify:
 
 - [ ] the paper was confirmed in at least two trustworthy sources,
-- [ ] the DOI or arXiv ID was checked,
+- [ ] any arXiv clue was resolved to a DOI or formal venue record when one exists,
 - [ ] the BibTeX was retrieved programmatically or completed from trusted metadata,
-- [ ] the entry type is correct (`@inproceedings`, `@article`, `@misc`, etc.),
+- [ ] the entry type is correct (`@inproceedings` or `@article` for published work; `@misc` only for accepted preprint exceptions),
 - [ ] the author list is complete and well formatted,
 - [ ] the year and venue were checked,
 - [ ] the citation key matches the project style,

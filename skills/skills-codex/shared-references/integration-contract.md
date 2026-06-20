@@ -287,13 +287,15 @@ row before claiming done. Prose-only "MUST" inside a long SKILL.md is
 the first thing to get skipped.
 
 ```
-📋 Submission audits required before Final Report:
-   [ ] 1. /proof-checker   → paper/PROOF_AUDIT.json
-   [ ] 2. /paper-claim-audit → paper/PAPER_CLAIM_AUDIT.json
-   [ ] 3. /citation-audit  → paper/CITATION_AUDIT.json
-   [ ] 4. Resolve $AUDIT_VERIFIER via §2 (canonical name verify_paper_audits.sh)
+?? Submission audits required before Final Report:
+   [ ] 1. /proof-checker        -> paper/PROOF_AUDIT.json
+   [ ] 2. /paper-math-consistency-audit -> paper/MATH_CONSISTENCY_AUDIT.json
+   [ ] 3. /paper-claim-audit    -> paper/PAPER_CLAIM_AUDIT.json
+   [ ] 4. /kill-argument        -> paper/KILL_ARGUMENT.json
+   [ ] 5. /citation-audit       -> paper/CITATION_AUDIT.json
+   [ ] 6. Resolve $AUDIT_VERIFIER via ?2 (canonical name verify_paper_audits.sh)
           then: bash "$AUDIT_VERIFIER" paper/ --assurance submission
-   [ ] 5. Block Final Report iff verifier exit code != 0
+   [ ] 7. Block Final Report iff verifier exit code != 0
 ```
 
 Cheap, and empirically resists lazy skipping. Skip only for single-step
@@ -355,7 +357,7 @@ resolve actual paths via §2.
 
 | Integration | Predicate | Helper | Artifact | Checklist | Backfill | Verifier |
 |---|---|---|---|---|---|---|
-| Submission audits (`max`/`beast`) | `paper/.debuffer_skills/assurance.txt = submission` | `verify_paper_audits.sh` + 3 audit skills emit JSON | `paper/PROOF_AUDIT.json`, `PAPER_CLAIM_AUDIT.json`, `CITATION_AUDIT.json` + `paper/.debuffer_skills/audit-verifier-report.json` | Phase 6.0 pre-flight checklist | Rerun the failed audit | `verify_paper_audits.sh` (exit 1 blocks) |
+| Submission audits (`max`/`beast`) | `paper/.debuffer_skills/assurance.txt = submission` | `verify_paper_audits.sh` + 5 audit skills emit JSON | `paper/PROOF_AUDIT.json`, `MATH_CONSISTENCY_AUDIT.json`, `PAPER_CLAIM_AUDIT.json`, `KILL_ARGUMENT.json`, `CITATION_AUDIT.json` + `paper/.debuffer_skills/audit-verifier-report.json` | Phase 6.0 pre-flight checklist | Rerun the failed audit | `verify_paper_audits.sh` (exit 1 blocks) |
 | Research wiki ingest | `research-wiki/` exists | `research_wiki.py ingest_paper` | `research-wiki/papers/<slug>.md` + `log.md` entry | Step in each paper-reading skill | `research_wiki.py sync --arxiv-ids …` | `verify_wiki_coverage.sh` (diagnostic) |
 
 When adding a new cross-skill integration, add a row to the table above

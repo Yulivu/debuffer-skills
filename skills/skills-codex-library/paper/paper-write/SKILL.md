@@ -13,7 +13,7 @@ Draft a LaTeX paper based on: **$ARGUMENTS**
 - **TARGET_VENUE = `ICLR`** — Default venue. Supported: `ICLR`, `NeurIPS`, `ICML`, `CVPR` (also ICCV/ECCV), `ACL` (also EMNLP/NAACL), `AAAI`, `ACM` (ACM MM, SIGIR, KDD, CHI, etc.), `IEEE_JOURNAL` (IEEE Transactions / Letters, e.g., T-PAMI, JSAC, TWC, TCOM, TSP, TIP), `IEEE_CONF` (IEEE conferences, e.g., ICC, GLOBECOM, INFOCOM, ICASSP). Determines style file and formatting.
 - **ANONYMOUS = true** — If true, use anonymous author block. Set `false` for camera-ready. Note: most IEEE venues do NOT use anonymous submission — set `false` for IEEE.
 - **MAX_PAGES = 9** — Main body page limit. For ML conferences: counts from first page to end of Conclusion section, references and appendix NOT counted. **For IEEE venues: references ARE counted toward the page limit.** Typical limits: IEEE journal = no strict limit (but 12-14 pages typical for Transactions, 4-5 for Letters), IEEE conference = 5-8 pages including references.
-- **DBLP_BIBTEX = true** — Fetch real BibTeX from DBLP/CrossRef instead of LLM-generated entries. Eliminates hallucinated citations. Zero install required. Set `false` to use legacy behavior (LLM search + `[VERIFY]` markers).
+- **DBLP_BIBTEX = true** — Fetch real BibTeX from DBLP/CrossRef instead of LLM-generated entries. Eliminates hallucinated citations. Zero install required. Final bibliography entries default to published conference/journal versions; arXiv is a discovery source only unless the user explicitly accepts an unpublished-preprint exception.
 
 ## Inputs
 
@@ -31,6 +31,7 @@ Keep the existing workflow, file layout, and defaults. Use the shared references
 
 - Read `../../skills-codex/shared-references/writing-principles.md` before drafting the Abstract, Introduction, Related Work, or when prose feels generic
 - Read `../../skills-codex/shared-references/paper-writing-rules.md` before drafting section prose, citations, math notation, figures/tables, and experiment discussion
+- Read `../../skills-codex/shared-references/icde-yu-memory-paper-structure.md` before initializing a new IEEE/Overleaf paper or drafting a systems, memory, query-processing, or benchmark paper
 - Read `../../skills-codex/shared-references/venue-checklists.md` during the final write-up and submission-readiness pass
 - Read `../../skills-codex/shared-references/citation-discipline.md` only when the built-in DBLP/CrossRef workflow is insufficient
 
@@ -40,15 +41,15 @@ These references are support material, not extra workflow phases.
 
 ### Venue-Specific Setup
 
-The skill includes modular paper-package templates under `templates/paper/`.
+The skill includes modular paper-package templates under `templates/`.
 Select the concrete skeleton based on `TARGET_VENUE`:
 
-- `IEEE_CONF` -> `templates/paper/ieee_conf_modular/`
-- `IEEE_JOURNAL` -> `templates/paper/ieee_journal_modular/`
+- `IEEE_CONF` -> `templates/ieee_conference.tex`
+- `IEEE_JOURNAL` -> `templates/ieee_journal.tex`
 - non-IEEE venues may use the venue's official template, but should still
-  follow the same modular package conventions: thin `main.tex`, section files
-  under `paper/sections/`, dedicated `figures/` and `tables/`, and appendix
-  material isolated from the main narrative
+  follow the same modular package conventions: thin `main.tex`, section files,
+  dedicated figure/table assets, and appendix material isolated from the main
+  narrative
 
 **ICLR:**
 ```latex
@@ -86,7 +87,30 @@ Select the concrete skeleton based on `TARGET_VENUE`:
 
 ### Project Structure
 
-Generate this file structure:
+For new IEEE/Overleaf starts, generate this `ICDE_YU_Memory`-compatible
+structure unless the target venue package requires different names:
+
+```text
+paper/
+  main.tex
+  IEEEtran.cls
+  IEEE.bib
+  Content/
+    0.Abstract.tex
+    1.Introduction.tex
+    2.Methodology.tex
+    3.BenchmarkConstruction.tex
+    4.Experiment.tex
+    5.Discussion.tex
+    6.RelatedWork.tex
+    7.Conclusion.tex
+  Figure/
+    figure1.pdf
+    figure2.pdf
+```
+
+For non-IEEE or existing pipeline projects, this normalized structure remains
+acceptable:
 
 ```
 paper/
@@ -109,8 +133,8 @@ paper/
 
 For IEEE-oriented modular starts, prefer copying from:
 
-- `templates/paper/ieee_conf_modular/`
-- `templates/paper/ieee_journal_modular/`
+- `templates/ieee_conference.tex`
+- `templates/ieee_journal.tex`
 
 Treat them as package skeletons, then swap in the target venue's official
 class/style bundle if submission instructions require a stricter venue package.
@@ -125,15 +149,16 @@ If `paper/` already exists, back up to `paper-backup-{timestamp}/` before overwr
 
 ### Step 1: Initialize Project
 
-1. Create `paper/` directory
-2. Copy the venue template from `templates/paper/` (or the target venue's
+1. Create `paper/` directory plus `Content/` and `Figure/` for new
+   IEEE/Overleaf starts; otherwise follow the existing project convention.
+2. Copy the venue template from `templates/` (or the target venue's
    official bundle while preserving the same modular layout) — the template
    already includes:
    - All standard packages (amsmath, hyperref, cleveref, booktabs, etc.)
    - Theorem environments with `\crefname{assumption}` fix
    - Anonymous author block
 3. Generate `math_commands.tex` with paper-specific notation
-4. Create section files matching PAPER_PLAN structure
+4. Create section files matching PAPER_PLAN structure and the selected layout
 
 **Author block (anonymous mode):**
 ```latex
@@ -163,16 +188,22 @@ Process sections in order. For each section:
 4. **Insert figures/tables** — use snippets from `figures/latex_includes.tex`
 5. **Add citations** — for ML conferences (ICLR/NeurIPS/ICML/CVPR/ACL/AAAI): use `\citep{}` / `\citet{}` (natbib). **For IEEE venues**: use `\cite{}` (numeric style via `cite` package). Never mix natbib and cite commands.
 
+When using the ICDE-style layout, translate figure snippets to `Figure/` paths
+inside `\includegraphics` and write bibliography entries to `IEEE.bib`.
+
 Before drafting the front matter, re-read the one-sentence contribution from `PAPER_PLAN.md`. The Abstract and Introduction should make that takeaway obvious before the reader reaches the full method.
 
 #### Section-Specific Guidelines
 
 Preferred package standard, matching `ICDE_YU_Memory` quality or better:
 - `main.tex` stays thin and declarative.
-- Section prose lives only under `paper/sections/`.
-- For system/memory papers, allow names like `2_methodology.tex`,
-  `3_benchmark_construction.tex`, `4_experiments.tex`, `5_discussion.tex`,
-  `6_related_work.tex`, `7_conclusion.tex`.
+- For new IEEE/Overleaf papers, section prose lives under `paper/Content/`,
+  figures under `paper/Figure/`, and bibliography in `paper/IEEE.bib`.
+- Preserve `paper/sections/`, `paper/figures/`, and `references.bib` for
+  existing projects and non-IEEE templates that already use them.
+- For system/memory papers, allow names like `2.Methodology.tex`,
+  `3.BenchmarkConstruction.tex`, `4.Experiment.tex`, `5.Discussion.tex`,
+  `6.RelatedWork.tex`, `7.Conclusion.tex`.
 
 For system or benchmark papers, placing Related Work after Experiments is
 allowed when the technical story reads more cleanly that way.
@@ -203,7 +234,10 @@ trade-offs, or scope boundaries deserve independent treatment.
 - Target: 1.5 pages
 
 **§2 Related Work:**
-- **MINIMUM 1 full page** (3-4 substantive paragraphs). Short related work sections are a common reviewer complaint.
+- **Default compact length**: write 2-4 tight synthesis paragraphs. In
+  IEEE/Overleaf-style two-column papers, Related Work plus Conclusion should
+  not exceed about 0.8 page unless the venue or user explicitly asks for a
+  longer survey.
 - Organize by category using `\paragraph{Category Name.}`
 - Each category: 1 paragraph summarizing the line of work + 1-2 sentences positioning this paper
 - Do NOT just list papers — synthesize and compare
@@ -229,7 +263,8 @@ trade-offs, or scope boundaries deserve independent treatment.
 - Limitations (be honest — reviewers appreciate this)
 - Future work (1-2 concrete directions)
 - Ethics statement and reproducibility statement (if venue requires)
-- Target: 0.5 pages
+- Target: 0.25-0.3 pages by default. Keep it as a concise close, not a second
+  discussion section.
 
 **Appendix:**
 - Proof details (full proofs of main-body theorems)
@@ -266,7 +301,12 @@ Default to `Y`. If accepted:
 3. For each citation key:
    - Check existing `.bib` files in the project/narrative docs
    - If not found and **DBLP_BIBTEX = true**, use the verified fetch chain below
-   - If not found and **DBLP_BIBTEX = false**, search arXiv/Scholar for correct BibTeX
+   - If only an arXiv clue is available, resolve it to DBLP, DOI/CrossRef,
+     Semantic Scholar, OpenAlex, ACL Anthology, IEEE, ACM, or the official
+     venue page before adding it to the final `.bib`
+   - If not found and **DBLP_BIBTEX = false**, search only to identify the
+     formal publication record; do not add arXiv BibTeX unless the user
+     explicitly accepts an unpublished-preprint exception
    - **NEVER fabricate BibTeX entries** — mark unknown ones with `[VERIFY]` comment
 4. Write `references.bib` containing ONLY cited entries (no bloat)
 
@@ -283,14 +323,16 @@ curl -s "https://dblp.org/search/publ/api?q=TITLE+AUTHOR&format=json&h=3"
 curl -s "https://dblp.org/rec/{key}.bib"
 ```
 
-**Step B: CrossRef DOI (fallback — works for arXiv preprints)**
+**Step B: CrossRef DOI (fallback — published DOI preferred)**
 ```bash
-# If paper has a DOI or arXiv ID (arXiv DOI = 10.48550/arXiv.{id})
+# If paper has a DOI, prefer the conference/journal DOI over an arXiv DOI.
 curl -sLH "Accept: application/x-bibtex" "https://doi.org/{doi}"
 ```
 
 **Step C: Mark `[VERIFY]` (last resort)**
-If both DBLP and CrossRef return nothing, mark the entry with `% [VERIFY]` comment. Do NOT fabricate.
+If DBLP, CrossRef, and other formal metadata sources return nothing, mark the
+entry with `% [VERIFY]` comment. Do NOT fabricate and do NOT silently fall back
+to arXiv in the final bibliography.
 
 **Why this matters:** LLM-generated BibTeX frequently hallucinates venue names, page numbers, or even co-authors. DBLP and CrossRef return publisher-verified metadata. Upstream skills (`/research-lit`, `/novelty-check`) may mention papers from LLM memory — this fetch chain is the gate that prevents hallucinated citations from entering the final `.bib`.
 
@@ -310,10 +352,12 @@ This prevents bib bloat (e.g., 948 lines → 215 lines in testing).
 
 **Citation verification rules (from claude-scholar + Imbad0202):**
 1. Every BibTeX entry must have: author, title, year, venue/journal
-2. Prefer published venue versions over arXiv preprints (if published)
+2. Use published venue versions over arXiv preprints by default
 3. Use consistent key format: `{firstauthor}{year}{keyword}` (e.g., `ho2020denoising`)
 4. Double-check year and venue for every entry
 5. Remove duplicate entries (same paper with different keys)
+6. Treat arXiv entries as final-bibliography blockers unless explicitly
+   accepted as unpublished-preprint exceptions.
 
 ### Step 5: Scientific Writing Quality Pass (5 audit passes)
 
@@ -366,9 +410,12 @@ spawn_agent:
     2. Is the writing clear, concise, and free of AI-isms?
     3. Any logical gaps or unclear explanations?
     4. Does it fit within [MAX_PAGES] pages (to end of Conclusion)?
-    5. Is related work sufficiently comprehensive (≥1 page)?
+    5. Is related work concise but sufficient, and do Related Work plus
+       Conclusion stay within about 0.8 page for IEEE/Overleaf-style papers?
     6. For theory papers: are proof sketches adequate?
     7. Are figures/tables clearly described and properly referenced?
+    8. Are there any solid-block paragraphs that nearly fill a two-column
+       column and should be split?
 
     For each issue, specify: severity (CRITICAL/MAJOR/MINOR), location, and fix.
 
@@ -400,8 +447,12 @@ Before declaring done:
 - [ ] No `[VERIFY]` markers left unchecked
 - [ ] Abstract is self-contained (understandable without reading the paper)
 - [ ] Title is specific and informative (not generic)
-- [ ] Related work is ≥1 full page
+- [ ] Related Work + Conclusion are compact by default (about 0.8 page total
+      for IEEE/Overleaf-style two-column papers unless explicitly overridden)
+- [ ] No paragraph is a solid block that nearly fills a whole two-column column
 - [ ] references.bib contains ONLY cited entries (no bloat)
+- [ ] No arXiv entries remain in the final `.bib` unless explicitly accepted
+      as unpublished-preprint exceptions
 - [ ] **No stale section files** — every .tex in `sections/` is `\input`ed by `main.tex`
 - [ ] **Section files match main.tex** — file numbering and `\input` paths are consistent
 - [ ] Venue-specific required sections/checklists satisfied (read `../../skills-codex/shared-references/venue-checklists.md` if needed)
@@ -420,6 +471,9 @@ Before declaring done:
 - **Venue style matters** — ML conferences (ICLR/NeurIPS/ICML) use `natbib` (`\citep`/`\citet`); **IEEE venues use `cite` package (`\cite{}`, numeric)**. Never mix.
 - **Page limit rules differ by venue** — ML conferences: main body to Conclusion, references/appendix NOT counted. **IEEE: references ARE counted toward the page limit.**
 - **Clean bib** — references.bib must only contain entries that are actually `\cite`d
+- **Published-only bibliography by default** — resolve arXiv clues to formal
+  venue records and block final bibliography use of arXiv unless the user
+  explicitly accepts an unpublished-preprint exception.
 - **Section count is flexible** — match PAPER_PLAN structure, don't force into 5 sections
 - **Backup before overwrite** — never destroy existing `paper/` directory without backing up
 - **Front-load the contribution** — do not hide the payoff until the experiments or appendix

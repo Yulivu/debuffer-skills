@@ -17,6 +17,7 @@ This is a first-layer entry skill. Keep it loaded as the user-facing route; when
 - `/qzcli`: read `../library/experiments/qzcli/SKILL.md`.
 - `/vast-gpu`: read `../library/experiments/vast-gpu/SKILL.md`.
 - `/serverless-modal`: read `../library/experiments/serverless-modal/SKILL.md`.
+- `/hpc-formal-run-gate`: read `../library/experiments/hpc-formal-run-gate/SKILL.md`.
 
 
 Implement and deploy experiments from plan: **$ARGUMENTS**

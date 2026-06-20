@@ -15,8 +15,10 @@ This is a first-layer entry skill. Keep it loaded as the user-facing route; when
 - `/paper-write`: read `../library/paper/paper-write/SKILL.md`.
 - `/paper-compile`: read `../library/paper/paper-compile/SKILL.md`.
 - `/overleaf-package`: read `../library/paper/overleaf-package/SKILL.md`.
+- `/artifact-package-splitter`: read `../library/paper/artifact-package-splitter/SKILL.md`.
 - `/experiment-writeup-audit`: read `../library/review/experiment-writeup-audit/SKILL.md`.
 - `/figure-table-audit`: read `../library/paper/figure-table-audit/SKILL.md`.
+- `/submission-repo-cleanroom`: read `../library/review/submission-repo-cleanroom/SKILL.md`.
 
 
 Compose a polished paper into a new venue under text-only constraints: **$ARGUMENTS**

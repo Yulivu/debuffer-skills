@@ -156,7 +156,7 @@ Process sections in order. For each section:
 - Target: 1.5 pages
 
 **§2 Related Work:**
-- **MINIMUM 1 full page** (3-4 substantive paragraphs). Short related work sections are a common reviewer complaint.
+- Keep Related Work compact by default; for IEEE/Overleaf-style two-column papers, plan Related Work plus Conclusion to fit within about 0.8 page total unless the target venue explicitly requires more.
 - Organize by category using `\paragraph{Category Name.}`
 - Each category: 1 paragraph summarizing the line of work + 1-2 sentences positioning this paper
 - Do NOT just list papers — synthesize and compare

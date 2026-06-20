@@ -6,6 +6,10 @@ This contract is referenced by `paper-writing`, `paper-claim-audit`, `citation-a
 `proof-checker`, and the external verifier (canonical name `verify_paper_audits.sh`;
 callers resolve the actual path via `integration-contract.md` §2).
 
+Current mandatory paper-submission audit set: `proof-checker`,
+`paper-math-consistency-audit`, `paper-claim-audit`, `kill-argument`, and
+`citation-audit`.
+
 ## Why a separate axis from `effort`
 
 Historically `effort` (lite/balanced/max/beast) was conflated with audit strictness.
@@ -150,6 +154,10 @@ Phase 6 of `paper-writing` invokes the verifier; at `assurance: submission`,
 non-zero exit blocks Final Report generation.
 
 ## Subskill Contract: "Always Emit, Never Block"
+
+The complete child audit set is `proof-checker`,
+`paper-math-consistency-audit`, `paper-claim-audit`, `kill-argument`, and
+`citation-audit`.
 
 Child audit skills (`paper-claim-audit`, `citation-audit`, `proof-checker`)
 follow this contract:

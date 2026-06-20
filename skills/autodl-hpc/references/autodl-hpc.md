@@ -87,10 +87,15 @@ For an existing server clone:
 
 ```bash
 cd /root/autodl-tmp/<repo_name>
-git pull --ff-only
+git stash push -u -m autodl-pre-run-$(date +%Y%m%d)
+git pull --ff-only origin <branch>
 git rev-parse --short HEAD
 git status --short
 ```
+
+Before remote sync, the local repo should already be a clean package: syntax
+checks, suite dry-run, manifest generation, and job-count inspection passed;
+then `git commit` and `git push`. Do not hand-edit formal-run code on AutoDL.
 
 ## Data Policy
 
@@ -109,6 +114,13 @@ python scripts/data/verify_data.py --strict
 
 ## Setup, Preflight, And Smoke
 
+AutoDL non-interactive shells often miss `python`. Start command blocks with:
+
+```bash
+export PATH=/root/miniconda3/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+export PYTHON=/root/miniconda3/bin/python
+```
+
 First command on the machine:
 
 ```bash
@@ -118,7 +130,7 @@ bash scripts/autodl_setup.sh
 Preflight:
 
 ```bash
-python scripts/hpc/preflight_autodl.py \
+$PYTHON scripts/hpc/preflight_autodl.py \
   --suite experiments/suites/autodl_smoke.yaml \
   --report experiments/runs/preflight/autodl_preflight.json
 ```
@@ -126,7 +138,7 @@ python scripts/hpc/preflight_autodl.py \
 Optional stricter CUDA check:
 
 ```bash
-python scripts/hpc/preflight_autodl.py \
+$PYTHON scripts/hpc/preflight_autodl.py \
   --suite experiments/suites/autodl_smoke.yaml \
   --strict-cuda
 ```
@@ -170,22 +182,38 @@ Before a formal suite:
 2. Confirm the formal protocol is frozen and reviewed.
 3. Confirm the formal suite is disabled by default or otherwise gated.
 4. Ask for explicit user approval for the exact suite and output path.
-5. Run the formal suite with `--dry-run` first.
+5. Run the formal suite with `dry-run` first, then generate manifests.
 
-Template:
-
-```bash
-python scripts/run_experiment_suite.py \
-  --suite <formal_suite_yaml> \
-  --dry-run
-```
-
-Only after explicit approval:
+Preferred gate sequence when project wrappers exist:
 
 ```bash
-python scripts/run_experiment_suite.py \
-  --suite <formal_suite_yaml>
+bash scripts/hpc/run_formal.sh dry-run
+bash scripts/hpc/run_formal.sh manifests
 ```
+
+Only after explicit approval, launch a detached screen session:
+
+```bash
+screen -dmS formal_run -L -Logfile experiments/runs/formal_run/_screen.log bash -lc '
+set -euo pipefail
+export PATH=/root/miniconda3/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+export PYTHON=/root/miniconda3/bin/python
+echo START
+date -Is
+
+bash scripts/hpc/run_formal.sh execute
+bash scripts/hpc/run_formal.sh aggregate
+
+echo FORMAL_SUCCESS
+date -Is
+/sbin/shutdown -h now
+'
+```
+
+With `set -euo pipefail`, a failed command stops the script before
+`FORMAL_SUCCESS` and before shutdown, preserving the machine for debugging.
+Move `/sbin/shutdown -h now` only if the project has a different all-success
+sentinel; never put it before the aggregate/success lines.
 
 Audit formal bundles on the server before download when an audit script exists:
 
@@ -194,6 +222,24 @@ python scripts/analysis/audit_run_bundles.py \
   --runs-dir experiments/runs/<formal_block> \
   --require <formal_run_id_1> <formal_run_id_2>
 ```
+
+Monitor:
+
+```bash
+screen -ls
+tail -80 experiments/runs/formal_run/_screen.log
+nvidia-smi
+find experiments/runs/formal_run/rows -name '*decision.json' | wc -l
+```
+
+Interpretation:
+
+- `screen` still exists: task still running.
+- `screen` ended and log has `FORMAL_SUCCESS`: success, shutdown has usually
+  happened or is imminent.
+- `screen` ended and log lacks `FORMAL_SUCCESS`: failed; inspect the tail and
+  keep the machine.
+- SSH fails after success was observed: likely intentional shutdown.
 
 ## FileZilla/SFTP Policy
 
@@ -222,6 +268,8 @@ local:  <local_repo_abs_path>/experiments/runs/autodl_smoke/
 - Do not write smoke output into `experiments/results/`.
 - Do not interpret smoke metrics as paper evidence.
 - Do not start formal runs during preflight/smoke preparation.
+- Do not start long formal runs in the foreground SSH shell.
+- Do not auto-shutdown on failure; success-only shutdown is the default.
 - Do not enable a disabled formal suite without explicit user approval.
 - Do not edit frozen protocols after seeing outputs unless making an explicit protocol revision.
 - Do not hand-edit server code for formal experiments. Change locally, commit, push, then `git pull --ff-only` on AutoDL.

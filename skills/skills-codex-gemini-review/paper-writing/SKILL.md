@@ -35,6 +35,12 @@ This skill chains five sub-skills into a single automated pipeline:
 
 Each phase builds on the previous one's output. The final deliverable is a polished, reviewed `paper/` directory with LaTeX source and compiled PDF.
 
+Default manuscript package target follows
+`../../skills-codex/shared-references/icde-yu-memory-paper-structure.md`.
+For new IEEE/Overleaf starts, prefer thin `main.tex`, `Content/`, `Figure/`,
+and `IEEE.bib`; preserve `sections/`, `figures/`, and `references.bib` for
+existing projects.
+
 ## Constants
 
 - **VENUE = `ICLR`** — Target venue. Options: `ICLR`, `NeurIPS`, `ICML`. Affects style file, page limit, citation format.
@@ -261,6 +267,10 @@ Invoke `/auto-paper-improvement-loop` to polish the paper:
 | 5. Improvement | ✅ | [score0]/10 → [score2]/10 |
 
 ## Improvement Scores
+
+For ICDE-style IEEE/Overleaf drafts, interpret `paper/sections/*.tex` in the
+summary above as `paper/Content/*.tex`, and `references.bib` as `IEEE.bib`.
+
 | Round | Score | Key Changes |
 |-------|-------|-------------|
 | Round 0 | X/10 | Baseline |

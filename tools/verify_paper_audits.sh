@@ -35,6 +35,7 @@ set -uo pipefail
 # ─── Constants ────────────────────────────────────────────────────────────────
 MANDATORY_AUDITS=(
     "PROOF_AUDIT.json|proof-checker"
+    "MATH_CONSISTENCY_AUDIT.json|paper-math-consistency-audit"
     "PAPER_CLAIM_AUDIT.json|paper-claim-audit"
     "CITATION_AUDIT.json|citation-audit"
     "KILL_ARGUMENT.json|kill-argument"

@@ -1,6 +1,6 @@
 # debuffer-skills
 
-这是一个面向科研项目的轻量化 Codex skills 定制包。总能力数：**83**。默认入口：**12**。
+这是一个面向科研项目的轻量化 Codex skills 定制包。总能力数：**89**。默认入口：**12**。
 
 默认采用分层加载：项目里只直接暴露少量第一层入口 skill，细分能力放在 `skills/library/` 和 `skills/skills-codex-library/`，由入口 skill 按 `Capability Routing` 读取。需要旧式全部 slash 直调时，安装 `full-flat` profile。
 
@@ -14,9 +14,10 @@
 
 ## 最近更新
 
-- 技能包改为两层结构：默认只安装 12 个入口 skill，71 个细分能力折叠到 library。
+- 技能包改为两层结构：默认只安装 12 个入口 skill，76 个细分能力折叠到 library。
 - `full` 现在表示“分层完整”；`full-flat` 表示“完整直调版”。
 - 入口 skill 新增 `Capability Routing`，用于把任务带到对应 library skill。
+- 新增 SpectralStore 后期收口经验：正式重跑 gate、最终实验集筛选、公开/内部包拆分、投稿前 cleanroom、图表 artifact QA。
 - 新增 `image-to-vector-ppt` 能力：把截图/PNG/JPG 重绘成可编辑 PPT 矢量图并导出清晰 PDF。
 
 <a id="quick-start"></a>

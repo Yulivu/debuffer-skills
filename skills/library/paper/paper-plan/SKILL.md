@@ -13,7 +13,9 @@ Generate a structured, section-by-section paper outline from: **$ARGUMENTS**
 
 Read `../../shared-references/lightweight-research-pack.md`,
 `../../shared-references/project-guide-protocol.md`, and
-`../../shared-references/venue-profiles.md` before planning. Defaults:
+`../../shared-references/venue-profiles.md`, plus
+`../../shared-references/icde-yu-memory-paper-structure.md` before planning.
+Defaults:
 
 - **TARGET_VENUE** supports `ICLR`, `AAAI`, `JMLR`, `TPAMI`, `NeurIPS`, `ICML`,
   and existing legacy venue labels. Apply the target venue profile before
@@ -78,6 +80,7 @@ Keep the existing `insleep` workflow and outputs, but use the shared references 
 
 - Read `../../shared-references/writing-principles.md` when framing the one-sentence contribution, Abstract, Introduction, Related Work, or hero figure.
 - Read `../../shared-references/paper-writing-rules.md` when shaping the paper story, Introduction flow, contribution list, experiment-section obligations, or submission-time structure.
+- Read `../../shared-references/icde-yu-memory-paper-structure.md` when planning a systems, memory, query-processing, benchmark, IEEE, or Overleaf paper.
 - Read `../../shared-references/venue-checklists.md` before freezing the outline for a specific venue.
 - Only load these references when needed; do not paste their full contents into the working draft.
 
@@ -252,22 +255,22 @@ generic method-paper order:
 **Empirical/Diagnostic paper:**
 ```
 1. Introduction (1.5 pages)
-2. Related Work (1 page)
+2. Related Work (0.5 pages)
 3. Method / Setup (1.5 pages)
 4. Experiments (3 pages)
 5. Analysis / Discussion (1 page)
-6. Conclusion (0.5 pages)
+6. Conclusion (0.25-0.3 pages)
 ```
 
 **Theory + Experiments paper:**
 ```
 1. Introduction (1.5 pages)
-2. Related Work (1 page)
+2. Related Work (0.5 pages)
 3. Preliminaries & Modeling (1.5 pages)
 4. Experiments (1.5 pages)
 5. Theory Part A (1.5 pages)
 6. Theory Part B (1.5 pages)
-7. Conclusion (0.5 pages)
+7. Conclusion (0.25-0.3 pages)
 — Total: 9 pages
 ```
 Theory papers often need 7 sections (splitting theory into estimation + optimization, or setup + analysis). The total page budget MUST sum to MAX_PAGES.
@@ -280,11 +283,11 @@ Theory papers should:
 **Method paper:**
 ```
 1. Introduction (1.5 pages)
-2. Related Work (1 page)
+2. Related Work (0.5 pages)
 3. Method (2 pages)
 4. Experiments (2.5 pages)
 5. Ablation / Analysis (1 page)
-6. Conclusion (0.5 pages)
+6. Conclusion (0.25-0.3 pages)
 ```
 
 ### Step 3: Section-by-Section Planning
@@ -322,7 +325,9 @@ For each section, specify:
 ### §2 Related Work
 - **Subtopics**: [2-4 categories of related work]
 - **Positioning**: [how this paper differs from each category]
-- **Minimum length**: 1 full page (at least 3-4 paragraphs with substantive synthesis)
+- **Default length**: compact; together with Conclusion, stay within about
+  0.8 page for IEEE/Overleaf-style two-column papers unless the venue requires
+  a longer survey.
 - **Organization rule**: organize by methodological family / assumption / question, not paper-by-paper
 - **Must NOT be just a list** — synthesize, compare, and position
 
@@ -345,7 +350,8 @@ For each section, specify:
 - **Restatement**: [contributions rephrased, not copy-pasted from intro]
 - **Limitations**: [honest assessment — reviewers value this]
 - **Future work**: [1-2 concrete directions]
-- **Estimated length**: 0.5 pages
+- **Estimated length**: 0.25-0.3 pages by default; do not expand it into a
+  second discussion section.
 ```
 
 ### Step 4: Figure Plan
@@ -392,7 +398,9 @@ For each section, list required citations:
 1. NEVER generate BibTeX from memory — always verify via search or existing .bib files
 2. Every citation must be verified: correct authors, year, venue
 3. Flag any citation you're unsure about with `[VERIFY]`
-4. Prefer published versions over arXiv preprints when available
+4. Use published conference or journal versions by default; arXiv is a
+   discovery source only unless the user explicitly accepts an unpublished
+   preprint exception.
 
 ### Step 6: Cross-Review with REVIEWER_MODEL
 
@@ -413,6 +421,8 @@ mcp__codex__codex:
     4. Positioning relative to prior work
     5. Page budget feasibility (MAX_PAGES = main body to Conclusion end, excluding refs/appendix)
     6. Front-matter strength — are the abstract, introduction, and hero figure plan strong enough for skim-reading reviewers?
+    7. Tail compactness — do Related Work and Conclusion together stay within
+       about 0.8 page unless the venue requires otherwise?
 
     For each weakness, suggest the MINIMUM fix.
     Be specific and actionable — "add X" not "consider more experiments".
@@ -472,6 +482,9 @@ Save the final outline to `docs/paper/PAPER_PLAN.md`:
 - **Do NOT generate author information** — leave author block as placeholder or anonymous
 - **Be honest about evidence gaps** — mark claims as "needs experiment" rather than overclaiming
 - **Page budget is hard** — if content exceeds MAX_PAGES, suggest what to move to appendix
+- **Tail budget is hard by default** — for IEEE/Overleaf-style two-column
+  papers, plan Related Work + Conclusion as compact tail sections totaling no
+  more than about 0.8 page unless explicitly overridden.
 - **MAX_PAGES counting differs by venue** — ML conferences: main body to Conclusion end, references/appendix NOT counted. **IEEE venues: references ARE counted toward the page limit.**
 - **Venue-specific norms** — ML conferences (ICLR/NeurIPS/ICML) use `natbib` (`\citep`/`\citet`); **IEEE venues use `cite` package (`\cite{}`, numeric style)**
 - **Claims-Evidence Matrix is the backbone** — every claim must map to evidence, every experiment must support a claim

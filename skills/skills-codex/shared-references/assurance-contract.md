@@ -4,6 +4,10 @@ debuffer audits emit machine-readable verdicts. The `assurance` axis decides whe
 
 This contract is referenced by `paper-writing`, `paper-claim-audit`, `citation-audit`, `proof-checker`, and the external verifier (canonical name `verify_paper_audits.sh`; callers resolve the actual path via `integration-contract.md` §2).
 
+Current mandatory paper-submission audit set: `proof-checker`,
+`paper-math-consistency-audit`, `paper-claim-audit`, `kill-argument`, and
+`citation-audit`.
+
 ## Why a separate axis from `effort`
 
 `effort` controls depth and cost. `assurance` controls audit strictness.
@@ -109,6 +113,10 @@ Field rules:
 At `assurance: submission`, `paper-writing` must treat verifier exit 1 as blocking.
 
 ## Subskill Contract
+
+The complete child audit set is `proof-checker`,
+`paper-math-consistency-audit`, `paper-claim-audit`, `kill-argument`, and
+`citation-audit`.
 
 Child audit skills follow this contract:
 

@@ -13,6 +13,7 @@ This is a first-layer entry skill. Keep it loaded as the user-facing route; when
 - `/training-check`: read `../library/experiments/training-check/SKILL.md`.
 - `/run-experiment`: read `../library/experiments/run-experiment/SKILL.md`.
 - `/overleaf-package`: read `../library/paper/overleaf-package/SKILL.md`.
+- `/submission-repo-cleanroom`: read `../library/review/submission-repo-cleanroom/SKILL.md`.
 
 
 Use this skill to turn research code or a skill bundle into a maintainable, reproducible repository. The base style is inspired by SpectralStore: reusable library code lives under `src/`, scripts are thin entrypoints, configs and suites describe experiments, raw runs are kept separate from curated results, and large artifacts stay out of Git.

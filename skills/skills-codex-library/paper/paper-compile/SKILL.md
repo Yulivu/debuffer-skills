@@ -42,10 +42,11 @@ Verify all required files exist:
 # Must exist
 ls $PAPER_DIR/main.tex
 
-# Should exist
-ls $PAPER_DIR/references.bib
-ls $PAPER_DIR/sections/*.tex
-ls $PAPER_DIR/figures/*.pdf 2>/dev/null || ls $PAPER_DIR/figures/*.png 2>/dev/null
+# Should exist; support both normalized and ICDE_YU_Memory layouts
+ls $PAPER_DIR/references.bib 2>/dev/null || ls $PAPER_DIR/IEEE.bib
+ls $PAPER_DIR/sections/*.tex 2>/dev/null || ls $PAPER_DIR/Content/*.tex
+ls $PAPER_DIR/figures/*.pdf 2>/dev/null || ls $PAPER_DIR/figures/*.png 2>/dev/null || \
+  ls $PAPER_DIR/Figure/*.pdf 2>/dev/null || ls $PAPER_DIR/Figure/*.png 2>/dev/null
 ```
 
 ### Step 2: First Compilation Attempt
@@ -197,6 +198,20 @@ for f in paper/sections/*.tex; do
     base=$(basename "$f")
     if ! grep -q "$base" paper/main.tex; then
         echo "WARNING: $f is not referenced by main.tex — consider removing"
+    fi
+done
+```
+
+For ICDE-style layouts, also check `Content/` section files:
+
+```bash
+for f in paper/Content/*.tex; do
+    [ -e "$f" ] || continue
+    base=$(basename "$f")
+    rel=${f#paper/}
+    stem=${rel%.tex}
+    if ! grep -q "$base" paper/main.tex && ! grep -q "$stem" paper/main.tex; then
+        echo "WARNING: $f is not referenced by main.tex - consider removing"
     fi
 done
 ```

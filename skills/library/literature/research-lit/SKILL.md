@@ -20,6 +20,10 @@ Research topic: $ARGUMENTS
 - **SOURCES = `all`** — Which literature sources to search. Options: `zotero`, `obsidian`, `local`, `web`, `semantic-scholar`, `deepxiv`, `exa`, `gemini`, `openalex`, `all`. Full source table and selection rules: see `## Data Sources` below.
 - **ARXIV_DOWNLOAD = false** — When `true`, download top 3-5 most relevant arXiv PDFs to PAPER_LIBRARY after search. When `false` (default), only fetch metadata (title, abstract, authors) via arXiv API — no files are downloaded.
 - **ARXIV_MAX_DOWNLOAD = 5** — Maximum number of PDFs to download when `ARXIV_DOWNLOAD = true`.
+- **PAPER_WRITING_CITATION_POLICY = published-only** — arXiv may be used for
+  discovery, recency, and PDF reading, but literature outputs intended for
+  `paper-plan` or `paper-write` must prefer DOI/DBLP/OpenAlex/Semantic Scholar
+  formal venue metadata whenever a published version exists.
 
 > 💡 Overrides:
 > - `/research-lit "topic" — paper library: ~/my_papers/` — custom local PDF path
@@ -202,7 +206,7 @@ fi
 
 If `$ARXIV_FETCHER` is empty (D2 graceful degradation), fall back to WebSearch for arXiv (same as before).
 
-The arXiv API returns structured metadata (title, abstract, full author list, categories, dates) — richer than WebSearch snippets. Merge these results with WebSearch findings and de-duplicate.
+The arXiv API returns structured metadata (title, abstract, full author list, categories, dates) — richer than WebSearch snippets. Merge these results with WebSearch findings and de-duplicate. For any paper that may be cited in a manuscript, treat the arXiv row as a discovery record and attempt to resolve a formal DOI, DBLP, OpenAlex, Semantic Scholar, ACL Anthology, IEEE, ACM, or official venue record before passing it downstream.
 
 **Semantic Scholar API search** (only when `semantic-scholar` is in sources):
 
@@ -239,7 +243,9 @@ If `$S2_FETCHER` is empty (canonical chain exhausted), skip silently — D2 mult
 
 **De-duplication between arXiv and S2**: Match by arXiv ID (S2 returns `externalIds.ArXiv`):
 - If a paper appears in both: check S2's `venue`/`publicationVenue` — if it has been published in a journal/conference (e.g. IEEE TWC, JSAC), use S2's metadata (venue, citationCount, DOI) as the authoritative version, since the published version supersedes the preprint. Keep the arXiv PDF link for download.
-- If the S2 match has no venue (still just a preprint indexed by S2): keep the arXiv version as-is.
+- If the S2 match has no venue (still just a preprint indexed by S2): keep the
+  arXiv version as discovery-only and mark it `unpublished_preprint` rather
+  than paper-writing-ready.
 - S2 results without `externalIds.ArXiv` are **venue-only papers** not on arXiv — these are the unique value of this source.
 
 **DeepXiv search** (only when `deepxiv` is in sources):
@@ -420,7 +426,8 @@ If `openalex_fetch.py` is not found or `requests` module is missing, skip this s
   - Prefer S2 for venue metadata (more accurate for CS/AI papers)
   - Use OpenAlex for institutional affiliations and funding data (unique value)
   - Merge both into a richer record
-- If OpenAlex and arXiv overlap, prefer arXiv's PDF link and metadata, but keep OpenAlex's citation/institution data
+- If OpenAlex and arXiv overlap, prefer OpenAlex/venue metadata for citation
+  handoff and keep the arXiv PDF link only as a reading/download aid.
 - OpenAlex's unique value: institutional affiliations, funding sources, comprehensive topic classification, and cross-discipline coverage
 
 **D2 aggregate finalization** (per integration-contract §2 Policy D2):

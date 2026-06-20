@@ -82,6 +82,10 @@ Based on TARGET_VENUE and paper content, classify and select structure.
 
 **IMPORTANT**: The section count is FLEXIBLE (5-8 sections). Choose what fits the content best. The templates below are starting points, not rigid constraints.
 
+For systems, memory, query-processing, benchmark, IEEE, or Overleaf papers,
+read `../../skills-codex/shared-references/icde-yu-memory-paper-structure.md`
+and prefer its `ICDE_YU_Memory` section topology when it fits the evidence.
+
 **Empirical/Diagnostic paper:**
 ```
 1. Introduction (1.5 pages)

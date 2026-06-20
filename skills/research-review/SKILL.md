@@ -17,6 +17,8 @@ This is a first-layer entry skill. Keep it loaded as the user-facing route; when
 - `/citation-audit`: read `../library/review/citation-audit/SKILL.md`.
 - `/proof-checker`: read `../library/review/proof-checker/SKILL.md`.
 - `/auto-review-loop`: read `../library/review/auto-review-loop/SKILL.md`.
+- `/final-experiment-curator`: read `../library/review/final-experiment-curator/SKILL.md`.
+- `/submission-repo-cleanroom`: read `../library/review/submission-repo-cleanroom/SKILL.md`.
 
 
 > 🔒 **Do not wrap this skill in `/loop`, `/schedule`, or `CronCreate`.** It is

@@ -46,6 +46,9 @@ paper workflow can stay consistent without generating long side documents.
   `why` before `how`.
 - Every claim must have support from prior work, theorem/proof, or experiment.
 - Unsupported claims are liabilities and should be deleted or downgraded.
+- For IEEE/Overleaf-style two-column papers, keep Related Work and Conclusion
+  compact by default. Together they should not exceed about 0.8 page unless the
+  target venue or user explicitly asks for an extended survey.
 
 ## Introduction
 
@@ -74,6 +77,10 @@ Rules:
 - Prefer `alleviate` or `relieve` over `eliminate` unless fully justified.
 - Keep the final line of a paragraph from degenerating into a single dangling
   word or tiny fragment when practical.
+- In two-column papers, do not leave a paragraph as a solid block that nearly
+  fills a whole column. Split long paragraphs into motivation, evidence, and
+  takeaway paragraphs, or use compact `\paragraph{...}` structure where the
+  venue style supports it.
 
 ## LaTeX
 
@@ -96,8 +103,10 @@ Rules:
 - Leave a nonbreaking space before `\cite{...}`.
 - Use Google Scholar or another verified source only to fetch real BibTeX;
   do not handwrite bibliographic metadata from memory.
-- Cite the published version instead of arXiv when an official venue version
-  exists, and avoid duplicating both.
+- For final paper bibliographies, default to published conference or journal
+  versions. Treat arXiv as a discovery source only; do not add arXiv entries to
+  the final `.bib` unless the user explicitly accepts an unpublished preprint
+  exception because no formal version exists.
 - Avoid excessive self-citation in double-blind submissions.
 - Related work should synthesize categories, then explain the limitation of
   those lines and the relative advantage of this paper.
@@ -112,6 +121,11 @@ Rules:
 - Prefer consistent conventions for matrices, vectors, scalars, subscripts, and
   dimensions.
 - Multi-line equations should align cleanly.
+- Keep a cross-section notation ledger for long papers: macros in
+  `math_commands.tex`, symbol definitions in prose, equation labels, theorem
+  restatements, and appendix notation must agree. Run
+  `/paper-math-consistency-audit` before submission when formulas or formal
+  notation appear in the manuscript.
 
 ## Figures
 
