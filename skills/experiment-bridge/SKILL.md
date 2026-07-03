@@ -1,7 +1,7 @@
 ---
 name: experiment-bridge
 description: "Lightweight experiment bridge between idea planning and review. Reads EXPERIMENT_PLAN.md, implements experiment code, runs local validation only, prepares AutoDL/HPC gated execution, and writes prompt-only code-review handoffs. Use when user says \"实现实验\", \"implement experiments\", \"bridge\", \"从计划到跑实验\", \"deploy the plan\", or has an experiment plan ready to execute."
-argument-hint: [experiment-plan-path-or-topic]
+argument-hint: "[experiment-plan-path-or-topic]"
 allowed-tools: Bash(*), Read, Write, Edit, Grep, Glob, Skill
 ---
 

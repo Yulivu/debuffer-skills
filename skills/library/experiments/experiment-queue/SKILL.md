@@ -1,7 +1,7 @@
 ---
 name: experiment-queue
 description: Opt-in SSH job queue for multi-seed/multi-config ML experiments with OOM-aware retry, stale-screen cleanup, and wave-transition race prevention. In the lightweight AutoDL-first pack, use only when the user explicitly asks for SSH queue orchestration or approves a prepared command block.
-argument-hint: [manifest-or-grid-spec]
+argument-hint: "[manifest-or-grid-spec]"
 allowed-tools: Bash(*), Read, Grep, Glob, Edit, Write, Skill(run-experiment), Skill(monitor-experiment)
 ---
 

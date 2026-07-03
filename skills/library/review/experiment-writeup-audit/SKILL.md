@@ -1,7 +1,7 @@
 ---
 name: experiment-writeup-audit
 description: "Audit whether a paper's experiment section is complete and convincing: settings, baselines, metrics, coverage of common experiment families, and quality of result analysis. Use when the user wants to know whether the paper still needs more experiments or whether the current experiments are written up poorly."
-argument-hint: [paper-dir-or-narrative-doc]
+argument-hint: "[paper-dir-or-narrative-doc]"
 allowed-tools: Bash(*), Read, Grep, Glob, Write, Edit
 ---
 

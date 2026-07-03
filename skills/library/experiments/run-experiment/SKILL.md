@@ -1,7 +1,7 @@
 ---
 name: run-experiment
 description: Prepare and gate ML experiment execution with AutoDL/HPC preferred for heavy compute. Runs only local validation/tiny smoke checks by default, prints SSH/remote command blocks for approval, and keeps Vast.ai/Modal as opt-in alternatives. Use when user says "run experiment", "deploy to server", "跑实验", or needs to launch training jobs.
-argument-hint: [experiment-description]
+argument-hint: "[experiment-description]"
 allowed-tools: Bash(*), Read, Grep, Glob, Edit, Write, Skill(serverless-modal)
 ---
 

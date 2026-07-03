@@ -1,7 +1,7 @@
 ---
 name: paper-slides
 description: "Prompt-only by default in the lightweight pack; Claude/Gemini reviewer transport is explicit opt-in. Generate conference presentation slides (beamer LaTeX → PDF + editable PPTX) from a compiled paper, with speaker notes and full talk script. Use when user says \"做PPT\", \"做幻灯片\", \"make slides\", \"conference talk\", \"presentation slides\", \"生成slides\", \"写演讲稿\", or wants beamer slides for a conference talk."
-argument-hint: [paper-directory-or-talk-length]
+argument-hint: "[paper-directory-or-talk-length]"
 allowed-tools: Bash(*), Read, Write, Edit, Grep, Glob, mcp__gemini-review__review, mcp__gemini-review__review_start, mcp__gemini-review__review_reply_start, mcp__gemini-review__review_status
 ---
 

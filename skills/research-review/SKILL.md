@@ -1,7 +1,7 @@
 ---
 name: research-review
 description: Prepare a prompt-only deep critical review package for research ideas, papers, or results. Generates concise reviewer prompts for a separate conversation, supports venue profiles such as ICLR, AAAI, JMLR, and TPAMI, and consumes pasted feedback; direct reviewer backends are opt-in. Use when user says "review my research", "help me review", or "get external review".
-argument-hint: [topic-or-scope]
+argument-hint: "[topic-or-scope]"
 allowed-tools: Bash(*), Read, Grep, Glob, Write, Edit
 ---
 

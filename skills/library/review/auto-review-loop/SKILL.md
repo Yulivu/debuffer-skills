@@ -1,7 +1,7 @@
 ---
 name: auto-review-loop
 description: Guided prompt-only multi-round research review loop. Generates external-review prompts for a separate conversation, waits for pasted feedback, implements user-approved fixes, and keeps compact review logs; legacy reviewer backends are opt-in. Use when user says "auto review loop", "review until it passes", or wants iterative research improvement without direct reviewer API calls.
-argument-hint: [topic-or-scope]
+argument-hint: "[topic-or-scope]"
 allowed-tools: Bash(*), Read, Grep, Glob, Write, Edit, Skill
 ---
 

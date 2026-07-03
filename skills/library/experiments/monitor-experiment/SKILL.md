@@ -1,7 +1,7 @@
 ---
 name: monitor-experiment
 description: Prepare gated monitoring commands for running experiments, check progress from pasted/logged outputs, and collect results after user approval. Use when user says "check results", "is it done", "monitor", or wants experiment output.
-argument-hint: [server-alias or screen-name]
+argument-hint: "[server-alias or screen-name]"
 allowed-tools: Bash(echo *), Read, Write, Edit
 ---
 

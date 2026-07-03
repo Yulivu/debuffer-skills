@@ -1,7 +1,7 @@
 ---
 name: idea-discovery
 description: "Workflow 1: Full idea discovery pipeline. Orchestrates research-lit → idea-creator → novelty-check → research-review → research-refine plus experiment-plan to go from a broad research direction to validated, pilot-tested ideas. Also handles robotics / embodied AI directions through simulation-first robotics mode. Use when user says \"找idea全流程\", \"idea discovery pipeline\", \"从零开始找方向\", \"robotics idea discovery\", \"embodied AI idea\", or wants the complete idea exploration workflow."
-argument-hint: [research-direction]
+argument-hint: "[research-direction]"
 allowed-tools: Bash(*), Read, Write, Edit, Grep, Glob, WebSearch, WebFetch, Skill, mcp__codex__codex, mcp__codex__codex-reply
 ---
 

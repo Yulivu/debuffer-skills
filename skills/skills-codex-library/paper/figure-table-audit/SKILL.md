@@ -1,7 +1,7 @@
 ---
 name: figure-table-audit
 description: "Audit whether paper figures and tables are submission-ready: referenced in the text, ordered correctly, readable, stylistically consistent, and venue-appropriate. Use when the user wants to check figure/table quality, caption quality, vector/raster risks, or final paper visuals before submission."
-argument-hint: [paper-dir-or-main.tex]
+argument-hint: "[paper-dir-or-main.tex]"
 allowed-tools: Bash(*), Read, Grep, Glob, Write, Edit
 ---
 
