@@ -32,6 +32,9 @@ opening autonomous SSH sessions.
   `screen`, `tmux`, or `nohup` launch.
 - Keep `EXPERIMENT_PROTOCOL.md` and `PROJECT_STATUS.md` aligned if this queue
   is used for formal runs.
+- If the queue setup changes Python/CUDA/packages/weights, read
+  `../../shared-references/compute-env-contract.md` and record the env spec hash
+  before launching jobs.
 
 ## When to Use This Skill
 

@@ -35,6 +35,22 @@ Assemble the key information:
 - The intended claim these experiments were designed to test
 - Any known confounds or caveats
 
+### Step 1.5: Evidence Pre-Check
+
+Before asking a model to judge support, mechanically verify that each cited
+`value + source` pair exists. Resolve `tools/evidence_check.py` via the usual
+`.debuffer_skills/tools/` → `tools/` → repo-root chain, then run it on a JSON
+batch of claim evidence pairs when available:
+
+```bash
+python3 "$EVIDENCE_CHECK" . --batch result_to_claim_evidence.json
+```
+
+`verified` only means the cited file and value exist; it does not mean the
+claim is supported. `path_missing` or `value_not_found` downgrades confidence
+and must be included in the judgment prompt as a blocker or caveat. See
+`shared-references/evidence-precheck.md`.
+
 ### Step 2: Codex Judgment
 
 Send the collected results to a secondary Codex agent for objective evaluation:
@@ -142,23 +158,21 @@ See `shared-references/experiment-integrity.md` for the full integrity protocol.
 
 ```
 if research-wiki/ exists:
-    # 1. Create experiment page
-    Create research-wiki/experiments/<exp_id>.md with:
-      - node_id: exp:<id>
-      - idea_id: idea:<active_idea>
-      - date, hardware, duration, metrics
-      - verdict, confidence, reasoning summary
+    # 1. Create/update experiment page deterministically
+    run the installed debuffer research_wiki.py helper:
+      add_experiment research-wiki/ --slug "<exp_id>" --title "<experiment title>" \
+        --idea "idea:<active_idea>" --verdict "<yes|partial|no>" \
+        --confidence "<high|medium|low>" --metrics "<key metrics>" \
+        --summary "<reasoning summary>" --update-on-exist
 
-    # 2. Update claim status
+    # 2. Add claim evidence edges only. Do not edit claim status here:
+    # claim status is the proof axis owned by proof-checker / add_claim.
     for each claim resolved by this verdict:
         if verdict == "yes":
-            Update claim page: status → supported
             run the installed debuffer research_wiki.py helper to add a supports edge from "exp:<id>" to "claim:<cid>"
         elif verdict == "partial":
-            Update claim page: status → partial
             run the installed debuffer research_wiki.py helper to add a partial supports edge from "exp:<id>" to "claim:<cid>"
         else:
-            Update claim page: status → invalidated
             run the installed debuffer research_wiki.py helper to add an invalidates edge from "exp:<id>" to "claim:<cid>"
 
     # 3. Update idea outcome

@@ -189,6 +189,25 @@ PERSONAL_PATTERNS=(
     '122\.'
 )
 
+# A local SKILL.md that is byte-identical to an older committed upstream
+# version is a stale install, not a user customization.
+GIT_HISTORY_OK=false
+if git -C "$REPO_ROOT" rev-parse --git-dir >/dev/null 2>&1; then
+    GIT_HISTORY_OK=true
+fi
+
+is_pristine_historical_copy() {
+    $GIT_HISTORY_OK || return 1
+    local lf="$1" rel="$2" local_hash commits c blob
+    local_hash=$(git -C "$REPO_ROOT" hash-object "$lf" 2>/dev/null) || return 1
+    commits=$(git -C "$REPO_ROOT" log --format='%H' -n 200 -- "$rel" 2>/dev/null) || return 1
+    for c in $commits; do
+        blob=$(git -C "$REPO_ROOT" rev-parse -q --verify "$c:$rel" 2>/dev/null) || continue
+        [[ "$blob" == "$local_hash" ]] && return 0
+    done
+    return 1
+}
+
 echo -e "${BLUE}━━━ debuffer Smart Skill Update ━━━${NC}"
 echo -e "Scope:    ${SCOPE}"
 echo -e "Upstream: ${UPSTREAM_DIR}"
@@ -229,6 +248,7 @@ declare -a IDENTICAL_SKILLS=()
 declare -a SAFE_SKILLS=()
 declare -a MERGE_SKILLS=()
 declare -a LOCAL_SKILLS=()
+declare -a STALE_PRISTINE_SKILLS=()
 
 # Track upstream skill names for local-only detection
 declare -a UPSTREAM_NAMES=()
@@ -286,6 +306,12 @@ for skill_dir in "$UPSTREAM_DIR"/*/; do
     done
 
     if $has_personal; then
+        if is_pristine_historical_copy "$local_file" "skills/$skill_name/SKILL.md"; then
+            SAFE_UPDATE=$((SAFE_UPDATE + 1))
+            SAFE_SKILLS+=("$skill_name")
+            STALE_PRISTINE_SKILLS+=("$skill_name")
+            continue
+        fi
         # Has personal customizations — needs careful merge
         NEEDS_MERGE=$((NEEDS_MERGE + 1))
         MERGE_SKILLS+=("$skill_name")
@@ -323,7 +349,18 @@ for s in "${NEW_SKILLS[@]:-}"; do [[ -n "$s" ]] && echo "   $s"; done
 echo ""
 
 echo -e "${BLUE}🔄 Updated upstream, no personal info (safe to replace): ${SAFE_UPDATE}${NC}"
-for s in "${SAFE_SKILLS[@]:-}"; do [[ -n "$s" ]] && echo "   $s"; done
+for s in "${SAFE_SKILLS[@]:-}"; do
+    [[ -n "$s" ]] || continue
+    is_stale=false
+    for sp in "${STALE_PRISTINE_SKILLS[@]:-}"; do
+        [[ "$sp" == "$s" ]] && is_stale=true && break
+    done
+    if $is_stale; then
+        echo -e "   $s ${BLUE}(stale pristine copy of an older release; no local edits)${NC}"
+    else
+        echo "   $s"
+    fi
+done
 echo ""
 
 echo -e "${YELLOW}⚠️  Updated upstream + local customizations (needs manual merge): ${NEEDS_MERGE}${NC}"

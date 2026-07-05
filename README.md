@@ -14,12 +14,11 @@
 
 ## 最近更新
 
-- 技能包改为两层结构：默认只安装 12 个入口 skill，76 个细分能力折叠到 library。
-- `full` 现在表示“分层完整”；`full-flat` 表示“完整直调版”。
-- 入口 skill 新增 `Capability Routing`，用于把任务带到对应 library skill。
-- 新增 SpectralStore 后期收口经验：正式重跑 gate、最终实验集筛选、公开/内部包拆分、投稿前 cleanroom、图表 artifact QA。
-- 新增 `image-to-vector-ppt` 能力：把截图/PNG/JPG 重绘成可编辑 PPT 矢量图并导出清晰 PDF。
-
+- 新增强循环工具：支持循环状态监控、停滞检测、结构性 pivot 和人工介入阈值。
+- 新增实验声明证据预检：先机械确认结果文件和值存在，再进入 claim 判断。
+- 新增计算环境合同：用 env spec、hash ledger 和 smoke witness 管理 AutoDL/HPC/远端环境。
+- 升级 research-wiki：paper、idea、experiment、claim 统一走确定性写入和 query_pack 重建。
+- 升级安装更新检查：旧版本原样安装不再误判为用户自定义。
 <a id="quick-start"></a>
 
 ## 快速开始

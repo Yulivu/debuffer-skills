@@ -43,6 +43,22 @@ Assemble the key information:
 - The intended claim these experiments were designed to test
 - Any known confounds or caveats
 
+### Step 1.5: Evidence Pre-Check
+
+Before asking a model to judge support, mechanically verify that each cited
+`value + source` pair exists. Resolve `tools/evidence_check.py` via the usual
+`.debuffer_skills/tools/` → `tools/` → repo-root chain, then run it on a JSON
+batch of claim evidence pairs when available:
+
+```bash
+python3 "$EVIDENCE_CHECK" . --batch result_to_claim_evidence.json
+```
+
+`verified` only means the cited file and value exist; it does not mean the
+claim is supported. `path_missing` or `value_not_found` downgrades confidence
+and must be included in the Codex prompt as a blocker or caveat. See
+`shared-references/evidence-precheck.md`.
+
 ### Step 2: Codex Judgment
 
 Send the collected results to Codex for objective evaluation:
@@ -169,23 +185,20 @@ WIKI_SCRIPT=".debuffer_skills/tools/research_wiki.py"
 
 ```
 if research-wiki/ exists:
-    # 1. Create experiment page
-    Create research-wiki/experiments/<exp_id>.md with:
-      - node_id: exp:<id>
-      - idea_id: idea:<active_idea>
-      - date, hardware, duration, metrics
-      - verdict, confidence, reasoning summary
+    # 1. Create/update experiment page deterministically
+    [ -n "$WIKI_SCRIPT" ] && python3 "$WIKI_SCRIPT" add_experiment research-wiki/ \
+      --slug "<exp_id>" --title "<experiment title>" --idea "idea:<active_idea>" \
+      --verdict "<yes|partial|no>" --confidence "<high|medium|low>" \
+      --metrics "<key metrics>" --summary "<reasoning summary>" --update-on-exist
 
-    # 2. Update claim status (page edits run unconditionally; edges only if $WIKI_SCRIPT resolved)
+    # 2. Add claim evidence edges only. Do not edit claim status here:
+    # claim status is the proof axis owned by proof-checker / add_claim.
     for each claim resolved by this verdict:
         if verdict == "yes":
-            Update claim page: status → supported
             [ -n "$WIKI_SCRIPT" ] && python3 "$WIKI_SCRIPT" add_edge research-wiki/ --from "exp:<id>" --to "claim:<cid>" --type supports --evidence "<metric>"
         elif verdict == "partial":
-            Update claim page: status → partial
             [ -n "$WIKI_SCRIPT" ] && python3 "$WIKI_SCRIPT" add_edge research-wiki/ --from "exp:<id>" --to "claim:<cid>" --type supports --evidence "partial"
         else:
-            Update claim page: status → invalidated
             [ -n "$WIKI_SCRIPT" ] && python3 "$WIKI_SCRIPT" add_edge research-wiki/ --from "exp:<id>" --to "claim:<cid>" --type invalidates --evidence "<why>"
 
     # 3. Update idea outcome (raw markdown, helper-free)

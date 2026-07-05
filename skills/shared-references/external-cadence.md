@@ -100,6 +100,12 @@ it as a "one-line-per-task summary for CronCreate polling." The
 artifact is built *so that* an external low-frequency poller can read
 completion state cheaply, without holding a session open.
 
+For long research loops, pair this with `tools/iteration_log.py`: record the
+number of new concrete findings per iteration, force a structural pivot after
+two consecutive zero-finding rounds, and escalate to human attention after four.
+This is still fire-control: it changes direction or asks for help; it does not
+declare the idea, claim, or paper accepted.
+
 ### Why these are safe same-model
 
 In every additive case the acceptance gate is **execution-completeness**

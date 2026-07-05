@@ -91,6 +91,19 @@ Paper writing is optional and controlled by both `AUTO_WRITE` and the
 manuscript entry gate; `AUTO_WRITE=true` is ignored when formal evidence is
 missing.
 
+## Strong Loop Hygiene
+
+For unattended idea/search/experiment loops, use the cheap deterministic helpers:
+
+- `tools/iteration_log.py note <root> <run_id> <phase> <new_findings>` after
+  each iteration. Consecutive zero-finding rounds force a structural pivot at 2
+  and human attention at 4. The signal changes direction only; it never judges
+  whether a result is good enough.
+- `tools/watchdog.py --register '{"name":"<run>","type":"loop","state_file":"<path>","stale_after_seconds":21600}'`
+  for long loops that rewrite a JSON state file. `STALE`/`MISSING` is detect-only:
+  surface it and resume/pivot explicitly; do not let the watchdog restart or
+  accept verdict-bearing work.
+
 ## Pipeline
 
 ### Stage 1: Idea Discovery (Workflow 1)

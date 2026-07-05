@@ -23,6 +23,11 @@ backend. In this customized pack:
   expectations, but treat them as opt-in legacy/alternate backends.
 - Raw outputs must land in `experiments/runs/`; paper-facing curation happens
   later through audit/analysis scripts.
+- For nontrivial remote/serverless environments, read
+  `../../shared-references/compute-env-contract.md` before launch. Write or
+  reuse an env spec, record its content hash in the provider ledger, and require
+  at least an import + GPU/kernel witness smoke before declaring the environment
+  ready.
 
 ## Workflow
 
