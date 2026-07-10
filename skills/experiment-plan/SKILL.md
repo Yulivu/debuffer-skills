@@ -1,10 +1,10 @@
 ---
 name: experiment-plan
-description: 'Turn a refined research proposal or method idea into a detailed, claim-driven experiment roadmap. Use after `research-refine`, or when the user asks for a detailed experiment plan, ablation matrix, evaluation protocol, run order, compute budget, or paper-ready validation that supports the core problem, novelty, simplicity, and any LLM / VLM / Diffusion / RL-based contribution.'
+description: 'Turn a refined research proposal or method idea into a detailed, question- and mechanism-driven experiment roadmap. Use after `research-refine`, or when the user asks for a detailed experiment plan, ablation matrix, evaluation protocol, run order, compute budget, or paper-ready validation that supports the core problem, novelty, simplicity, and any LLM / VLM / Diffusion / RL-based contribution.'
 allowed-tools: Bash(*), Read, Write, Edit, Grep, Glob, WebSearch, WebFetch
 ---
 
-# Experiment Plan: Claim-Driven, Paper-Oriented Validation
+# Experiment Plan: Question-Driven, Paper-Oriented Validation
 
 ## Capability Routing
 
@@ -20,9 +20,9 @@ Refine and concretize: **$ARGUMENTS**
 
 ## Overview
 
-Use this skill after the method is stable enough that the next question becomes: **what exact experiments should we run, in what order, to defend the paper?** If the user wants the full chain in one request, run `/research-refine` first and continue here once the method thesis is stable.
+Use this skill after the method is stable enough that the next question becomes: **what exact experiments should we run, in what order, to understand the mechanism and prepare paper evidence?** If the user wants the full chain in one request, run `/research-refine` first and continue here once the method thesis is stable.
 
-The goal is not to generate a giant benchmark wishlist. The goal is to turn a proposal into a **claim -> evidence -> run order** roadmap that supports four things:
+The goal is not to generate a giant benchmark wishlist. The goal is to turn a proposal into a **question -> evidence -> run order** roadmap that supports four things:
 
 1. the method actually solves the anchored problem
 2. the dominant contribution is real and focused
@@ -58,7 +58,7 @@ without generating redundant long documents:
 ## Constants
 
 - **OUTPUT_DIR = `refine-logs/`** — Default destination for experiment planning artifacts.
-- **MAX_PRIMARY_CLAIMS = 2** — Prefer one dominant claim plus one supporting claim.
+- **MAX_PRIMARY_FINDINGS = 2** - Prefer one dominant expected finding plus one supporting finding.
 - **MAX_CORE_BLOCKS = 5** — Keep the must-run experimental story compact.
 - **MAX_BASELINE_FAMILIES = 3** — Prefer a few strong baselines over many weak ones.
 - **DEFAULT_SEEDS = 3** — Use 3 seeds when stochastic variance matters and budget allows.
@@ -87,18 +87,18 @@ Extract:
 
 If these files do not exist, derive the same information from the user's prompt.
 
-### Phase 1: Freeze the Paper Claims
+### Phase 1: Define Core Questions and Expected Findings
 
-Before proposing experiments, write down the claims that must be defended.
+Before proposing experiments, write down the research questions and hypotheses the experiments must distinguish.
 
 Use this structure:
 
-- **Primary claim**: the main mechanism-level contribution
-- **Supporting claim**: optional, only if it directly strengthens the main paper story
-- **Anti-claim to rule out**: e.g. "the gain only comes from more parameters," "the gain only comes from a larger search space," or "the modern component is just decoration"
-- **Minimum convincing evidence**: what would make each claim believable to a strong reviewer?
+- **Primary question / expected finding**: the main mechanism-level result the work is trying to establish
+- **Supporting finding**: optional, only if it directly strengthens the main paper story
+- **Alternative explanation to rule out**: e.g. "the gain only comes from more parameters," "the gain only comes from a larger search space," or "the modern component is just decoration"
+- **Minimum convincing evidence**: what would make each finding believable to a strong reviewer?
 
-Do not exceed `MAX_PRIMARY_CLAIMS` unless the paper truly has multiple inseparable claims.
+Do not exceed `MAX_PRIMARY_FINDINGS` unless the paper truly has multiple inseparable findings.
 
 ### Phase 2: Build the Experimental Storyline
 
@@ -112,7 +112,7 @@ Design the paper around a compact set of experiment blocks. Default to the follo
 
 For each block, decide whether it belongs in:
 
-- **Main paper** — essential to defend the core claims
+- **Main paper** - essential to establish the core findings
 - **Appendix** — useful but non-blocking
 - **Cut** — interesting, but not worth the paper budget
 
@@ -122,14 +122,14 @@ Prefer one strong baseline family over many weak baselines. If a stronger modern
 
 For every kept block, fully specify:
 
-- **Goal / claim tested**
+- **Goal / hypothesis tested**
 - **Why this block exists**
 - **Dataset / split / task**
 - **Design**: factors varied, fixed settings, number of seeds, run order
 - **Compared systems**: strongest baselines, ablations, and variants only
 - **Metrics**: decisive metrics first, secondary metrics second
 - **Setup details**: backbone, frozen vs trainable parts, key hyperparameters, training budget, seeds
-- **Expected result / decision rule**: what outcome would support, weaken, or falsify the claim?
+- **Expected result / decision rule**: what outcome would support, weaken, or falsify the hypothesis?
 - **Failure interpretation**: if the result is negative, what does it mean?
 - **Table / figure target**: where this result should appear in the paper
 - **Reproducibility entrypoint**: config path, suite path, command, output directory
@@ -159,7 +159,7 @@ Insert a **Pilot gate** before any formal AutoDL/HPC suite:
 - Output path: `experiments/runs/pilot/<slug>/`.
 - If GPU time is needed, write an AutoDL-ready command block or suite path and
   wait for user approval or pasted results.
-- Pilot pass means "no obvious collapse"; it does not support paper claims.
+- Pilot pass means "no obvious collapse"; it is not paper evidence.
 - Pilot fail or inconclusive must update `experiments/NEGATIVE_RESULTS.md`, and
   idea-level consequences should update `idea-stage/IDEA_MEMORY.md`.
 
@@ -185,8 +185,8 @@ Use this structure:
 **Method Thesis**: [one-sentence thesis]
 **Date**: [today]
 
-## Claim Map
-| Claim | Why It Matters | Minimum Convincing Evidence | Linked Blocks |
+## Question / Finding Map
+| Question or Finding | Why It Matters | Minimum Convincing Evidence | Linked Blocks |
 |-------|-----------------|-----------------------------|---------------|
 | C1    | ...             | ...                         | B1, B2        |
 
@@ -198,7 +198,7 @@ Use this structure:
 ## Experiment Blocks
 
 ### Block 1: [Name]
-- Goal / claim tested:
+- Goal / hypothesis tested:
 - Why this block exists:
 - Dataset / split / task:
 - Design:
@@ -303,19 +303,19 @@ Tracker file: refine-logs/EXPERIMENT_TRACKER.md
 
 - **Large file handling**: If the Write tool fails due to file size, immediately retry using Bash (`cat << 'EOF' > file`) to write in chunks. Do NOT ask the user for permission — just do it silently.
 
-- **Every experiment must defend a claim.** If it does not change a reviewer belief, cut it.
+- **Every experiment must answer a research question.** If it does not change a reviewer belief, cut it.
 - **Prefer a compact paper story.** Design the main table first, then add only the ablations that defend it.
 - **Defend simplicity explicitly.** If complexity is a concern, include a deletion study or a stronger-but-bloated variant comparison.
 - **Defend frontier choices explicitly.** If a modern primitive is central, prove why it is better than the strongest simpler alternative.
 - **Prefer strong baselines over long baseline lists.** A short, credible comparison set is better than a padded one.
 - **Separate must-run from nice-to-have.** Do not let appendix ideas delay the core paper evidence.
 - **Reuse proposal constraints.** Do not invent unrealistic budgets or data assumptions.
-- **Do not fabricate results.** Plan evidence; do not claim evidence.
+- **Do not fabricate results.** Plan evidence; do not assert evidence.
 
 ## Composing with Other Skills
 
 ```
-/research-refine   -> method and claim refinement
+/research-refine   -> method and mechanism refinement
 /experiment-plan   -> detailed experiment roadmap
 /run-experiment    -> execute the runs
 /auto-review-loop  -> react to results and iterate on the paper

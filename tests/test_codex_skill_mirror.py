@@ -61,8 +61,8 @@ def test_codex_skill_set_matches_mainline() -> None:
     codex_names = skill_names(CODEX_SKILLS)
     main_library = library_skill_names(MAIN_LIBRARY)
     codex_library = library_skill_names(CODEX_LIBRARY)
-    assert len(main_names) == 12
-    assert len(main_names | main_library) == 89
+    assert len(main_names) == 13
+    assert len(main_names | main_library) == 91
     assert main_names == codex_names
     assert main_library == codex_library
 

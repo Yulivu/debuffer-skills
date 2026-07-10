@@ -539,9 +539,9 @@ If `VERIFY` or `MISMATCH` is printed, do not invent metadata:
 6. Treat arXiv entries as final-bibliography blockers unless explicitly
    accepted as unpublished-preprint exceptions.
 
-### Step 5: Scientific Writing Quality Pass (5 audit passes)
+### Step 5: Scientific Writing Quality Pass (6 audit passes)
 
-After drafting all sections, run five sequential audit passes. Based on Sainani's "Writing in the Sciences" methodology: every word must earn its place.
+After drafting all sections, run six sequential audit passes. Based on Sainani's "Writing in the Sciences" methodology: every word must earn its place.
 
 **Pass 1: Clutter Extraction** — Strip sentences to cleanest components.
 
@@ -600,6 +600,15 @@ Passive voice IS acceptable for: established facts, methods where agent is irrel
 - Do Figure graphics match Table values?
 - Flag statistics cited only through secondary sources (reviews, textbooks) — recommend verifying primary source
 
+**Pass 6: Anti-Defensive Writing**
+
+- Lead with the claim, result, or positive scope, not with what the paper does not claim, prove, cover, or attempt.
+- Delete disclaimers that do not add evidence, scope, logic, conceptual precision, or necessary reader guidance.
+- Keep necessary limitations once, calmly, where they belong: Methods, Discussion, Limitations, or the exact sentence whose interpretation depends on the limit.
+- Convert negative scope into positive scope: `The analysis focuses on X` instead of `We do not claim to cover Y`.
+- Replace vague hedges (`may`, `could`, `potentially`) with precise evidence strength and scope; when uncertainty is real, name its source.
+- Remove reflexive defense patterns unless the contrast is part of the argument: `to be clear`, `it is worth noting`, `not X but Y`, `this should not be taken to mean`, repeated `however/although` caveat openings.
+
 ### Step 6: Cross-Review with REVIEWER_MODEL
 
 Send the complete draft to GPT-5.4 xhigh:
@@ -622,7 +631,10 @@ mcp__codex__codex:
     7. Are figures/tables clearly described and properly referenced?
     8. Are there any solid-block paragraphs that nearly fill a two-column
        column and should be split?
-    9. Would a skim reader understand the contribution from the title, abstract, introduction, and Figure 1?
+    9. Does any high-impact prose sound defensive: repeated caveats, "we do
+       not claim" framing, vague hedges, or limitation-first contribution
+       paragraphs?
+    10. Would a skim reader understand the contribution from the title, abstract, introduction, and Figure 1?
 
     For each issue, specify: severity (CRITICAL/MAJOR/MINOR), location, and fix.
 
@@ -657,6 +669,8 @@ Before declaring done:
 - [ ] Related Work + Conclusion are compact by default (about 0.8 page total
       for IEEE/Overleaf-style two-column papers unless explicitly overridden)
 - [ ] No paragraph is a solid block that nearly fills a whole two-column column
+- [ ] No unnecessary defensive writing remains in high-impact prose; necessary
+      limitations are stated once in the right section
 - [ ] references.bib contains ONLY cited entries (no bloat)
 - [ ] No arXiv entries remain in the final `.bib` unless explicitly accepted
       as unpublished-preprint exceptions
@@ -683,6 +697,9 @@ Before declaring done:
 - **Section count is flexible** — match PAPER_PLAN structure, don't force into 5 sections
 - **Backup before overwrite** — never destroy existing `paper/` directory without backing up
 - **Front-load the contribution** — do not hide the payoff until the experiments or appendix
+- **Anti-defensive prose** — state what the paper shows and where it applies;
+  do not pad abstracts, introductions, contributions, captions, or conclusions
+  with caveats aimed only at hypothetical objections.
 
 ## Writing Quality Reference
 

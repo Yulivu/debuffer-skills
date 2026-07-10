@@ -46,7 +46,7 @@ User input (PROBLEM + vague APPROACH)
 - **OUTPUT_DIR = `refine-logs/`** — Directory for round files and final report.
 - **MAX_LOCAL_PAPERS = 15** — Maximum local papers/notes to scan for grounding.
 - **MAX_CORE_EXPERIMENTS = 3** — Default cap for core validation blocks inside this skill.
-- **MAX_PRIMARY_CLAIMS = 2** — Soft cap for paper-level claims. Prefer one dominant claim plus one supporting claim.
+- **MAX_PRIMARY_FINDINGS = 2** - Soft cap for paper-level findings. Prefer one dominant finding plus one supporting finding.
 - **MAX_NEW_TRAINABLE_COMPONENTS = 2** — Soft cap for genuinely new trainable pieces. Exceed only if the paper breaks otherwise.
 
 > Override via argument if needed, e.g. `/research-refine "problem | approach" -- max rounds: 3, threshold: 9`.
@@ -168,8 +168,8 @@ Do not stop at generic research questions. Make the gap operational:
 2. **Why naive fixes are insufficient**: larger context, more data, prompting, memory bank, or stacking more modules.
 3. **Smallest adequate intervention**: what is the least additional mechanism that could plausibly fix the bottleneck?
 4. **Frontier-native alternative**: is there a more current route using foundation-model-era primitives that better matches the bottleneck?
-5. **Core technical claim**: what exact mechanism claim could survive top-venue scrutiny?
-6. **Required evidence**: what minimum proof is needed to defend that claim?
+5. **Core technical hypothesis**: what exact mechanism hypothesis could survive top-venue scrutiny?
+6. **Required evidence**: what minimum proof is needed to test that hypothesis?
 
 #### Step 1.3: Choose the Sharpest Route
 
@@ -202,7 +202,7 @@ The proposal must answer "how would we actually build this?" Prefer method detai
 
 Cover:
 
-1. **One-sentence method thesis**: the single strongest mechanism claim.
+1. **One-sentence method thesis**: the single strongest mechanism thesis.
 2. **Contribution focus**: one dominant contribution and at most one supporting contribution.
 3. **Complexity budget**: what is frozen or reused, what is new, and what tempting additions are intentionally excluded.
 4. **System graph**: modules, data flow, inputs, outputs.
@@ -216,13 +216,13 @@ Cover:
 
 If the method is still only described as "add a module" or "use a planner," it is not concrete enough.
 
-#### Step 1.5: Design Minimal Claim-Driven Validation
+#### Step 1.5: Design Minimal Mechanism Validation
 
 Experiments exist to validate the method, not to dominate the document.
 
-For each core claim, define the **smallest strong experiment** that can validate it:
+For each core hypothesis, define the **smallest strong experiment** that can test it:
 
-- the claim being tested
+- the hypothesis being tested
 - the necessary baseline or ablation
 - the decisive metric
 - the expected directional outcome
@@ -303,21 +303,21 @@ Use this structure:
 ### Novelty and Elegance Argument
 [Closest work, exact difference, why this is a focused mechanism-level contribution rather than a module pile-up]
 
-## Claim-Driven Validation Sketch
-### Claim 1: [Main claim]
+## Mechanism Validation Sketch
+### Hypothesis 1: [Main mechanism]
 - Minimal experiment:
 - Baselines / ablations:
 - Metric:
 - Expected evidence:
 
-### Claim 2: [Optional]
+### Hypothesis 2: [Optional]
 - Minimal experiment:
 - Baselines / ablations:
 - Metric:
 - Expected evidence:
 
 ## Experiment Handoff Inputs
-- Must-prove claims:
+- Must-test hypotheses:
 - Must-run ablations:
 - Critical datasets / metrics:
 - Highest-risk assumptions:
@@ -354,7 +354,7 @@ mcp__codex__codex:
     - Penalize parallel contributions that make the paper feel unfocused.
     - If a modern LLM / VLM / Diffusion / RL route would clearly produce a better paper, say so concretely.
     - If the proposal is already modern enough, do NOT force trendy components.
-    - Do not ask for extra experiments unless they are needed to prove the core claims.
+    - Do not ask for extra experiments unless they are needed to test the core mechanism.
 
     Read the Problem Anchor first. If your suggested fix would change the problem being solved,
     call that out explicitly as drift instead of treating it as a normal revision request.
@@ -375,7 +375,7 @@ mcp__codex__codex:
 
     5. **Feasibility**: Can this method be trained and integrated with the stated resources and data assumptions?
 
-    6. **Validation Focus**: Are the proposed experiments minimal but sufficient to validate the core claims? Is there unnecessary experimental bloat?
+    6. **Validation Focus**: Are the proposed experiments minimal but sufficient to validate the core mechanism? Is there unnecessary experimental bloat?
 
     7. **Venue Readiness**: If executed well, would the contribution feel sharp and timely enough for a top venue?
 
@@ -388,7 +388,7 @@ mcp__codex__codex:
     - Priority: CRITICAL / IMPORTANT / MINOR
 
     Then add:
-    - **Simplification Opportunities**: 1-3 concrete ways to delete, merge, or reuse components while preserving the main claim. Write "NONE" if already tight.
+    - **Simplification Opportunities**: 1-3 concrete ways to delete, merge, or reuse components while preserving the central thesis. Write "NONE" if already tight.
     - **Modernization Opportunities**: 1-3 concrete ways to replace old-school pieces with more natural foundation-model-era primitives if genuinely better. Write "NONE" if already modern enough.
     - **Drift Warning**: "NONE" if the proposal still solves the anchored problem; otherwise explain the drift clearly.
     - **Verdict**: READY / REVISE / RETHINK
@@ -466,7 +466,7 @@ Bias the revisions toward:
 - fewer moving parts
 - cleaner reuse of strong existing backbones
 - more natural foundation-model-era leverage when it improves the paper
-- leaner, claim-driven experiments
+- leaner, question-driven experiments
 
 Do **not** add multiple parallel contributions just to chase score. If the reviewer requests another module, first ask whether the same gain can come from a better interface, distillation signal, reward model, or inference policy on top of an existing backbone.
 
@@ -504,7 +504,7 @@ Save to `refine-logs/round-N-refinement.md`:
 - Impact on core method:
 
 ## Revised Proposal
-[Full updated proposal from Problem Anchor through Claim-Driven Validation Sketch]
+[Full updated proposal from Problem Anchor through Mechanism Validation Sketch]
 ```
 
 **Checkpoint:** Update `refine-logs/REFINE_STATE.json` with `{"phase": "refine", "round": N, ...}`.
@@ -725,7 +725,7 @@ Suggested next step: /experiment-plan
 - **The smallest adequate mechanism wins.** Bigger is not automatically better.
 - **Prefer reuse over invention.** Start from strong existing backbones and add only what the bottleneck requires.
 - **Modern techniques are a prior, not a decoration.** Use LLM / VLM / Diffusion / RL-era components when they sharpen the method, not when they only make the proposal sound trendy.
-- **Minimal experiments.** Inside this skill, experiments only need to prove the core claims.
+- **Minimal experiments.** Inside this skill, experiments only need to test the core mechanism.
 - **Review the mechanism, not the parts count.** A long module list is not novelty.
 - **Pushback is encouraged.** If reviewer feedback causes drift or unnecessary complexity, argue back with evidence.
 - **ALWAYS use `config: {"model_reasoning_effort": "xhigh"}`** for all Codex review calls.
@@ -750,7 +750,7 @@ Typical flow:
 
 1. `/idea-creator` or local reading gives you a problem and a vague method direction
 2. `/research-refine` turns that into an anchored, elegant, frontier-aware method plan
-3. `/experiment-plan` turns the final proposal into a detailed claim-driven experiment roadmap
+3. `/experiment-plan` turns the final proposal into a detailed question-driven experiment roadmap
 4. For a one-shot request, run this skill first and immediately continue with `/experiment-plan` if the method thesis is stable
 5. `/run-experiment` executes the chosen runs
 6. Later loops operate on results, not just ideas

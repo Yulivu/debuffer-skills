@@ -81,6 +81,23 @@ Rules:
   fills a whole column. Split long paragraphs into motivation, evidence, and
   takeaway paragraphs, or use compact `\paragraph{...}` structure where the
   venue style supports it.
+- Run an anti-defensive writing pass before finalizing prose. Lead with the
+  claim, result, or scope instead of explaining what the paper does not claim,
+  does not prove, or does not cover.
+- Keep real limitations only when they affect validity, evidence
+  interpretation, scope of application, research design, or correct reader use.
+  State them once, calmly, in Methods, Discussion, Limitations, or another
+  appropriate section.
+- Avoid putting defensive caveats in high-impact positions: title, abstract,
+  contribution paragraphs, paragraph openings, conclusion openings, and figure
+  captions.
+- Replace vague hedges (`may`, `could`, `potentially`) with precise evidence
+  strength and scope. If uncertainty is real, name its source.
+- Convert negative scope to positive scope: write what the paper examines,
+  tests, explains, or contributes rather than reflexive `we do not claim...`.
+- Avoid unnecessary patterns such as `to be clear`, `it is worth noting`,
+  `not X but Y`, `this should not be taken to mean`, and repeated limitation
+  setup unless the contrast is part of the argument.
 
 ## LaTeX
 

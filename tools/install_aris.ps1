@@ -320,13 +320,13 @@ function Test-ProfileIncludesName {
         }
         'paper' {
             return $Name -in @(
-                'paper-writing', 'paper-visualization', 'research-review',
+                'human-tone', 'paper-writing', 'paper-visualization', 'research-review',
                 'research-blueprint', 'rebuttal', 'resubmit-pipeline'
             )
         }
         'review' {
             return $Name -in @(
-                'research-review', 'research-blueprint', 'rebuttal', 'resubmit-pipeline'
+                'human-tone', 'research-review', 'research-blueprint', 'rebuttal', 'resubmit-pipeline'
             )
         }
     }

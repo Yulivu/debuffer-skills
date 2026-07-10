@@ -359,9 +359,9 @@ This prevents bib bloat (e.g., 948 lines → 215 lines in testing).
 6. Treat arXiv entries as final-bibliography blockers unless explicitly
    accepted as unpublished-preprint exceptions.
 
-### Step 5: Scientific Writing Quality Pass (5 audit passes)
+### Step 5: Scientific Writing Quality Pass (6 audit passes)
 
-After drafting all sections, run five sequential audit passes. De-AI polish is included as one part of this quality pass, not a replacement for it.
+After drafting all sections, run six sequential audit passes. De-AI polish is included as one part of this quality pass, not a replacement for it.
 
 **Pass 1: Clutter Extraction** — strip sentences to their cleanest components, remove filler, and remove AI-isms.
 
@@ -372,6 +372,8 @@ After drafting all sections, run five sequential audit passes. De-AI polish is i
 **Pass 4: Keyword Consistency** — apply the Banana Rule: do not rename defined technical terms just to avoid repetition. If Methods defines a group, variable, or technique name, Results, Discussion, tables, and captions must use the same term.
 
 **Pass 5: Numerical and Citation Integrity** — check sample sizes, percentages, significant figures, figure/table values, and whether citations support the claims they are attached to.
+
+**Pass 6: Anti-Defensive Writing** — lead with the claim, result, or positive scope instead of what the paper does not claim, prove, cover, or attempt. Delete disclaimers that do not add evidence, scope, logic, conceptual precision, or necessary reader guidance. Keep necessary limitations once, calmly, in Methods, Discussion, Limitations, or the exact sentence whose interpretation depends on the limit. Convert negative scope into positive scope (`The analysis focuses on X`, not `We do not claim to cover Y`). Replace vague hedges (`may`, `could`, `potentially`) with precise evidence strength and scope; when uncertainty is real, name its source. Remove reflexive defense patterns unless the contrast is part of the argument: `to be clear`, `it is worth noting`, `not X but Y`, `this should not be taken to mean`, repeated `however/although` caveat openings.
 
 After drafting all sections, scan for common AI writing patterns and fix them:
 
@@ -416,6 +418,9 @@ spawn_agent:
     7. Are figures/tables clearly described and properly referenced?
     8. Are there any solid-block paragraphs that nearly fill a two-column
        column and should be split?
+    9. Does any high-impact prose sound defensive: repeated caveats, "we do
+       not claim" framing, vague hedges, or limitation-first contribution
+       paragraphs?
 
     For each issue, specify: severity (CRITICAL/MAJOR/MINOR), location, and fix.
 
@@ -450,6 +455,8 @@ Before declaring done:
 - [ ] Related Work + Conclusion are compact by default (about 0.8 page total
       for IEEE/Overleaf-style two-column papers unless explicitly overridden)
 - [ ] No paragraph is a solid block that nearly fills a whole two-column column
+- [ ] No unnecessary defensive writing remains in high-impact prose; necessary
+      limitations are stated once in the right section
 - [ ] references.bib contains ONLY cited entries (no bloat)
 - [ ] No arXiv entries remain in the final `.bib` unless explicitly accepted
       as unpublished-preprint exceptions
@@ -477,6 +484,9 @@ Before declaring done:
 - **Section count is flexible** — match PAPER_PLAN structure, don't force into 5 sections
 - **Backup before overwrite** — never destroy existing `paper/` directory without backing up
 - **Front-load the contribution** — do not hide the payoff until the experiments or appendix
+- **Anti-defensive prose** — state what the paper shows and where it applies;
+  do not pad abstracts, introductions, contributions, captions, or conclusions
+  with caveats aimed only at hypothetical objections.
 
 ## Writing Quality Reference
 

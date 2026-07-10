@@ -1,0 +1,4 @@
+interface:
+  display_name: "Human Tone 学术改稿"
+  short_description: "去除无效防御性表达，并用经典论文结构改写和润色学术文本"
+  default_prompt: "Use $human-tone to revise this academic draft into direct, natural prose while preserving evidence and necessary limitations."

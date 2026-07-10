@@ -1,6 +1,6 @@
 # debuffer-skills
 
-这是一个面向科研项目的轻量化 Codex skills 定制包。总能力数：**89**。默认入口：**12**。
+这是一个面向科研项目的轻量化 Codex skills 定制包。总能力数：**91**。默认入口：**13**。
 
 默认采用分层加载：项目里只直接暴露少量第一层入口 skill，细分能力放在 `skills/library/` 和 `skills/skills-codex-library/`，由入口 skill 按 `Capability Routing` 读取。需要旧式全部 slash 直调时，安装 `full-flat` profile。
 
@@ -62,6 +62,7 @@ Windows 可双击根目录的 `Install Debuffer Skills.cmd` 打开中文图形�
 | `experiment-bridge` | 本地 tiny checks 到 AutoDL/HPC handoff |
 | `autodl-hpc` | AutoDL/HPC preflight、smoke、数据和结果回传 |
 | `research-review` | prompt-only 外部评审和证据审计入口 |
+| `human-tone` | 学术改稿、润色、去防御性表达和经典论文语气改写 |
 | `paper-writing` | 论文计划、正文、编译、Overleaf 和提交检查 |
 | `paper-visualization` | 数据图、架构图、PPT 矢量重绘和图表审查 |
 | `rebuttal` | rebuttal 和审稿意见处理 |

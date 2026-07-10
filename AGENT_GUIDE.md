@@ -1,6 +1,6 @@
 # debuffer-skills Agent Guide
 
-给第一次读取本仓库的 AI agent。人的入口看 [README.md](README.md)，完整技能目录看 [docs/SKILLS_CATALOG.md](docs/SKILLS_CATALOG.md)。总能力数：**89**。默认入口：**12**。
+给第一次读取本仓库的 AI agent。人的入口看 [README.md](README.md)，完整技能目录看 [docs/SKILLS_CATALOG.md](docs/SKILLS_CATALOG.md)。总能力数：**91**。默认入口：**13**。
 
 ## 包状态
 
@@ -34,6 +34,7 @@
 | 实验实现 | `/experiment-bridge` | 本地 tiny checks 到远程 handoff |
 | 远程准备 | `/autodl-hpc` | AutoDL/HPC preflight 和 smoke |
 | 审查评审 | `/research-review` | prompt-only 外部评审和证据审计 |
+| 学术改稿 | `/human-tone` | 改稿、润色、去防御性表达和经典论文语气改写 |
 | 论文写作 | `/paper-writing` | paper plan、LaTeX、编译、Overleaf |
 | 论文图表 | `/paper-visualization` | 数据图、架构图、PPT 矢量重绘、图表审查 |
 | rebuttal | `/rebuttal` | 审稿意见和 rebuttal |
@@ -49,7 +50,7 @@
 | `core-research` | 建仓、idea、实验计划、AutoDL、基础审计入口 |
 | `paper` | 论文写作、图表、rebuttal/resubmit 入口 |
 | `review` | prompt-only 评审和证据审计入口 |
-| `full-flat` | 完整直调版，安装 89 个能力 |
+| `full-flat` | 完整直调版，安装 91 个能力 |
 
 ## 修改仓库时的校验
 

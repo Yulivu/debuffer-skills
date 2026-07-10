@@ -1,6 +1,6 @@
 ---
 name: research-pipeline
-description: "Lightweight AutoDL-first research pipeline: idea discovery → blueprint → experiment planning/AutoDL gates → prompt-only review/audit → optional evidence-gated paper planning. Adapts to venue-only, reference-paper/codebase, idea-doc, existing-repo, or partial-results starts; avoids heavy local compute, defaults to concise artifacts, and prepares AutoDL/HPC gated runs. Use when user says \"全流程\", \"full pipeline\", \"从找idea到投稿\", \"end-to-end research\", or wants a complete but user-gated research lifecycle. Manuscript drafting is allowed only after formal runs and evidence audit pass."
+description: "Lightweight AutoDL-first research pipeline: idea discovery → blueprint → experiment planning/AutoDL readiness checks → prompt-only review/audit → optional evidence-checked paper planning. Adapts to venue-only, reference-paper/codebase, idea-doc, existing-repo, or partial-results starts; avoids heavy local compute, defaults to concise artifacts, and prepares AutoDL/HPC approval-bounded runs. Use when user says \"全流程\", \"full pipeline\", \"从找idea到投稿\", \"end-to-end research\", or wants a complete but user-gated research lifecycle. Manuscript drafting is allowed only after formal runs and evidence audit pass."
 argument-hint: "[research-direction] [resume <run_id>]"
 allowed-tools: Bash(*), Read, Write, Edit, Grep, Glob, WebSearch, WebFetch, Skill, mcp__codex__codex, mcp__codex__codex-reply
 ---
@@ -21,7 +21,7 @@ This is a first-layer entry skill. Keep it loaded as the user-facing route; when
 > ⏱ **External cadence: non-judgmental heartbeat only.** An overnight `/loop` /
 > `CronCreate` heartbeat may wake, detect a **stalled** phase (no progress, dead
 > process, blocked on a freed resource) and **nudge** it forward — it may NEVER
-> decide the work is good (paper good enough, proof holds, claim supported).
+> decide the work is good (paper good enough, proof holds, result supported).
 > Every such verdict stays on its own skill's internal cadence and terminates in
 > the cross-model jury. A heartbeat may say "keep going," never "good enough."
 > See
@@ -100,9 +100,9 @@ This skill chains the research lifecycle into a gated pipeline:
 ├── Workflow 1 ──┤├── Stage-gate design ──┤├── Workflow 1.5 ──┤├── Workflow 2 ───┤├── Workflow 3 ──┤
 ```
 
-It orchestrates the major research workflows plus blueprint and evidence gates.
+It orchestrates the major research workflows plus blueprint and evidence readiness checks.
 Paper writing is optional and controlled by both `AUTO_WRITE` and the
-manuscript entry gate; `AUTO_WRITE=true` is ignored when formal evidence is
+manuscript entry check; `AUTO_WRITE=true` is ignored when formal evidence is
 missing.
 
 ## Resumable runs (`— resume <run_id>`)
@@ -136,12 +136,12 @@ are actually opened.
   | `idea-discovery` | Gate 1 cross-model jury / novelty-check passed | `codex-gpt-5.5` + thread id |
   | `experiment-bridge` | experiments actually ran (jobs completed) — deterministic | `deterministic:experiment-bridge` |
   | `auto-review-loop` | the loop hit its positive STOP (`score>=6 AND verdict∈{ready,almost}` — codex's verdict) | `codex-gpt-5.5` + final review trace id |
-  | `evidence-summary` | compact status files updated and Stage 4 gate recorded; `docs/paper/NARRATIVE_REPORT.md` only if evidence gate passed | `deterministic:evidence-summary` |
-  | `paper-plan` | `docs/paper/PAPER_PLAN.md` accepted and manuscript entry gate explicitly passed | `deterministic:paper-plan-gate` |
+  | `evidence-summary` | compact status files updated and Stage 4 gate recorded; `docs/paper/NARRATIVE_REPORT.md` only if evidence readiness check passed | `deterministic:evidence-summary` |
+  | `paper-plan` | `docs/paper/PAPER_PLAN.md` accepted and manuscript entry check explicitly passed | `deterministic:paper-plan-gate` |
   | `paper-writing` | submission audits passed (`verify_paper_audits.sh` exit 0) — deterministic | `deterministic:verify_paper_audits.sh` |
 
 **If `AUTO_WRITE = false`** (default), `paper-plan` and `paper-writing` are not
-part of this run unless the user explicitly continues after the evidence gate.
+part of this run unless the user explicitly continues after the evidence readiness check.
 Do not mark a writing phase pending just because experiments validated. Record each
 `accept` `verdict_id` as a **durable handle** — the codex thread/trace id, or the
 path/sha of the deterministic verifier's report (e.g. the `verify_paper_audits.sh`
@@ -274,11 +274,11 @@ paper handoff.
 - `docs/project/NEXT_ACTIONS.md`
 
 **Step 2:** Check the manuscript-entry prerequisites:
-- formal baseline/main/required ablation runs exist for paper-level claims;
+- formal baseline/main/required ablation runs exist for paper-level findings;
 - raw evidence names run folders, metrics, configs/resolved configs, seeds,
   logs/metadata, and result summaries;
 - `docs/evidence/EVIDENCE_LEDGER.md`, `CLAIMS_FROM_RESULTS.md`, or an
-  equivalent audit maps claims to raw evidence and unresolved gaps;
+  equivalent audit maps findings to raw evidence and unresolved gaps;
 - `docs/project/BLUEPRINT_GATE.md` does not block paper planning.
 
 If any prerequisite fails, stop in the experiment/audit phase. Do not generate
@@ -290,14 +290,14 @@ If the gate passes, generate `docs/paper/NARRATIVE_REPORT.md` as a compact
 evidence-audited handoff for `paper-plan`, not as a manuscript draft.
 
 The narrative report must contain:
-- Problem statement and core claim
+- Problem statement and core finding
 - Method summary
-- Formal quantitative results with raw evidence for each claim
+- Formal quantitative results with raw evidence for each finding
 - Figure/table inventory (which exist, which need manual creation)
 - Limitations and remaining follow-up items
 
 **Output:** compact status files, and `docs/paper/NARRATIVE_REPORT.md` only
-when the evidence gate passes.
+when the evidence readiness check passes.
 
 ```markdown
 # Research Pipeline Report
@@ -317,7 +317,7 @@ when the evidence gate passes.
 - Formal runs complete: [yes/no + evidence path]
 - Evidence audit complete: [yes/no + artifact path]
 - Allowed next step: [experiment-plan/autodl-hpc/experiment-audit/paper-plan/stop]
-- Narrative report: [generated only if gate passed]
+- Narrative report: [generated only if readiness check passed]
 
 ## Remaining TODOs (if any)
 - [items flagged by reviewer that weren't addressed]
@@ -335,22 +335,22 @@ If Stage 4 passes and `AUTO_WRITE=false` (default), stop after presenting the
 paper-planning command, not a manuscript command:
 
 ```
-Evidence gate passed. Next allowed step:
+evidence readiness check passed. Next allowed step:
 /paper-plan "docs/paper/NARRATIVE_REPORT.md" --venue [VENUE]
 ```
 
 If `AUTO_WRITE=true`, first run or request `/paper-plan`. Invoke
 `/paper-writing` only if the resulting `docs/paper/PAPER_PLAN.md` says the
-manuscript entry gate passed and the user explicitly confirms. Never proceed
+manuscript entry check passed and the user explicitly confirms. Never proceed
 from Stage 4 directly to LaTeX drafting.
 
 Checks before any manuscript drafting:
 - If `VENUE` is missing, stop and ask. Do not silently use a default venue.
-- If formal evidence or the paper plan gate is missing, stop and write
+- If formal evidence or the paper plan readiness check is missing, stop and write
   `docs/project/NEXT_ACTIONS.md`.
 - If manual figures are required, pause and list them. Wait for user approval.
 
-## Render HTML view (opt-in, only after evidence gate passes)
+## Render HTML view (opt-in, only after evidence readiness check passes)
 
 Only after Stage 4 finalizes an evidence-audited
 `docs/paper/NARRATIVE_REPORT.md`, optionally invoke `/render-html` on the
