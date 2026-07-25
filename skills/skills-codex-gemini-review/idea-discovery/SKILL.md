@@ -45,10 +45,25 @@ Each phase builds on the previous one's output. The final deliverables are a val
 - **OUTPUT_DIR = `idea-stage/`** — All idea-stage outputs go here. Create the directory if it doesn't exist.
 - **REVIEWER_MODEL = `gemini-review`** — Gemini reviewer invoked through the local `gemini-review` MCP bridge. Passed to the reviewer-aware sub-skills installed by this overlay.
 - **ARXIV_DOWNLOAD = false** — When `true`, `/research-lit` downloads the top relevant arXiv PDFs during Phase 1. When `false` (default), only fetches metadata. Passed through to `/research-lit`.
+- **REFERENCE_LED = false** — Enable evidence-grounded topic discovery from a
+  core reference paper and optional comparators. Automatically enabled when
+  `— ref papers:` is supplied.
+- **REF_PAPERS = false** — Semicolon-separated core paper and up to three
+  comparators. Sources accept local paths, arXiv identifiers/URLs, or paper URLs.
 
 > 💡 These are defaults. Override by telling the skill, e.g., `/idea-discovery "topic" — pilot budget: 4h per idea, 20h total` or `/idea-discovery "topic" — arxiv download: true`.
 
 ## Pipeline
+
+### Phase 0.5: Reference-Led Deconstruction (when `REFERENCE_LED` is enabled)
+
+**Skip entirely unless `REFERENCE_LED = true` or `$ARGUMENTS` contains `— ref papers:`.**
+
+Read and follow `../../skills-codex-library/idea-method/reference-paper-deconstruction/SKILL.md`.
+Write `idea-stage/REFERENCE_DECONSTRUCTION.md` and
+`idea-stage/TOPIC_CANDIDATES.md`, then carry the candidate evidence, minimum
+discriminating test, and conclusion boundary into the remaining phases. Treat
+all statuses as provisional until `/novelty-check` completes.
 
 ### Phase 1: Literature Survey
 
@@ -57,6 +72,13 @@ Invoke `/research-lit` to map the research landscape:
 ```
 /research-lit "$ARGUMENTS"
 ```
+
+When `idea-stage/TOPIC_CANDIDATES.md` exists, use it as a hypothesis ledger,
+not as a novelty verdict. Search broader recent literature for every carried
+candidate, then preserve its ID, source locators, gate status, minimum
+discriminating test, and conclusion boundary in the landscape notes. Report
+whether the lead remains open, contested, addressed, or evidence-incomplete;
+only `/novelty-check` can make the final differentiation judgment.
 
 **What this does:**
 - Search arXiv, Google Scholar, Semantic Scholar for recent papers
@@ -86,6 +108,13 @@ Invoke `/idea-creator` with the landscape context:
 ```
 
 **What this does:**
+- If `idea-stage/TOPIC_CANDIDATES.md` exists, pass each retained candidate's ID,
+  source locators, gate status, minimum discriminating evidence, and conclusion
+  boundary into the Gemini-backed generator. These are evidence-backed seeds,
+  not a replacement for broader candidate generation or novelty verification.
+- Keep `needs_evidence` as an explicit search or validation requirement; keep
+  `blocked` candidates out of ranking unless a narrower, evidence-backed repair
+  is stated.
 - Brainstorm 8-12 concrete ideas via the Gemini-backed `/idea-creator` overlay
 - Filter by feasibility, compute cost, quick novelty search
 - Deep validate top ideas (full novelty check + devil's advocate)

@@ -226,6 +226,34 @@ Build a **Claims-Evidence Matrix**:
 | [claim 2] | [exp C] | Partially supported | §4.1 |
 ```
 
+### Step 1.5: Freeze the Evidence Story Before Structure
+
+Before deciding section order, record one sentence each for the **research
+question**, **main finding**, and **significance**. Freeze the one-sentence core
+contribution only when all three are supported by the Claims-Evidence Matrix.
+
+Build the Claim–Evidence–Figure Storyboard inside `PAPER_PLAN.md`. It is the
+contract for figures, Results prose, and user review; it is not a separate
+narrative report.
+
+```markdown
+## Claim–Evidence–Figure Storyboard
+
+| Order | Figure/Table | Primary question | Claim supported | Evidence/raw-result locator | Strongest permitted conclusion | Excluded conclusion | Missing evidence/analysis | Narrative location |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Fig. 1 | [single question] | [claim ID] | [run path / table / script] | [what data directly show] | [causal, universal, or mechanism claim not shown] | [none or exact gap] | [Results §x] |
+```
+
+Hard rules:
+- Every primary figure/table answers **one primary question**; split overloaded
+  figures rather than asking readers to infer several conclusions at once.
+- The storyboard order is the first-draft evidence order, not necessarily the
+  final numbering. Preserve conventional final section order in the manuscript.
+- The permitted conclusion sets the maximum claim strength; the excluded
+  conclusion prevents correlation-to-causation or scope inflation.
+- Missing rows are experiment/audit work, not prose to invent. Record bounded
+  user decisions or interpretation questions in the plan.
+
 ### Step 2: Determine Paper Type and Structure
 
 Based on TARGET_VENUE and paper content, classify and select structure.
@@ -354,9 +382,10 @@ For each section, specify:
   second discussion section.
 ```
 
-### Step 4: Figure Plan
+### Step 4: Figure Plan and Storyboard Check
 
-List every figure and table:
+List every figure and table using the Claim–Evidence–Figure Storyboard fields;
+do not reduce the plan to visual type and data source alone.
 
 ```markdown
 ## Figure Plan
@@ -368,20 +397,24 @@ genuinely inapplicable:
 - one main-comparison table
 - one ablation or component-impact visualization
 
-| ID | Type | Description | Data Source | Priority |
-|----|------|-------------|-------------|----------|
-| Fig 1 | Hero/Architecture | System overview + comparison | manual | HIGH |
-| Fig 2 | Line plot | Training curves comparison | figures/exp_A.json | HIGH |
-| Fig 3 | Bar chart | Ablation results | figures/ablation.json | MEDIUM |
-| Table 1 | Comparison table | Main results vs. baselines | figures/main_results.json | HIGH |
-| Table 2 | Theory comparison | Prior bounds vs. ours | manual | HIGH (theory papers) |
+| Order | ID | Type | Primary question | Claim supported | Data / raw-result locator | Strongest permitted conclusion | Excluded conclusion | Missing evidence/analysis | Priority |
+|---|---|---|---|---|---|---|---|---|---|
+| 1 | Fig. 1 | Hero/Architecture | [what the method changes] | C1 | [manual source / design spec] | [method structure is distinct] | [performance superiority] | [comparison figure if needed] | HIGH |
+| 2 | Table 1 | Comparison table | [does it improve the target metric?] | C1 | figures/main_results.json | [bounded empirical improvement] | [universal dominance] | [dataset/metric gap] | HIGH |
+| 3 | Fig. 2 | Line plot | [when and where does it help?] | C2 | figures/exp_A.json | [trend under stated conditions] | [unobserved mechanism] | [stress-test gap] | HIGH |
+| 4 | Fig. 3 | Bar chart | [which component matters?] | C3 | figures/ablation.json | [component impact in this setup] | [necessary in every setting] | [interaction ablation] | MEDIUM |
+| 5 | Table 2 | Theory comparison | [how do bounds compare?] | C4 | [proof / comparison source] | [stated bound relation] | [practical gain without data] | [assumption audit] | HIGH (theory papers) |
 ```
 
-**CRITICAL for Figure 1 / Hero Figure**: Describe in detail what the figure should contain, including:
-- Which methods are being compared
-- What the visual difference should demonstrate
-- Caption draft that clearly states the comparison
-- Why the figure helps a skim reader understand the paper before reading the full method
+**CRITICAL for Figure 1 / Hero Figure**: Describe which methods are compared,
+what visual distinction it demonstrates, a caption draft, its primary question,
+and why a skim reader can recover the paper's core claim without reading the
+full method. If the hero figure is conceptual rather than evidential, mark that
+it cannot by itself support a performance claim.
+
+Before leaving this step, verify that every planned Results paragraph has a
+storyboard row, no figure is used to support an excluded conclusion, and every
+missing item becomes either an evidence task or a bounded user decision.
 
 ### Step 5: Citation Scaffolding
 
@@ -451,8 +484,17 @@ Save the final outline to `docs/paper/PAPER_PLAN.md`:
 ## Structure
 [from Step 2-3, section by section]
 
+## Claim–Evidence–Figure Storyboard
+[from Step 1.5; include the question, raw-result locator, conclusion boundary,
+excluded conclusion, missing evidence, and narrative order for every primary
+figure/table]
+
 ## Figure Plan
 [from Step 4, with detailed hero figure description]
+
+## User Decisions / Open Questions
+- [decision or interpretation that cannot be settled from current evidence]
+- [owner and decision deadline/checkpoint]
 
 ## Citation Plan
 [from Step 5]
@@ -488,6 +530,8 @@ Save the final outline to `docs/paper/PAPER_PLAN.md`:
 - **MAX_PAGES counting differs by venue** — ML conferences: main body to Conclusion end, references/appendix NOT counted. **IEEE venues: references ARE counted toward the page limit.**
 - **Venue-specific norms** — ML conferences (ICLR/NeurIPS/ICML) use `natbib` (`\citep`/`\citet`); **IEEE venues use `cite` package (`\cite{}`, numeric style)**
 - **Claims-Evidence Matrix is the backbone** — every claim must map to evidence, every experiment must support a claim
+- **Storyboard before prose** — every primary figure/table must state one question, its raw-result locator, its strongest permitted conclusion, and its excluded conclusion before writing Results
+- **Open decisions stay visible** — mark user-facing interpretation or scope decisions in `PAPER_PLAN.md`; never resolve them through unmarked prose
 - **Front-load the story** — the outline should make the contribution clear in the title, abstract, introduction, and hero figure before the reader reaches the full method
 - **Figures need detailed descriptions** — especially the hero figure, which must clearly specify comparisons and visual expectations
 - **Section count is flexible** — 5-8 sections depending on paper type. Don't force content into a rigid 5-section template.

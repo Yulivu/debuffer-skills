@@ -27,6 +27,8 @@ project/
 │   ├── IDEA_REPORT_20250615_143022.md     # Timestamped version
 │   ├── IDEA_CANDIDATES.md
 │   ├── REF_PAPER_SUMMARY.md
+│   ├── REFERENCE_DECONSTRUCTION.md
+│   ├── TOPIC_CANDIDATES.md
 │   └── docs/
 │       └── research_contract.md
 │
@@ -55,7 +57,8 @@ project/
 ## What to Timestamp
 
 Files that get overwritten on re-runs:
-- `IDEA_REPORT.md`, `IDEA_CANDIDATES.md`, `REF_PAPER_SUMMARY.md`
+- `IDEA_REPORT.md`, `IDEA_CANDIDATES.md`, `REF_PAPER_SUMMARY.md`,
+  `REFERENCE_DECONSTRUCTION.md`, `TOPIC_CANDIDATES.md`
 - `EXPERIMENT_PLAN.md`, `EXPERIMENT_TRACKER.md`, `EXPERIMENT_RESULTS.md`
 - `FINAL_PROPOSAL.md`, `PIPELINE_SUMMARY.md`
 - `AUTO_REVIEW.md` (when starting a new review loop, not within a loop)
@@ -82,6 +85,12 @@ If not found → fall back to ./IDEA_REPORT.md
 
 Read from idea-stage/IDEA_CANDIDATES.md
 If not found → fall back to ./IDEA_CANDIDATES.md
+
+Read from idea-stage/REFERENCE_DECONSTRUCTION.md
+If not found → fall back to ./REFERENCE_DECONSTRUCTION.md
+
+Read from idea-stage/TOPIC_CANDIDATES.md
+If not found → fall back to ./TOPIC_CANDIDATES.md
 
 # For review-stage files:
 Read from review-stage/AUTO_REVIEW.md

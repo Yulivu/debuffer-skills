@@ -55,9 +55,28 @@ If `research-wiki/query_pack.md` exists and is less than 7 days old, read it as 
 
 If `research-wiki/` exists but `query_pack.md` is stale or missing, rebuild it only when `WIKI_SCRIPT` is available. If the helper is unavailable, continue without rebuilding and report that wiki refresh was skipped.
 
+### Phase 0.5: Load Reference-Led Topic Seeds (if available)
+
+Before the landscape survey, check `idea-stage/TOPIC_CANDIDATES.md`. If it
+exists, read it as a compact evidence handoff. Read the corresponding parts of
+`idea-stage/REFERENCE_DECONSTRUCTION.md` only when a source locator or boundary
+needs interpretation; do not redo the paper or figure evidence extraction.
+
+For every carried seed, preserve its candidate ID, gap source type, source
+locators, gate status, minimum discriminating evidence, and conclusion boundary.
+A `ready_for_novelty_check` seed is still unverified; `needs_evidence` becomes
+an explicit research task; `blocked` remains excluded unless a narrower
+repairable question is supported. These seeds inform the landscape and A-E
+candidate generation, but do not replace either workflow.
+
 ### Phase 1: Landscape Survey (5-10 min)
 
 Map the research area to understand what exists and where the gaps are.
+
+When reference-led seeds exist, use their source locators as starting queries,
+then test each asserted gap against broader and more recent literature. Keep the
+seed's status and conclusion boundary visible in the landscape; do not turn a
+single paper's future-work statement or limitation into a field-wide claim.
 
 1. **Scan local paper library first**: Check `papers/` and `literature/` in the project directory for existing PDFs. Read first 3 pages of relevant papers to build a baseline understanding before searching online. This avoids re-discovering what the user already knows.
 
@@ -98,6 +117,16 @@ spawn_agent:
 
     Key gaps identified:
     [paste gaps from Phase 1]
+
+    Reference-led topic seeds (optional):
+    [paste candidate ID, source locators, gate status, minimum discriminating
+    evidence, and conclusion boundary from TOPIC_CANDIDATES.md]
+
+    Treat a seed as a constrained starting point, not a novelty verdict. For
+    every idea descended from a seed, preserve its provenance and do not claim
+    more than its recorded conclusion boundary. `needs_evidence` means the
+    missing evidence must appear in the validation plan; `blocked` is not a
+    candidate to promote without a narrower, evidence-backed repair.
 
     Read the AutoSci-lite A-E idea-path contract from
     `../../skills-codex/shared-references/autosci-lite-patterns.md`. Generate 8-12 concrete
@@ -226,6 +255,9 @@ Write a structured report to `idea-stage/IDEA_REPORT.md`:
 
 ### Idea 1: [title]
 - **Hypothesis**: [one sentence]
+- **Reference-led provenance**: [candidate ID + source locators, or none]
+- **Evidence gate**: [source status + evidence still required]
+- **Conclusion boundary**: [strongest supported claim and excluded claim]
 - **Minimum experiment**: [concrete description]
 - **Expected outcome**: [what success/failure looks like]
 - **Novelty**: X/10 — closest work: [paper]

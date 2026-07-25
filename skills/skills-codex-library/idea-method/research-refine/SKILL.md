@@ -25,6 +25,11 @@ lenses for an existing problem, while broad candidate generation belongs to
 `experiments/NEGATIVE_RESULTS.md` to avoid repeating failed mechanisms or
 experiment directions.
 
+When a selected `idea-stage/TOPIC_CANDIDATES.md` record is available, preserve
+its question, evidence gaps, minimum discriminating test, and conclusion
+boundary in the Problem Anchor. The deconstruction artifact supplies evidence
+locators; it does not make the candidate novel or validated.
+
 ```
 User input (PROBLEM + vague APPROACH)
   -> Phase 0 (Local step): Freeze Problem Anchor
@@ -104,6 +109,15 @@ Before starting any phase, check whether a previous run left a checkpoint:
    - Resume from the next phase based on the saved `phase`
 3. **On fresh start**, ensure `refine-logs/` exists and proceed to Phase 0.
 
+### Reference-Led Candidate Preflight (optional)
+
+If the user selects a candidate from `idea-stage/TOPIC_CANDIDATES.md`, read that
+record before Phase 0. Use `REFERENCE_DECONSTRUCTION.md` only to resolve its
+source locators. Do not turn `needs_evidence` into a validated premise: carry
+its missing item into the anchor and the first validation block. If the selected
+record is `blocked`, stop refinement and return to candidate narrowing unless a
+new, narrower question has evidence and an obtainable discriminating test.
+
 ### Phase 0: Freeze the Problem Anchor
 
 Before proposing anything, extract the user's immutable bottom-line problem. This anchor must be copied verbatim into every proposal and every refinement round.
@@ -115,6 +129,14 @@ Write:
 - **Non-goals**: What is explicitly *not* the goal of this project?
 - **Constraints**: Compute, data, time, tooling, venue, deployment limits.
 - **Success condition**: What evidence would make the user say "yes, this method addresses the actual problem"?
+- **Evidence-backed question and source locators**: For a selected reference-led
+  candidate, what question is supported by which paper locations?
+- **Remaining evidence conditions**: Which `needs_evidence` items remain before
+  the premise can be trusted?
+- **Minimum discriminating test**: What comparison could distinguish the stated
+  explanations?
+- **Conclusion boundary**: What is the strongest permissible claim, and what
+  must remain unclaimed?
 
 If later reviewer feedback would change the problem being solved, mark that as **drift** and push back or adapt carefully.
 
@@ -223,6 +245,10 @@ Use this structure:
 - Non-goals:
 - Constraints:
 - Success condition:
+- Evidence-backed question and source locators:
+- Remaining evidence conditions:
+- Minimum discriminating test:
+- Conclusion boundary:
 
 ## Technical Gap
 [Why current methods fail, why naive bigger systems are not enough, and what mechanism is missing]

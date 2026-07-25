@@ -25,6 +25,28 @@ Draft a LaTeX paper based on: **$ARGUMENTS**
 
 If no PAPER_PLAN.md exists, ask the user to run `/paper-plan` first or provide a brief outline.
 
+## Draft Readiness and Composition Order
+
+Before prose, re-read the one-sentence contribution and the
+Claim–Evidence–Figure Storyboard in `PAPER_PLAN.md`. If the research question,
+main finding, significance, figure evidence, or permitted conclusion is still
+unstable, stop and return to `/paper-plan` or the evidence audit; do not write
+around an unresolved result.
+
+Compose the **first draft in evidence order**, while preserving the plan's
+conventional final section order in `main.tex`:
+
+1. frozen contribution and figure storyboard;
+2. Methods / setup needed to interpret the evidence;
+3. Results in storyboard order;
+4. Discussion (interpretation, literature comparison, limitations);
+5. Introduction;
+6. Abstract and title.
+
+This is a composition sequence, not a requirement to reorder the submitted
+paper. It prevents an attractive Introduction from getting ahead of the
+available evidence.
+
 ## Orchestra-Guided Writing Overlay
 
 Keep the existing workflow, file layout, and defaults. Use the shared references below only when they improve writing quality:
@@ -180,13 +202,24 @@ Create shared math macros based on the paper's notation:
 
 ### Step 3: Write Each Section
 
-Process sections in order. For each section:
+Compose in the evidence order defined above: Methods → Results in storyboard
+order → Discussion → Introduction → Abstract/title. Then place completed prose
+in the final section order specified by `PAPER_PLAN.md` and `main.tex`.
 
-1. **Read the plan** — what claims, evidence, citations belong here
-2. **Read NARRATIVE_REPORT.md** — extract relevant content, findings, and quantitative results
-3. **Draft content** — write complete LaTeX (not placeholders)
-4. **Insert figures/tables** — use snippets from `figures/latex_includes.tex`
-5. **Add citations** — for ML conferences (ICLR/NeurIPS/ICML/CVPR/ACL/AAAI): use `\citep{}` / `\citet{}` (natbib). **For IEEE venues**: use `\cite{}` (numeric style via `cite` package). Never mix natbib and cite commands.
+For each drafting unit:
+
+1. **Read the plan and storyboard** — identify the supported claim, primary
+   question, evidence locator, permitted conclusion, and excluded conclusion.
+2. **Read raw-linked evidence** — use `NARRATIVE_REPORT.md` plus the cited run,
+   table, figure source, or audit record; do not rely on a narrative claim when
+   the raw locator conflicts.
+3. **Draft content** — write complete LaTeX (no fabricated placeholders).
+4. **Insert figures/tables** — use snippets from `figures/latex_includes.tex`.
+   Captions must state the comparison, `n`/statistics where applicable, and the
+   conclusion readers may take from the figure.
+5. **Add citations** — for ML conferences (ICLR/NeurIPS/ICML/CVPR/ACL/AAAI): use
+   `\citep{}` / `\citet{}` (natbib). **For IEEE venues**: use `\cite{}`
+   (numeric style via `cite` package). Never mix natbib and cite commands.
 
 When using the ICDE-style layout, translate figure snippets to `Figure/` paths
 inside `\includegraphics` and write bibliography entries to `IEEE.bib`.
@@ -251,12 +284,24 @@ trade-offs, or scope boundaries deserve independent treatment.
 - Include algorithm pseudocode if applicable (`algorithm2e` or `algorithmic`)
 - Target: 1.5-2 pages
 
-**§4 Experiments:**
+**§4 Experiments / Results:**
 - Start with experimental setup (datasets, baselines, metrics, implementation details)
-- Main results table/figure first
-- Then ablations and analysis
-- Every claim from the introduction must have supporting evidence here
-- Target: 2.5-3 pages
+- Present main results in Claim–Evidence–Figure Storyboard order, then
+  ablations and analysis; structure by research questions (`RQ1`, `RQ2`, ...)
+  when possible.
+- Every claim from the Introduction must have supporting evidence here.
+- For each primary figure/table, write a four-sentence Results paragraph:
+  1. state the question; 2. state the comparison or analysis; 3. report the key
+  observation; 4. state only the storyboard's bounded conclusion.
+- Results report observations and comparisons. Do **not** move mechanism
+  explanations, literature comparison, limitations, or causal claims not
+  identified by the storyboard into Results.
+- Target: 2.5-3 pages.
+
+**Discussion (when planned as a separate section):**
+- Interpret the observed results, compare with prior work, explain supported
+  differences, and state concrete limitations. Do not repeat the Results or add
+  new unreported evidence.
 
 **§5 Conclusion:**
 - Summarize contributions (NOT copy-paste from intro — rephrase)
@@ -359,9 +404,26 @@ This prevents bib bloat (e.g., 948 lines → 215 lines in testing).
 6. Treat arXiv entries as final-bibliography blockers unless explicitly
    accepted as unpublished-preprint exceptions.
 
-### Step 5: Scientific Writing Quality Pass (6 audit passes)
+### Step 5: Evidence and Scientific Writing Quality Pass
 
-After drafting all sections, run six sequential audit passes. De-AI polish is included as one part of this quality pass, not a replacement for it.
+Before language polish, run an evidence-story audit:
+
+- Confirm the title, abstract, Results, and Discussion state the same bounded
+  main finding; flag any stronger wording outside the storyboard.
+- Check every primary figure/table reference, raw-result locator, version/date,
+  sample size or definition of `n`, unit, group name, and statistic for
+  consistency across prose, captions, tables, and source outputs.
+- Confirm captions include the comparison and statistical details needed to
+  interpret the claim, and that negative or contradictory results are visible
+  or explicitly bounded rather than silently omitted.
+- Check that methods identify sources/samples, key parameters, and an analysis
+  method appropriate to the data type.
+- Verify that citations support the claims they accompany, raw data remain
+  traceable, and unresolved user decisions are listed rather than buried in
+  prose.
+
+Then run six sequential writing-quality passes. De-AI polish is included as one
+part of this quality pass, not a replacement for it.
 
 **Pass 1: Clutter Extraction** — strip sentences to their cleanest components, remove filler, and remove AI-isms.
 
@@ -464,6 +526,11 @@ Before declaring done:
 - [ ] **Section files match main.tex** — file numbering and `\input` paths are consistent
 - [ ] Venue-specific required sections/checklists satisfied (read `../../skills-codex/shared-references/venue-checklists.md` if needed)
 - [ ] A skim reader can recover the main claim from the title, abstract, introduction, and Figure 1/captions
+- [ ] Title, abstract, Results, and Discussion agree on the same bounded main finding
+- [ ] Every primary figure/table answers one storyboard question and is not used for an excluded conclusion
+- [ ] Sample sizes/`n`, units, group names, captions, and statistics are consistent with raw-linked evidence
+- [ ] Negative or contradictory results are visible or explicitly scoped; raw data and result versions are traceable
+- [ ] User-facing interpretation or scope decisions remain listed in `PAPER_PLAN.md`
 
 ## Key Rules
 

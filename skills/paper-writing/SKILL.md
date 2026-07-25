@@ -171,6 +171,15 @@ Proceed only if all are true:
 4. `docs/paper/PAPER_PLAN.md` exists and its next-step block says the manuscript
    entry gate passed, or the user explicitly asks to create the plan first and
    the evidence gate is already passed.
+5. The paper can state a stable one-sentence core contribution, with separately
+   named research question, main finding, and significance. If any of these is
+   still changing, return to evidence/plan work instead of drafting prose.
+6. The accepted plan contains a Claim–Evidence–Figure Storyboard: every primary
+   figure/table answers one question, maps to a raw-result locator, names the
+   claim it supports, and records the strongest permitted conclusion plus any
+   missing evidence or analysis.
+7. The target venue range is known and unresolved user decisions are explicitly
+   listed rather than silently decided in the draft.
 
 If any check fails, stop before Phase 1. Do not create `paper/`, LaTeX section
 files, or `docs/paper/PAPER_GUIDE.md`; do not update `PROJECT_STATUS.md` to
@@ -179,6 +188,12 @@ files, or `docs/paper/PAPER_GUIDE.md`; do not update `PROJECT_STATUS.md` to
 next gate.
 
 Smoke, pilot, toy, or validation runs never satisfy this gate.
+
+This is a readiness gate, not a calendar promise. Once it passes, compose the
+first draft in evidence order (storyboard → Methods → Results → Discussion →
+Introduction → Abstract/title) while preserving the plan's conventional final
+section order. `/paper-plan` owns the storyboard contract; `/paper-write` owns
+the composition order and section-level evidence discipline.
 
 ### Phase 0.5: Assurance Setup
 
@@ -245,8 +260,11 @@ If `— style-ref: <source>` was passed in `$ARGUMENTS` and the helper succeeded
 **What this does:**
 - Parse NARRATIVE_REPORT.md for claims, evidence, and figure descriptions
 - Build a **Claims-Evidence Matrix** — every claim maps to evidence, every experiment supports a claim
+- Freeze a **Claim–Evidence–Figure Storyboard** — each primary figure/table has
+  a question, evidence locator, bounded conclusion, excluded conclusion, and
+  unresolved analysis or user decision
 - Design section structure (5-8 sections depending on paper type)
-- Plan figure/table placement with data sources
+- Plan figure/table placement in narrative evidence order with data sources
 - Scaffold citation structure
 - GPT-5.4 reviews the plan for completeness
 

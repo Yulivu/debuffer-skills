@@ -12,6 +12,7 @@ allowed-tools: Bash(*), Read, Write, Edit, Grep, Glob, WebSearch, WebFetch, Skil
 This is a first-layer entry skill. Keep it loaded as the user-facing route; when a request needs a specialized capability below, resolve the debuffer repo root from `.debuffer_skills/installed-skills-codex.txt` (`repo_root`) when available, read the referenced library `SKILL.md`, then follow that skill. Do not copy the whole library skill into this file.
 
 - `/idea-creator`: read `../library/idea-method/idea-creator/SKILL.md`.
+- `/reference-paper-deconstruction`: read `../library/idea-method/reference-paper-deconstruction/SKILL.md`.
 - `/research-refine`: read `../library/idea-method/research-refine/SKILL.md`.
 - `/research-lit`: read `../library/literature/research-lit/SKILL.md`.
 - `/novelty-check`: read `../library/review/novelty-check/SKILL.md`.
@@ -51,6 +52,11 @@ lightweight idea discovery unless the user requests a full report:
 - Treat `idea-creator` as the owner of A-E candidate generation. This workflow
   should only pass startup mode, landscape, reference material, venue
   constraints, and failure-memory context into `idea-creator`.
+- When `REFERENCE_LED = true`, run `reference-paper-deconstruction` before the
+  broad landscape search. It produces evidence-backed candidate seeds; it does
+  not replace `idea-creator`, `novelty-check`, or the user checkpoint.
+- Treat every reference-led candidate as provisional until its novelty check
+  passes; do not turn a future-work statement into a confirmed gap.
 - If the direction is robotics or embodied AI, use robotics mode: simulation
   first, benchmark-specific ideas only, explicit embodiment/task/action frame,
   failure metrics, and no real-robot execution without user approval.
@@ -67,7 +73,12 @@ lightweight idea discovery unless the user requests a full report:
 - **ARXIV_DOWNLOAD = false** — When `true`, `/research-lit` downloads the top relevant arXiv PDFs during Phase 1. When `false` (default), only fetches metadata. Passed through to `/research-lit`.
 - **COMPACT = false** — When `true`, generate compact summary files for short-context models and session recovery. Writes `idea-stage/IDEA_CANDIDATES.md` (top 3-5 ideas only) at the end of this workflow. Downstream skills read this instead of the full `idea-stage/IDEA_REPORT.md`.
 - **RENDER_HTML = true** — When `true` (default), auto-render `idea-stage/IDEA_REPORT.md` to HTML at workflow end via `/render-html`. Uses `--no-review` (the source MD already went through novelty + cross-model review during Phase 3). Set `false` to skip, or pass `— render html: false`.
-- **REF_PAPER = false** — Reference paper to base ideas on. Accepts: local PDF path, arXiv URL, or any paper URL. When set, the paper is summarized first (`idea-stage/REF_PAPER_SUMMARY.md`), then idea generation uses it as context. Combine with `base repo` for "improve this paper with this codebase" workflows.
+- **REF_PAPER = false** — Legacy single-paper fast path. Accepts a local PDF path, arXiv URL, or paper URL and writes `idea-stage/REF_PAPER_SUMMARY.md`.
+- **REFERENCE_LED = false** — Enable evidence-grounded topic discovery from a
+  core reference paper and optional comparators. Automatically enabled when
+  `— ref papers:` is supplied.
+- **REF_PAPERS = false** — Semicolon-separated core paper and up to three
+  comparators. Sources accept local paths, arXiv identifiers/URLs, or paper URLs.
 
 > 💡 These are defaults. Override by telling the skill, e.g., `/idea-discovery "topic" — ref paper: https://arxiv.org/abs/2406.04329` or `/idea-discovery "topic" — compact: true`.
 
@@ -91,7 +102,23 @@ If no brief exists, proceed normally with `$ARGUMENTS` as the research direction
 
 > 💡 Create a brief from the template at `docs/project/RESEARCH_BRIEF.md`.
 
-### Phase 0.5: Reference Paper Summary (when REF_PAPER is set)
+### Phase 0.5: Reference-Led Deconstruction (when `REFERENCE_LED` is enabled)
+
+**Skip entirely unless `REFERENCE_LED = true` or `$ARGUMENTS` contains `— ref papers:`.**
+
+1. Invoke `/reference-paper-deconstruction` with the research direction and the
+   supplied reference set. A single core paper is sufficient; the skill may add
+   comparators selected for question/design/data compatibility.
+2. Write and read `idea-stage/REFERENCE_DECONSTRUCTION.md` and the compact
+   `idea-stage/TOPIC_CANDIDATES.md` handoff.
+3. Carry the candidate evidence, minimum discriminating test, and conclusion
+   boundary into Phases 1 and 2. A `ready_for_novelty_check` status is not a
+   novelty verdict; `needs_evidence` and `blocked` records remain constraints,
+   not ideas to silently promote.
+4. Do not generate a legacy `REF_PAPER_SUMMARY.md` unless the user requested
+   `REF_PAPER` without reference-led mode. This preserves the old fast path.
+
+### Phase 0.6: Reference Paper Summary (when REF_PAPER is set)
 
 **Skip entirely if `REF_PAPER` is `false`.**
 
@@ -158,6 +185,14 @@ Invoke `/research-lit` to map the research landscape. Idea discovery is exactly 
 /research-lit "$ARGUMENTS" — sources: all, gemini
 ```
 
+When `idea-stage/TOPIC_CANDIDATES.md` exists, use it as a hypothesis ledger,
+not as a novelty verdict. For every carried candidate, search broader recent
+literature to determine whether its stated gap is still open, contested,
+already addressed, or still missing evidence. Preserve the candidate ID, source
+locators, gate status, minimum discriminating test, and conclusion boundary in
+the landscape notes. This check may downgrade a lead, but only
+`/novelty-check` can make the final differentiation judgment.
+
 If `gemini-cli` is not installed, `/research-lit` skips the Gemini source gracefully with a warning — no break to the pipeline. Users who want to force-disable Gemini in idea-discovery can pass `/idea-discovery "topic" — sources: all` explicitly (which becomes the literal source list, no auto-injection).
 
 **What this does:**
@@ -182,7 +217,8 @@ Does this match your understanding? Should I adjust the scope before generating 
 
 ### Phase 2: Idea Generation + Filtering + Pilots
 
-Invoke `/idea-creator` with the landscape context (and `idea-stage/REF_PAPER_SUMMARY.md` if available):
+Invoke `/idea-creator` with the landscape context and any available
+`idea-stage/REF_PAPER_SUMMARY.md` or `idea-stage/TOPIC_CANDIDATES.md` handoff:
 
 ```
 /idea-creator "$ARGUMENTS"
@@ -190,6 +226,13 @@ Invoke `/idea-creator` with the landscape context (and `idea-stage/REF_PAPER_SUM
 
 **What this does:**
 - If `idea-stage/REF_PAPER_SUMMARY.md` exists, include it as context — ideas should build on, improve, or extend the reference paper
+- If `idea-stage/TOPIC_CANDIDATES.md` exists, pass each retained candidate's ID,
+  source locators, gate status, minimum discriminating evidence, and conclusion
+  boundary. These are evidence-backed seeds, not a replacement for A-E
+  generation or novelty verification.
+- Keep `needs_evidence` as an explicit search or validation requirement; do not
+  turn it into an accepted premise. Keep `blocked` candidates out of ranking
+  unless a narrower, evidence-backed repair is stated.
 - Delegate A-E candidate generation and compact idea-memory updates to
   `idea-creator`; do not restate that logic here.
 - Pass `idea-stage/IDEA_MEMORY.md` and `experiments/NEGATIVE_RESULTS.md` as
