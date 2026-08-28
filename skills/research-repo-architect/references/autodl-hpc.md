@@ -27,22 +27,26 @@ An AutoDL runbook should include:
 
 - Project values: project slug, GitHub SSH URL, branch, server repo dir, and local repo path.
 - Preconditions: local protocol status, data availability, Python version, and "no formal run before smoke passes."
-- Server bootstrap: machine-specific deploy key, GitHub deploy key setup, clone/update commands.
+- Direct SSH connection: the exact provider-issued host/port command, without storing the password.
+- Optional GitHub bootstrap: machine-specific deploy key only when the server must authenticate to GitHub non-interactively.
 - Data policy: tracked data paths, FileZilla/SFTP upload exceptions, and `data/DATA_MANIFEST.md` update rules.
+- Network acceleration: `source /etc/network_turbo`, explicit Hugging Face mirror fallback, and checksum verification.
 - First command: `bash scripts/autodl_setup.sh`.
 - Preflight and smoke commands.
 - Pass criteria: bundle audit, tests, and lint.
 - Formal-run gate: disabled by default, dry-run first, explicit user approval required.
 - FileZilla/SFTP paths for uploading missing data and downloading raw run folders.
+- Shutdown protocol: issue standard Linux shutdown only after explicit approval, then require SSH unreachability.
 - Do-not list for smoke evidence, protocol edits, full-repo upload, `.git/` sync, and server hand edits.
 
 ## Operational Boundaries
 
-- Treat AutoDL as offline except for GitHub access.
-- Never copy a local private key to the server. Generate an AutoDL machine-specific key under `/root/.ssh/`.
-- Prefer deploy keys without write access unless the project explicitly needs server pushes.
+- Treat AutoDL as network-restricted by default; enable `/etc/network_turbo` only in the download shell.
+- Never store the provider password in the repository, runbook, shell history, or automation command.
+- Use a machine-specific key only for optional non-interactive GitHub access or batch SSH verification.
 - Keep server code immutable during formal runs: edit locally, commit, push, then `git pull --ff-only` on AutoDL.
 - Upload only missing large data files with FileZilla/SFTP, never the whole repo and never `.git/`.
+- Use `aria2c` only for direct range-capable archive URLs, followed by hash verification.
 - Keep smoke output in `experiments/runs/autodl_smoke/`; it is not paper evidence.
 - Keep formal raw outputs in `experiments/runs/<formal_block>/`; copy into `experiments/results/` only after local audit/result-to-claim scripts produce curated artifacts.
 

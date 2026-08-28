@@ -21,6 +21,36 @@ local repo: <local_repo_abs_path>
 smoke suite: experiments/suites/autodl_smoke.yaml
 ```
 
+## Direct SSH Connection
+
+AutoDL's connection panel provides the authoritative endpoint. Copy the command
+exactly, then replace only the secret values with local shell variables:
+
+```bash
+export AUTODL_HOST=connect.<REGION>.seetacloud.com
+export AUTODL_PORT=<PORT>
+export AUTODL_USER=root
+
+ssh -p "$AUTODL_PORT" "$AUTODL_USER@$AUTODL_HOST"
+```
+
+The displayed form may escape the `@` character as `\@`; the shell form is
+`root@<HOST>`. Do not save the password in this file, a runbook, shell history,
+or an automation command. Password authentication is interactive. For
+non-interactive monitoring and shutdown verification, configure a public key or
+an `ssh-agent` locally through the provider's supported SSH settings.
+
+Use the same endpoint for all remote operations:
+
+```bash
+ssh -p "$AUTODL_PORT" "$AUTODL_USER@$AUTODL_HOST" "<remote command>"
+scp -P "$AUTODL_PORT" <local_path> "$AUTODL_USER@$AUTODL_HOST:<remote_path>"
+sftp -P "$AUTODL_PORT" "$AUTODL_USER@$AUTODL_HOST"
+```
+
+Do not invent a region, port, hostname, alias, or alternate SSH route. If the
+instance is recreated, collect the new command from the console again.
+
 ## Expected Repo Contracts
 
 Prefer these paths for AutoDL-ready research repos:
@@ -44,7 +74,12 @@ Shell scripts should have LF line endings. Add a `.gitattributes` rule if the re
 *.sh text eol=lf
 ```
 
-## Server Bootstrap
+## Optional GitHub Bootstrap
+
+Direct AutoDL SSH login and GitHub authentication are separate concerns. The
+following machine-specific deploy-key setup is optional and is needed only when
+the server must clone or pull a private repository without interactive GitHub
+authentication. Never copy a local private key to AutoDL.
 
 Create an AutoDL machine-specific SSH key. Never copy a local private key to AutoDL.
 
@@ -111,6 +146,46 @@ Validate data before setup or smoke when project scripts exist:
 ```bash
 python scripts/data/verify_data.py --strict
 ```
+
+## Network Acceleration And Downloads
+
+Run the provider's network acceleration setup in the same shell as the download:
+
+```bash
+source /etc/network_turbo
+```
+
+Check the route before starting a large transfer:
+
+```bash
+curl -I --max-time 15 https://github.com
+curl -I --max-time 15 https://huggingface.co
+```
+
+If Hugging Face remains slow, use the domestic mirror explicitly for
+Hugging Face clients that support `HF_ENDPOINT`:
+
+```bash
+source /etc/network_turbo
+export HF_ENDPOINT=https://hf-mirror.com
+```
+
+After any mirror download, verify the requested repository revision, file list,
+and available SHA-256 or framework-provided checksums. Do not silently mix
+mirror output with an official artifact claim.
+
+For a direct archive URL that supports HTTP range requests, `aria2c` (not
+`ariac2`) can accelerate a resumable download:
+
+```bash
+aria2c -c -x 16 -s 16 -k 1M \
+  -d <download_dir> -o <archive_name> <direct_archive_url>
+sha256sum <download_dir>/<archive_name>
+```
+
+Use `aria2c` only for direct, range-capable URLs. Do not use it as a substitute
+for authenticated Hugging Face snapshot handling, Git repositories, Git LFS,
+or expiring URLs unless the source explicitly supports that workflow.
 
 ## Setup, Preflight, And Smoke
 
@@ -206,14 +281,102 @@ bash scripts/hpc/run_formal.sh aggregate
 
 echo FORMAL_SUCCESS
 date -Is
-/sbin/shutdown -h now
+try_poweroff() {
+  command_path="$1"
+  [ -x "$command_path" ] || return 1
+  "$command_path" -h now && return 0
+  "$command_path" && return 0
+  return 1
+}
+for command_path in \
+  "$(command -v shutdown 2>/dev/null || true)" \
+  /sbin/shutdown /usr/sbin/shutdown /usr/bin/shutdown \
+  "$(command -v poweroff 2>/dev/null || true)" \
+  /sbin/poweroff /usr/sbin/poweroff /usr/bin/poweroff; do
+  [ -n "$command_path" ] || continue
+  try_poweroff "$command_path" && exit 0
+done
+echo "ERROR: no working shutdown or poweroff command found" >&2
+exit 127
 '
 ```
 
 With `set -euo pipefail`, a failed command stops the script before
 `FORMAL_SUCCESS` and before shutdown, preserving the machine for debugging.
-Move `/sbin/shutdown -h now` only if the project has a different all-success
-sentinel; never put it before the aggregate/success lines.
+Move the shutdown block only if the project has a different all-success
+sentinel; never put it before the aggregate/success lines. Resolve shutdown
+and poweroff binaries at runtime rather than assuming they live under `/sbin`.
+
+## Remote Shutdown From Local SSH
+
+Shutdown is an explicit user action, not an automatic cleanup side effect.
+Before issuing it, check that no required process is still running and that
+all results/logs needed for local transfer are available.
+
+The official documentation describes instance control and SSH access but does
+not define a provider-specific SSH shutdown command. Use the compatible
+shutdown/poweroff fallback below and treat the machine as shut down only after
+a later SSH connection attempt fails:
+
+```bash
+ssh -p "$AUTODL_PORT" "$AUTODL_USER@$AUTODL_HOST" \
+  'nohup sh -c '"'"'
+    sleep 2
+    try_shutdown() {
+      command_path="$1"
+      [ -x "$command_path" ] || return 1
+      "$command_path" -h now >/dev/null 2>&1 && return 0
+      "$command_path" >/dev/null 2>&1 && return 0
+      return 1
+    }
+    for command_path in \
+      "$(command -v shutdown 2>/dev/null || true)" \
+      /sbin/shutdown /usr/sbin/shutdown /usr/bin/shutdown \
+      "$(command -v poweroff 2>/dev/null || true)" \
+      /sbin/poweroff /usr/sbin/poweroff /usr/bin/poweroff; do
+      [ -n "$command_path" ] || continue
+      try_shutdown "$command_path" && exit 0
+    done
+    echo "ERROR: no working shutdown or poweroff command found" >&2
+    exit 127
+  '"'"' >/tmp/autodl-shutdown.log 2>&1 &'
+```
+
+For automated verification, key or agent authentication must already work in
+batch mode. First verify that the check is meaningful:
+
+```bash
+ssh -o BatchMode=yes -o ConnectTimeout=5 -o ConnectionAttempts=1 \
+  -p "$AUTODL_PORT" "$AUTODL_USER@$AUTODL_HOST" true
+```
+
+Then poll without reusing a persistent SSH connection:
+
+```bash
+for attempt in $(seq 1 12); do
+  sleep 5
+  if ssh -o BatchMode=yes -o ControlPath=none \
+      -o ConnectTimeout=5 -o ConnectionAttempts=1 \
+      -p "$AUTODL_PORT" "$AUTODL_USER@$AUTODL_HOST" true \
+      >/dev/null 2>&1; then
+    continue
+  fi
+  echo "AUTODL_SHUTDOWN_CONFIRMED: SSH unreachable"
+  exit 0
+done
+
+echo "ERROR: SSH is still reachable; shutdown not confirmed" >&2
+exit 1
+```
+
+With password-only authentication, do not use `sshpass` or put the password in
+the command. Issue the shutdown command, then manually retry the exact SSH
+command until it cannot connect. A transient timeout is not enough if a later
+retry succeeds; record the final failed connection attempt and timestamp.
+
+If the shutdown command returns but SSH remains reachable, treat shutdown as
+unconfirmed and inspect `/tmp/autodl-shutdown.log` after reconnecting. Never
+declare success merely because the remote shell accepted the command.
 
 Audit formal bundles on the server before download when an audit script exists:
 

@@ -7,7 +7,7 @@
 ## 当前提供
 
 - 本地轻量工作流：建仓、代码编辑、审查准备、测试、lint、配置解析和 tiny smoke。
-- AutoDL/HPC 优先：本地只做轻量验证，重型 GPU/HPC 任务走 AutoDL handoff、preflight、smoke gate 和结果回传。
+- AutoDL/HPC 优先：本地只做轻量验证，重型 GPU/HPC 任务使用控制台直连 SSH、preflight、smoke gate、网络加速和结果回传；关机必须以 SSH 不可再次连接为准。
 - prompt-only 外部评审：生成 `review-prompts/`，交给独立对话评审，再把反馈整理成行动项。
 - 研究完整性审计：检查自动化流程是否越过用户授权、证据边界、数据隔离和结论权限，并保留可追溯的审计记录。
 - 发现与义务台账：用 append-only findings / obligations ledger 记录发现、待办、证据来源、责任边界和关闭条件，避免流程状态被覆盖。

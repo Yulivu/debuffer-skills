@@ -112,7 +112,23 @@ bash scripts/hpc/run_formal.sh aggregate
 
 echo FORMAL_SUCCESS
 date -Is
-/sbin/shutdown -h now
+try_poweroff() {
+  command_path="$1"
+  [ -x "$command_path" ] || return 1
+  "$command_path" -h now && return 0
+  "$command_path" && return 0
+  return 1
+}
+for command_path in \
+  "$(command -v shutdown 2>/dev/null || true)" \
+  /sbin/shutdown /usr/sbin/shutdown /usr/bin/shutdown \
+  "$(command -v poweroff 2>/dev/null || true)" \
+  /sbin/poweroff /usr/sbin/poweroff /usr/bin/poweroff; do
+  [ -n "$command_path" ] || continue
+  try_poweroff "$command_path" && exit 0
+done
+echo "ERROR: no working shutdown or poweroff command found" >&2
+exit 127
 '
 ```
 
@@ -145,7 +161,7 @@ Interpretation:
 
 - Do not run formal experiments outside a persistent session.
 - Do not run formal experiments from a foreground SSH shell.
-- Do not place `/sbin/shutdown -h now` before the success sentinel.
+- Do not place the shutdown/poweroff fallback before the success sentinel.
 - Do not mix partial failed results into submission artifacts.
 - Do not kill processes blindly; identify parent/child relationships first.
 - Do not clean old runs before showing `du -sh` and active process checks.
