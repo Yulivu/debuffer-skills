@@ -32,6 +32,9 @@ autonomous settings below unless the user explicitly asks for legacy automation:
 - **REVIEW_MODE = prompt-only**: generate `review-prompts/*_review_prompt.md`
   and wait for pasted feedback from a separate review conversation. Do not call
   reviewer agents unless the user explicitly opts into legacy review.
+- **AUTONOMOUS_REVIEW = false**: automatic reviewer loops are available only
+  after explicit user authorization for the current run. Preserve raw reviews
+  and append-only obligations.
 - **CODE_REVIEW = prompt-only**: for implementation review, write a code-review
   prompt file instead of calling a reviewer agent directly.
 - **LOCAL_HEAVY_COMPUTE = false**, **DEPLOY_TARGET = autodl**: local work is
@@ -49,6 +52,9 @@ autonomous settings below unless the user explicitly asks for legacy automation:
   `docs/project/RESEARCH_BLUEPRINT.md` and
   `docs/project/BLUEPRINT_GATE.md` via `/research-blueprint`.
   Keep routine updates compact.
+- **OVERNIGHT_HEARTBEAT = false**: when explicitly enabled, only checks external
+  machine-readable progress and resumes a stalled phase. It never accepts a
+  quality verdict, changes scope, or bypasses a user gate.
 
 For venue-specific review and writing, read
 `../shared-references/venue-profiles.md` and apply the target venue profile
@@ -103,6 +109,14 @@ For unattended idea/search/experiment loops, use the cheap deterministic helpers
   for long loops that rewrite a JSON state file. `STALE`/`MISSING` is detect-only:
   surface it and resume/pivot explicitly; do not let the watchdog restart or
   accept verdict-bearing work.
+
+Do not wrap an automatic reviewer loop in an external timer. Use its internal
+round state and integrity audit. External cadence is reserved for job completion,
+resource availability, artifact arrival, or scheduled literature changes.
+
+An explicitly enabled overnight heartbeat may read state, inspect external
+machine-verifiable facts, resume a stalled phase without changing its contract,
+record the wake event, and stop. It may say "keep going", never "good enough".
 
 ## Pipeline
 

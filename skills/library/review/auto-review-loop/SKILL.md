@@ -1,6 +1,6 @@
 ---
 name: auto-review-loop
-description: Guided prompt-only multi-round research review loop. Generates external-review prompts for a separate conversation, waits for pasted feedback, implements user-approved fixes, and keeps compact review logs; legacy reviewer backends are opt-in. Use when user says "auto review loop", "review until it passes", or wants iterative research improvement without direct reviewer API calls.
+description: Bounded multi-round research review loop with prompt-only default and explicit opt-in automatic reviewer calls, full raw traces, append-only obligations, and integrity checks. Use when user says "auto review loop", "review until it passes", or wants iterative research improvement.
 argument-hint: [topic-or-scope]
 allowed-tools: Bash(*), Read, Grep, Glob, Write, Edit, Skill
 ---
@@ -16,7 +16,10 @@ allowed-tools: Bash(*), Read, Grep, Glob, Write, Edit, Skill
 > *external wait that precedes it* (experiments done → then run this once). See
 > [`shared-references/external-cadence.md`](../../shared-references/external-cadence.md).
 
-Autonomously iterate: review → implement fixes → re-review, until the external reviewer gives a positive assessment or MAX_ROUNDS is reached.
+Iterate review → implement approved or pre-authorized fixes → re-review, until
+the registered stop condition or `MAX_ROUNDS` is reached. The loop is
+prompt-only by default and becomes automatic only when the user explicitly
+opts in.
 
 ## Customized Pack Defaults
 
@@ -24,7 +27,8 @@ Read `../../shared-references/lightweight-research-pack.md` before starting. In
 this customized pack the loop is guided, not fully autonomous, unless the user
 explicitly requests legacy automation:
 
-- **REVIEWER_BACKEND = prompt-only**, **HUMAN_CHECKPOINT = true**,
+- **REVIEWER_BACKEND = prompt-only**, **AUTONOMOUS_REVIEW = false**,
+  **HUMAN_CHECKPOINT = true**,
   **COMPACT = true**, **RENDER_HTML = false**, **MAX_ROUNDS = 2**.
 - For each round, write `review-prompts/auto_review_round<N>_prompt.md` and ask
   the user to paste the output from a separate review conversation. Do not call
@@ -48,8 +52,15 @@ explicitly requests legacy automation:
 - **REVIEWER_BACKEND = `prompt-only`**. Legacy backends (`codex`,
   `manual`, `oracle-pro`) require an explicit user request plus available
   tools; otherwise write reviewer prompts and wait for pasted feedback.
+- **AUTONOMOUS_REVIEW = `false`** — When `true`, the user has explicitly
+  authorized automatic reviewer calls and bounded low-risk fixes for this run.
+  It never authorizes scope changes, test access, heavy compute, or research
+  acceptance.
 - **OUTPUT_DIR = `review-stage/`** — All review-stage outputs go here. Create the directory if it doesn't exist.
-- **HUMAN_CHECKPOINT = false** — When `true`, pause after each round's review (Phase B) and present the score + weaknesses to the user. Wait for user input before proceeding to Phase C. The user can: approve the suggested fixes, provide custom modification instructions, skip specific fixes, or stop the loop early. When `false` (default), the loop runs fully autonomously.
+- **HUMAN_CHECKPOINT = true** — When `true`, pause after each round's review
+  and present the score plus weaknesses. Set it to `false` only together with
+  explicit `AUTONOMOUS_REVIEW = true`; this still does not authorize scope,
+  test, or acceptance decisions.
 - **COMPACT = false** — When `true`, (1) read `EXPERIMENT_LOG.md` and `findings.md` instead of parsing full logs on session recovery, (2) append key findings to `findings.md` after each round.
 - **REVIEWER_DIFFICULTY = medium** — Controls how adversarial the reviewer is. Three levels:
   - `medium` (default): Current behavior — MCP-based review, the executor controls what context the reviewer sees.
@@ -61,6 +72,23 @@ explicitly requests legacy automation:
 > "difficulty: nightmare requires Codex CLI / codex exec and is not compatible with --reviewer: manual. Use difficulty: hard, or switch reviewer to codex."
 
 > 💡 Override: `/auto-review-loop "topic" — compact: true, human checkpoint: true, difficulty: hard`
+
+## Automatic Mode Safeguards
+
+When `AUTONOMOUS_REVIEW = true`, require all of the following before round 1:
+
+1. the user has explicitly enabled automatic mode for this run;
+2. `MAX_ROUNDS`, the positive stop condition, and allowed fix classes are
+   recorded in the run manifest;
+3. full raw review responses are preserved;
+4. `review-stage/OBLIGATIONS.md` is append-only;
+5. fixes cannot change the problem, data, split, supervision, metric, scope,
+   test-access policy, or acceptance gate;
+6. heavy compute and irreversible changes are queued for user approval;
+7. `/integrity-forensics` runs at termination.
+
+An automatic positive stop marks `review-positive`, not `accepted`. A separate
+acceptance gate must still record any quality or correctness decision.
 
 ## Reviewer Calling Convention
 
@@ -130,6 +158,8 @@ Long-running loops may hit the context window limit, triggering automatic compac
 4. Identify current weaknesses and open TODOs from prior reviews
 5. Initialize round counter = 1 (unless recovered from state file)
 6. Create/update `review-stage/AUTO_REVIEW.md` with header and timestamp
+7. Create or update append-only `review-stage/OBLIGATIONS.md`; never remove a
+   prior finding without recording its state transition and evidence.
 
 ### Loop (repeat up to MAX_ROUNDS)
 
@@ -246,6 +276,11 @@ Then extract structured fields:
 - **Score** (numeric 1-10)
 - **Verdict** ("ready" / "almost" / "not ready")
 - **Action items** (ranked list of fixes)
+
+Run the anti-automation checks from
+`../../shared-references/research-integrity.md` after parsing and after each
+round. A missing raw response or unexplained finding disappearance blocks the
+loop.
 
 **STOP CONDITION**: If score >= 6 AND verdict ∈ {"ready", "almost"} (exact match — "not ready" does NOT qualify) → stop loop, document final state.
 

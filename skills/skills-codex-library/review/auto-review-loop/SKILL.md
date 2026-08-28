@@ -1,11 +1,13 @@
 ---
 name: "auto-review-loop"
-description: "Guided prompt-only multi-round research review loop. Generates external-review prompts for a separate conversation, waits for pasted feedback, implements user-approved fixes, and keeps compact review logs; legacy reviewer agents are opt-in. Use when user says \"auto review loop\", \"review until it passes\", or wants iterative research improvement without direct reviewer API calls."
+description: "Bounded multi-round research review loop with prompt-only default and explicit opt-in automatic reviewer calls, full raw traces, append-only obligations, and integrity checks. Use when user says \"auto review loop\", \"review until it passes\", or wants iterative research improvement."
 ---
 
 # Auto Review Loop: Autonomous Research Improvement
 
-Autonomously iterate: review → implement fixes → re-review, until the external reviewer gives a positive assessment or MAX_ROUNDS is reached.
+Iterate review → implement approved or pre-authorized fixes → re-review, until
+the registered stop condition or `MAX_ROUNDS` is reached. The loop is guided by
+default and becomes automatic only when the user explicitly opts in.
 
 ## Customized Pack Defaults
 
@@ -13,7 +15,8 @@ Read `../../skills-codex/shared-references/lightweight-research-pack.md` before 
 this customized pack the loop is guided, not fully autonomous, unless the user
 explicitly requests legacy automation:
 
-- **REVIEWER_BACKEND = prompt-only**, **HUMAN_CHECKPOINT = true**,
+- **REVIEWER_BACKEND = prompt-only**, **AUTONOMOUS_REVIEW = false**,
+  **HUMAN_CHECKPOINT = true**,
   **COMPACT = true**, **RENDER_HTML = false**, **MAX_ROUNDS = 2**.
 - For each round, write `review-prompts/auto_review_round<N>_prompt.md` and ask
   the user to paste the output from a separate review conversation. Do not call
@@ -35,13 +38,26 @@ explicitly requests legacy automation:
 - REVIEW_DOC: `review-stage/AUTO_REVIEW.md` (cumulative log) *(fall back to `./AUTO_REVIEW.md` for legacy projects)*
 - **OUTPUT_DIR = `review-stage/`** — All review-stage outputs go here. Create the directory if it doesn't exist.
 - REVIEWER_MODEL = `gpt-5.5` — Model used via a secondary Codex agent. Must be an OpenAI model (e.g., `gpt-5.5`, `o3`, `gpt-4o`)
-- **REVIEWER_BACKEND = `codex`** — Default: Codex reviewer agent at xhigh reasoning. Override with `--reviewer: oracle-pro` only when the user explicitly requests Oracle; if Oracle is unavailable, warn and fall back to Codex xhigh.
-- **HUMAN_CHECKPOINT = false** — When `true`, pause after each round's review (Phase B) and present the score + weaknesses to the user. Wait for user input before proceeding to Phase C. The user can: approve the suggested fixes, provide custom modification instructions, skip specific fixes, or stop the loop early. When `false` (default), the loop runs fully autonomously.
+- **AUTONOMOUS_REVIEW = false** — When `true`, the user has explicitly
+  authorized automatic reviewer calls and bounded low-risk fixes for this run.
+  It never authorizes scope changes, test access, heavy compute, or acceptance.
+- **REVIEWER_BACKEND = `codex`** — Default: independent reviewer agent at xhigh reasoning. Override only when the user explicitly requests another available reviewer.
+- **HUMAN_CHECKPOINT = true** — Pause after each round's review by default.
+  Set it to `false` only together with explicit `AUTONOMOUS_REVIEW = true`.
 - **COMPACT = false** — When `true`, (1) read `EXPERIMENT_LOG.md` and `findings.md` instead of parsing full logs on session recovery, (2) append key findings to `findings.md` after each round.
 - **REVIEWER_DIFFICULTY = medium** — Controls adversarial depth: `medium` uses normal Codex xhigh review through `spawn_agent` / `send_input`; `hard` adds Reviewer Memory and Debate Protocol; `nightmare` adds direct repository-reading adversarial verification by an independent reviewer.
 - **RENDER_HTML = true** — When `true` (default), auto-render `review-stage/AUTO_REVIEW.md` to HTML on loop termination via `/render-html`. Uses `--no-review` (the loop itself IS the cross-model review; the HTML render is a structural conversion). Set `false` to skip, or pass `— render html: false`.
 
 > 💡 Override: `/auto-review-loop "topic" — compact: true, human checkpoint: true, difficulty: hard`
+
+## Automatic Mode Safeguards
+
+When `AUTONOMOUS_REVIEW = true`, record the user's explicit authorization,
+maximum rounds, positive stop condition, allowed fix classes, and immutable
+research contracts before round 1. Preserve full raw review responses and keep
+`review-stage/OBLIGATIONS.md` append-only. Automatic mode may not change scope,
+data, split, supervision, metric, test access, or acceptance gates. Run
+`/integrity-forensics` when the loop terminates.
 
 ## Claude-Aligned Reviewer Memory and Debate
 
@@ -103,6 +119,8 @@ Long-running loops may hit the context window limit, triggering automatic compac
 4. Identify current weaknesses and open TODOs from prior reviews
 5. Initialize round counter = 1 (unless recovered from state file)
 6. Create/update `review-stage/AUTO_REVIEW.md` with header and timestamp
+7. Create or update append-only `review-stage/OBLIGATIONS.md`; never remove a
+   prior finding without recording its state transition and evidence.
 
 ### Loop (repeat up to MAX_ROUNDS)
 
@@ -151,6 +169,11 @@ Then extract structured fields:
 - **Score** (numeric 1-10)
 - **Verdict** ("ready" / "almost" / "not ready")
 - **Action items** (ranked list of fixes)
+
+Run the anti-automation checks from
+`../../skills-codex/shared-references/research-integrity.md` after parsing and
+after each round. A missing raw response or unexplained finding disappearance
+blocks the loop.
 
 **STOP CONDITION**: If score >= 6 AND verdict ∈ {"ready", "almost"} (exact match — "not ready" does NOT qualify) → stop loop, document final state.
 

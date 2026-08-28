@@ -1,6 +1,6 @@
 # debuffer-skills Agent Guide
 
-给第一次读取本仓库的 AI agent。人的入口看 [README.md](README.md)，完整技能目录看 [docs/SKILLS_CATALOG.md](docs/SKILLS_CATALOG.md)。总能力数：**92**。默认入口：**13**。
+给第一次读取本仓库的 AI agent。人的入口看 [README.md](README.md)，完整技能目录看 [docs/SKILLS_CATALOG.md](docs/SKILLS_CATALOG.md)。总能力数：**93**。默认入口：**13**。
 
 ## 包状态
 

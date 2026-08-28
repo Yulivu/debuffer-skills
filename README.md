@@ -1,6 +1,6 @@
 # debuffer-skills
 
-这是一个面向科研项目的轻量化 Codex skills 定制包。总能力数：**92**。默认入口：**13**。
+这是一个面向科研项目的轻量化 Codex skills 定制包。总能力数：**93**。默认入口：**13**。
 
 默认采用分层加载：项目里只直接暴露少量第一层入口 skill，细分能力放在 `skills/library/` 和 `skills/skills-codex-library/`，由入口 skill 按 `Capability Routing` 读取。需要旧式全部 slash 直调时，安装 `full-flat` profile。
 
@@ -9,6 +9,10 @@
 - 本地轻量工作流：建仓、代码编辑、审查准备、测试、lint、配置解析和 tiny smoke。
 - AutoDL/HPC 优先：本地只做轻量验证，重型 GPU/HPC 任务走 AutoDL handoff、preflight、smoke gate 和结果回传。
 - prompt-only 外部评审：生成 `review-prompts/`，交给独立对话评审，再把反馈整理成行动项。
+- 研究完整性审计：检查自动化流程是否越过用户授权、证据边界、数据隔离和结论权限，并保留可追溯的审计记录。
+- 发现与义务台账：用 append-only findings / obligations ledger 记录发现、待办、证据来源、责任边界和关闭条件，避免流程状态被覆盖。
+- 自动 reviewer loop：支持显式开启的连续评审模式，固定轮数和修复范围，保留原始 reviewer 回复，并防止 scope drift。
+- 安全夜间推进：通过 opt-in heartbeat 检查外部状态、恢复停滞阶段和报告阻塞，不自动判断质量、novelty、idea 或论文是否成立。
 - 论文链路：blueprint、实验计划、evidence audit、claim/citation/proof 审查、LaTeX、图表、Overleaf 打包、rebuttal 和 resubmit。
 - 紧凑项目记忆：根目录保留 `PROJECT_STATUS.md`，其它项目材料进入 `docs/` 分区。
 
@@ -19,6 +23,8 @@
 - 新增计算环境合同：用 env spec、hash ledger 和 smoke witness 管理 AutoDL/HPC/远端环境。
 - 升级 research-wiki：paper、idea、experiment、claim 统一走确定性写入和 query_pack 重建。
 - 升级安装更新检查：旧版本原样安装不再误判为用户自定义。
+- 新增 novelty audit：分别审计问题、范围和方法的新颖性，并区分 `direct`、`partial`、`incomparable` 与 `insufficient-evidence`。
+- 自动化只推进已授权流程，不替用户接受 idea、论文、质量或 novelty 结论。
 <a id="quick-start"></a>
 
 ## 快速开始

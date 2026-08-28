@@ -14,6 +14,7 @@ This is a first-layer entry skill. Keep it loaded as the user-facing route; when
 - `/research-refine`: read `../../skills-codex-library/idea-method/research-refine/SKILL.md`.
 - `/research-lit`: read `../../skills-codex-library/literature/research-lit/SKILL.md`.
 - `/novelty-check`: read `../../skills-codex-library/review/novelty-check/SKILL.md`.
+- `/integrity-forensics`: read `../../skills-codex-library/review/integrity-forensics/SKILL.md`.
 
 
 Orchestrate a complete idea discovery workflow for: **$ARGUMENTS**
@@ -65,7 +66,7 @@ lightweight idea discovery unless the user requests a full report:
 - **PILOT_TIMEOUT_HOURS = 3** — Hard timeout: kill any running pilot that exceeds 3 hours. Collect partial results if available.
 - **MAX_PILOT_IDEAS = 3** — Run pilots for at most 3 top ideas in parallel. Additional ideas are validated on paper only.
 - **MAX_TOTAL_GPU_HOURS = 8** — Total GPU budget across all pilots. If exceeded, skip remaining pilots and note in report.
-- **AUTO_PROCEED = true** — If user doesn't respond at a checkpoint, automatically proceed with the best option after presenting results. Set to `false` to always wait for explicit user confirmation.
+- **AUTO_PROCEED = false** — Never auto-select an idea or cross a quality gate because the user did not respond. Automatic reviewer loops may run only after the user explicitly starts them.
 - **REVIEWER_MODEL = `gpt-5.5`** — Model used via a secondary Codex agent. Must be an OpenAI model (e.g., `gpt-5.5`, `o3`, `gpt-4o`). Passed to sub-skills.
 - **ARXIV_DOWNLOAD = false** — When `true`, `/research-lit` downloads the top relevant arXiv PDFs during Phase 1. When `false` (default), only fetches metadata. Passed through to `/research-lit`.
 - **COMPACT = false** — When `true`, generate compact summary files for short-context sessions and downstream skills. Writes `idea-stage/IDEA_CANDIDATES.md`.
@@ -249,7 +250,7 @@ Which ideas should I validate further? Or should I regenerate with different con
 (If no response, I'll proceed with the top-ranked ideas.)
 ```
 
-- **User picks ideas** (or no response + AUTO_PROCEED=true) → proceed to Phase 3 with top-ranked ideas.
+- **User picks ideas** → proceed to Phase 3 with the selected ideas. No response is not approval.
 - **User unhappy with all ideas** → collect feedback ("what's missing?", "what direction do you prefer?"), update the prompt with user's constraints, and re-run Phase 2 (idea generation). Repeat until the user selects at least 1 idea.
 - **User wants to adjust scope** → go back to Phase 1 with refined direction.
 
@@ -267,8 +268,9 @@ For each top idea (positive pilot signal), run a thorough novelty check:
 - Cross-verify with GPT-5.4 xhigh
 - Check for concurrent work (last 3-6 months)
 - Identify closest existing work and differentiation points
+- Run `/integrity-forensics` on the novelty evidence trail when the check used an automated reviewer loop.
 
-**Update `idea-stage/IDEA_REPORT.md`** with deep novelty results. Eliminate any idea that turns out to be already published.
+**Update `idea-stage/IDEA_REPORT.md`** with deep novelty results. Preserve the complete prior-work ledger and do not eliminate an idea solely because a related paper exists; classify the overlap as direct, partial, incomparable, or unresolved.
 
 ### Phase 4: External Critical Review
 

@@ -44,6 +44,9 @@ autonomous settings below unless the user explicitly asks for legacy automation:
 - **REVIEW_MODE = prompt-only**: generate `review-prompts/*_review_prompt.md`
   and wait for pasted feedback from a separate review conversation. Do not call
   reviewer MCP/API backends unless the user explicitly opts into legacy review.
+- **AUTONOMOUS_REVIEW = false**: automatic reviewer loops are available only
+  after explicit user authorization for the current run. The loop must preserve
+  raw reviews and append-only obligations.
 - **CODE_REVIEW = prompt-only**: for implementation review, write a code-review
   prompt file instead of calling a reviewer backend directly.
 - **LOCAL_HEAVY_COMPUTE = false**, **DEPLOY_TARGET = autodl**: local work is
@@ -61,6 +64,9 @@ autonomous settings below unless the user explicitly asks for legacy automation:
   `docs/project/RESEARCH_BLUEPRINT.md` and
   `docs/project/BLUEPRINT_GATE.md` via `/research-blueprint`.
   Keep routine updates compact.
+- **OVERNIGHT_HEARTBEAT = false**: when explicitly enabled, only checks external
+  machine-readable progress and resumes a stalled phase. It never accepts a
+  quality verdict, changes scope, or bypasses a user gate.
 
 For venue-specific review and writing, read
 `../shared-references/venue-profiles.md` and apply the target venue profile
@@ -162,6 +168,22 @@ For unattended idea/search/experiment loops, use the cheap deterministic helpers
   for long loops that rewrite a JSON state file. `STALE`/`MISSING` is detect-only:
   surface it and resume/pivot explicitly; do not let the watchdog restart or
   accept verdict-bearing work.
+
+For automatic reviewer loops, do not wrap the loop in an external timer. Use
+the loop's own round state and `/integrity-forensics`. External cadence is
+reserved for waiting on job completion, resource availability, artifact arrival,
+or scheduled literature changes.
+
+For an explicitly enabled overnight heartbeat:
+
+1. read the run state and last progress timestamp;
+2. check only machine-verifiable external facts;
+3. resume or nudge a stalled phase without changing its contract;
+4. record the wake event and stop;
+5. leave quality, novelty, correctness, and acceptance verdicts to their owning
+   gate.
+
+The heartbeat may say "keep going"; it may never say "good enough".
 
 ## Pipeline
 

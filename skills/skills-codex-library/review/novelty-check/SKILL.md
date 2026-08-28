@@ -14,11 +14,14 @@ Check whether a proposed method/idea has already been done in the literature: **
 
 ## Instructions
 
-Given a method description, systematically verify its novelty:
+Given a method, problem, or scope description, systematically verify its
+novelty:
 
-### Phase A: Extract Key Claims
-1. Read the user's method description
-2. Identify 3-5 core technical claims that would need to be novel:
+### Phase A: Extract Claims and Contract
+1. Read the user's description.
+2. Identify the research problem, task contract, supervision, output, and
+   claim boundary before extracting technical claims.
+3. Identify 3-5 core claims that would need to be novel:
    - What is the method?
    - What problem does it solve?
    - What is the mechanism?
@@ -83,6 +86,15 @@ Output a structured report:
 - Check both the method AND the experimental setting for novelty
 - If the method is not novel but the FINDING would be, say so explicitly
 - Always check the most recent 6 months of arXiv — the field moves fast
+- A related paper is not automatically direct coverage. Classify overlap as
+  `direct`, `partial`, `incomparable`, or `insufficient-evidence`.
+- `ABANDON` requires direct coverage, an explicit user decision, or a
+  non-repairable feasibility failure. Do not abandon a candidate solely because
+  adjacent work exists.
+- Maintain an append-only prior-art ledger with paper identity, source
+  verification, overlapping claim, difference, status, and status-change reason.
+- If an automated reviewer loop was used, run `/integrity-forensics` on its
+  trace and obligation ledger before recording a final novelty decision.
 
 ## Review Tracing
 

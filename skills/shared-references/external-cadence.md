@@ -9,6 +9,11 @@ work or **WHETHER** a result is accepted.
 
 **External cadence is pure fire-control. It is never a jury.**
 
+In this repository, an overnight heartbeat is an opt-in operational service:
+it may resume work after an external event or detect a stalled phase, but it
+cannot accept a research verdict. Quality, novelty, correctness, and
+publishability remain owned by their internal review or deterministic gates.
+
 A scheduler picks the firing moment. It points the agent at a task at a
 chosen time. It has no opinion on correctness, quality, novelty, or
 publishability, and it must never silently re-spawn an agent or drop a
