@@ -81,7 +81,11 @@ following machine-specific deploy-key setup is optional and is needed only when
 the server must clone or pull a private repository without interactive GitHub
 authentication. Never copy a local private key to AutoDL.
 
-Create an AutoDL machine-specific SSH key. Never copy a local private key to AutoDL.
+### 1. Generate a machine-specific key on AutoDL
+
+Create one key per AutoDL machine and private repository as an isolation
+default. The values below are placeholders and must be filled from the current
+task; never copy a local computer's private key to AutoDL.
 
 ```bash
 mkdir -p /root/.ssh /root/autodl-tmp
@@ -91,7 +95,51 @@ ssh-keygen -t ed25519 \
   -C "autodl_<project_slug>_$(date +%Y%m%d_%H%M)" \
   -f /root/.ssh/id_ed25519_<project_slug> \
   -N ""
+```
 
+The resulting files are:
+
+```text
+private key: /root/.ssh/id_ed25519_<project_slug>
+public key:  /root/.ssh/id_ed25519_<project_slug>.pub
+```
+
+### 2. Show only the public key to the user
+
+The fingerprint is not the value to paste into GitHub:
+
+```bash
+ssh-keygen -lf /root/.ssh/id_ed25519_<project_slug>.pub
+```
+
+Print the complete public key instead:
+
+```bash
+cat /root/.ssh/id_ed25519_<project_slug>.pub
+```
+
+The output must be one complete line beginning with `ssh-ed25519`. The private
+key must never be sent, uploaded, committed, screenshotted, or written to logs.
+
+### 3. User adds the GitHub Deploy Key
+
+The user opens the target private repository in GitHub and chooses:
+
+```text
+Settings -> Deploy keys -> Add deploy key
+```
+
+Use a descriptive title such as `AutoDL <project_slug>`, paste the complete
+`.pub` line, and leave `Allow write access` disabled unless server-side pushes
+are explicitly required. A read-only Deploy Key is sufficient for clone/pull.
+The user, not the skill, performs this web-console action and confirms when it
+is complete before the server continues.
+
+### 4. Configure the server to select this key
+
+After the user confirms that the key was added to the correct repository:
+
+```bash
 cat > /root/.ssh/config <<'EOF'
 Host github.com
   HostName github.com
@@ -100,22 +148,72 @@ Host github.com
   IdentitiesOnly yes
 EOF
 
-chmod 600 /root/.ssh/config /root/.ssh/id_ed25519_<project_slug>
+chmod 600 /root/.ssh/config
+chmod 600 /root/.ssh/id_ed25519_<project_slug>
 chmod 644 /root/.ssh/id_ed25519_<project_slug>.pub
-cat /root/.ssh/id_ed25519_<project_slug>.pub
 ```
 
-Add the printed public key to the GitHub repository as a deploy key. Usually do not enable write access. Then test and clone:
+`IdentitiesOnly yes` prevents SSH from trying unrelated keys first. Do not
+assume that the default SSH agent selects the newly generated key.
+
+### 5. Verify in layers
+
+First verify GitHub authentication:
 
 ```bash
 ssh -T git@github.com
+```
 
+GitHub's successful response normally says that authentication succeeded but
+shell access is not provided. This confirms key authentication, not repository
+access. Next verify the exact private repository and branch:
+
+```bash
+git ls-remote git@github.com:<owner>/<private_repo>.git \
+  HEAD refs/heads/<branch>
+```
+
+A returned commit hash confirms the Deploy Key can access that repository.
+Only then clone or update:
+
+```bash
 cd /root/autodl-tmp
-git clone <github_ssh_url>
+git clone git@github.com:<owner>/<private_repo>.git
 cd /root/autodl-tmp/<repo_name>
 git checkout <branch>
 git rev-parse --short HEAD
 git status --short
+```
+
+### 6. Diagnose key-selection failures
+
+Use an explicit identity to separate key validity from default SSH selection:
+
+```bash
+ssh -i /root/.ssh/id_ed25519_<project_slug> \
+  -o IdentitiesOnly=yes \
+  -T git@github.com
+```
+
+Interpret failures in this order:
+
+```text
+explicit -i succeeds, ordinary ssh/git fails
+=> inspect ~/.ssh/config, IdentityFile, permissions, and IdentitiesOnly
+
+explicit -i also fails
+=> check the private-key path, file permissions, and whether the matching
+   .pub line was added to the correct private repository
+
+ssh -T succeeds, git ls-remote fails
+=> check the repository SSH URL, owner/repository name, branch, and Deploy Key
+   association
+```
+
+Inspect the effective SSH configuration without revealing private key contents:
+
+```bash
+ssh -G git@github.com | grep -E '^(user|identityfile|identitiesonly) '
 ```
 
 For an existing server clone:

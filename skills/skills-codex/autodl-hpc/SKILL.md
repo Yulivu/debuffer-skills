@@ -24,6 +24,10 @@ Read `references/autodl-hpc.md` before issuing commands, writing a runbook, or c
 
 - Always start from the exact SSH command shown in the AutoDL console, for example:
   `ssh -p <PORT> root@connect.<REGION>.seetacloud.com`.
+- All connection and repository examples in this skill are templates. Replace
+  `<PORT>`, `<REGION>`, `<project_slug>`, `<owner>`, `<private_repo>`, `<repo_name>`,
+  and `<branch>` only with values supplied for the current machine and repository.
+  Never reuse values from an earlier project or infer missing values.
 - Treat the host, port, username, and password as session-specific secrets. Never
   commit them, place the password in a command block, or put the password in a
   runbook. The user enters a password interactively, or configures an AutoDL
@@ -34,6 +38,10 @@ Read `references/autodl-hpc.md` before issuing commands, writing a runbook, or c
   verification. Do not silently fall back to an old server alias.
 - The backslash sometimes shown before `@` is escaping from a display layer; the
   shell command is `root@host`.
+- When private GitHub access is needed, route to the reference's six-step
+  machine-key workflow: generate the key on AutoDL, show only `.pub`, wait for
+  the user to add the repository Deploy Key, configure `IdentityFile`, verify
+  authentication and repository access, then diagnose key selection if needed.
 
 ## Customized Pack Defaults
 
