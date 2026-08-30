@@ -58,12 +58,17 @@ refine-logs/FINAL_PROPOSAL.md
 
 ## Constants
 
-- **AUTO_DEPLOY = true** — Automatically deploy experiments after implementation. Set `false` to review code before deploying.
-- **CODE_REVIEW = true** — Secondary Codex reviewer with xhigh reasoning reviews experiment code before deployment. Catches logic bugs before wasting GPU hours. Set `false` to skip.
+- **AUTO_DEPLOY = false** — Prepare the deployment plan and wait for explicit
+  approval after implementation, local checks, and the review handoff. Set
+  `true` only for an explicitly authorized run.
+- **CODE_REVIEW = prompt-only** — Write an external code-review prompt before
+  deployment. A direct reviewer backend requires explicit authorization for the
+  current run and must follow `shared-references/model-policy.md`.
 - **SANITY_FIRST = true** — Run the sanity-stage experiment first (smallest, fastest) before launching the rest. Catches setup bugs early.
 - **MAX_PARALLEL_RUNS = 4** — Maximum number of experiments to deploy in parallel (limited by available GPUs).
 - **BASE_REPO = false** — GitHub repo URL to use as a base codebase. When set, clone it first and implement experiments on top of it.
-- **COMPACT = false** — When `true`, prefer `idea-stage/IDEA_CANDIDATES.md` over the full `idea-stage/IDEA_REPORT.md`, and append completed runs to `EXPERIMENT_LOG.md`.
+- **COMPACT = true** — Prefer compact idea and experiment logs for session
+  recovery; use the full reports when the compact artifacts are unavailable.
 - **BACKENDS = local | ssh | vast | modal** — Preserve the Claude mainline backend lifecycle. Vast.ai and Modal routes are first-class when configured; do not silently fall back to local execution if the user requested either backend.
 - **RESCUE_ON_FAILURE = true** — If sanity or deployment fails, run a Codex-native rescue / second opinion review before abandoning the experiment plan.
 
@@ -147,9 +152,14 @@ For each milestone (in order), write the experiment scripts:
    - Does the code match FINAL_PROPOSAL.md's method description?
    - **CRITICAL**: does evaluation compare predictions against dataset ground truth, never another model's output?
 
-### Phase 2.5: Cross-Model Code Review (when CODE_REVIEW = true)
+### Phase 2.5: Code Review Handoff (Cross-Model Code Review When Explicitly Enabled)
 
 Skip this step if `CODE_REVIEW` is `false`.
+
+When `CODE_REVIEW = prompt-only`, write the review request to
+`review-prompts/experiment_code_review_prompt.md` and wait for pasted feedback.
+Only use the legacy direct reviewer payload below when the user explicitly
+authorizes an automatic reviewer backend.
 
 Before deploying, send the experiment code to a secondary Codex reviewer with xhigh reasoning:
 

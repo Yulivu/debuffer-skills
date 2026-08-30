@@ -33,8 +33,9 @@ Get a multi-round critical review of research work from the selected external re
 
 ## Customized Pack Defaults
 
-Read `../shared-references/lightweight-research-pack.md` and
-`../shared-references/venue-profiles.md` before preparing the review. Default to
+Read `../shared-references/lightweight-research-pack.md`,
+`../shared-references/venue-profiles.md`, and
+`../shared-references/model-policy.md` before preparing the review. Default to
 prompt-only review:
 
 - **REVIEWER_BACKEND = prompt-only**. Do not call Codex MCP, Manual Review MCP,
@@ -83,11 +84,11 @@ Review tracing applies equally to both backends.
 
 ## Prerequisites
 
-- **Codex MCP Server** configured in Claude Code:
-  ```bash
-  claude mcp add codex -s user -- codex mcp-server
-  ```
-- This gives Claude Code access to `mcp__codex__codex` and `mcp__codex__codex-reply` tools
+Prompt-only review has no provider prerequisite. For an explicit automatic
+backend, verify that the requested adapter is installed and record the
+resolved model, effort, and thread/task handle in the review trace. If the
+adapter is unavailable, stop with a blocked result instead of silently
+switching reviewers.
 
 ## Workflow
 
@@ -98,7 +99,8 @@ Before calling the external reviewer, compile a comprehensive briefing:
 3. Identify: core claims, methodology, key results, known weaknesses
 
 ### Step 2: Initial Review (Round 1)
-Send a detailed prompt with xhigh reasoning, using the selected backend.
+Send a detailed prompt using the selected backend and its supported effort
+setting. The prompt-only path is the default.
 
 *For codex backend:*
 

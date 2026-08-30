@@ -1,85 +1,58 @@
 # Reviewer Routing
 
-## Default Reviewer Contract
+Read `model-policy.md` before selecting a reviewer. This file defines the
+transport rules; it does not pin a global model or reasoning level.
 
-All reviewer-heavy Codex base skills use the same default contract:
+## Default
 
-- executor: current Codex main agent
-- reviewer: second Codex reviewer
-- reasoning effort: `xhigh`
-- round 1: `spawn_agent`
-- follow-up rounds: `send_input`
+External quality review is **prompt-only** in the lightweight pack:
 
-This is the base default for `skills/skills-codex/`. No effort level or unrelated parameter changes it.
+1. Write the exact reviewer prompt under `review-prompts/`.
+2. Ask the user to run it in a separate conversation with the model they
+   choose.
+3. Consume the pasted response and record the prompt, response, and summary
+   under `review-stage/`.
 
-## Default Pattern
+This default is deliberately independent of any provider subscription.
 
-Single-round review:
+## Explicit automatic backends
 
-```text
-spawn_agent:
-  model: gpt-5.5
-  reasoning_effort: xhigh
-  message: |
-    [role + task]
-    Read the listed files directly.
-```
+Only when the user explicitly selects a backend and the corresponding adapter
+is available:
 
-Multi-round review:
+- `codex`: create a fresh review task/thread for round 1; use continuation only
+  when the skill's protocol requires it.
+- `manual`: open the configured manual-review page or file handoff. The user
+  must choose a reviewer from a different model family for a quality verdict.
+- `oracle-pro` or another named provider: use the configured provider adapter
+  and record the resolved model alias in the trace. Do not assume that a model
+  alias remains available.
 
-```text
-spawn_agent:
-  model: gpt-5.5
-  reasoning_effort: xhigh
-  message: |
-    [initial review prompt]
-```
+If a requested adapter is missing, stop with an explicit blocked message.
+Never silently fall back to a different model family, claim that a review
+happened, or convert a failed review into an acceptance.
 
-Save the returned reviewer id, then continue with:
+## Common routing contract
 
-```text
-send_input:
-  target: <saved reviewer id>
-  message: |
-    [follow-up materials only]
-```
-
-## Oracle Pro Override
-
-When the user explicitly passes `--reviewer: oracle-pro`, switch only the reviewer route:
-
-- default reviewer remains Codex xhigh if no reviewer is specified
-- `oracle-pro` is optional, not the base default
-
-Routing rule:
+Every reviewer-capable skill should record:
 
 ```text
-If reviewer is omitted or reviewer=codex:
-  use spawn_agent / send_input with Codex reviewer at xhigh
-
-If reviewer=oracle-pro:
-  check Oracle MCP availability
-  if available:
-    call mcp__oracle__consult with model gpt-5.4-pro
-  if unavailable:
-    print a clear warning
-    fall back to the default Codex xhigh reviewer
+backend, resolved_model, effort, fresh_context, thread_or_task_handle,
+prompt_path, raw_response_path, verdict_id
 ```
 
-## Invariants
+- `fresh_context=true` means the reviewer sees the artifact and prompt, not
+  executor reasoning or a prior score summary.
+- A continuation handle is allowed only for a declared multi-round protocol.
+- Quality, novelty, correctness, and publication decisions require a
+  cross-model reviewer or a deterministic verifier, as defined in
+  `acceptance-gate.md`.
+- Scheduling and heartbeat tools can wake a workflow, but cannot accept its
+  output.
 
-- Base skills do not use the legacy Codex MCP thread path as the default reviewer route.
-- Reviewer independence still applies: pass file paths and task framing, not executor summaries.
-- Overlay packages may replace only the reviewer route.
-- Overlay packages do not change executor semantics.
-- Browser-based Oracle review is acceptable for one-shot stress tests, not ideal for tight multi-round loops.
+## Platform adapters
 
-## Skills That Commonly Benefit From `oracle-pro`
-
-- `research-review`
-- `auto-review-loop`
-- `experiment-audit`
-- `proof-checker`
-- `rebuttal`
-- `idea-creator`
-- `research-lit`
+Canonical workflow instructions must stay platform-neutral. Codex, Claude, and
+other mirrors may translate the abstract operations above into their local
+tool names and path conventions. Keep those translations in the mirror or a
+provider reference; do not copy them into every canonical skill.

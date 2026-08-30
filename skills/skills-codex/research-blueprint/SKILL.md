@@ -1,6 +1,6 @@
 ---
 name: research-blueprint
-description: Create or refresh a detailed stage-gate research blueprint before formal experiment planning, AutoDL formal runs, or a pre-paper evidence readiness check. Use when Codex needs a project-specific `RESEARCH_BLUEPRINT.md` with rigorous theory, method, dataset, baseline, experiment, implementation, reproducibility, paper-readiness prerequisites, and a sequential macro progress table; when the user asks for a complete research design document, project guide, pre-experiment blueprint, pre-paper evidence gate, or wants to know the next research stage. This skill is not manuscript drafting.
+description: Create or refresh a detailed, PDF-level executable research plan after an idea is selected and frozen. Use when Codex needs a project-specific `RESEARCH_BLUEPRINT.md` with positioning corrections, formal model layers, theory, capability matrix, datasets, baselines, claim-driven experiments, numeric gates, pivots, timeline, implementation, reproducibility, risks, and paper packaging. This skill is not manuscript drafting.
 ---
 
 # Research Blueprint
@@ -18,9 +18,38 @@ This is a first-layer entry skill. Keep it loaded as the user-facing route; when
 Create a detailed, carefully reasoned research design document for:
 **$ARGUMENTS**
 
-This skill produces a stage-gate artifact. It should be detailed enough that a
-future session can implement experiments or plan the paper without rereading all
-notes, but it should not be regenerated on every turn.
+This skill produces the **Executable Research Plan**. It is the detailed,
+stage-gated artifact that follows Idea Freeze and corresponds to the kind of
+research plan represented by a strong reference PDF: not a paper draft, not a
+candidate list, and not only an experiment checklist.
+
+The plan must be detailed enough that a future session can implement the method,
+challenge its claims, run the first de-risking experiments, and package the
+eventual paper without rereading all notes. It should not be regenerated on
+every status update.
+
+## PDF-Compatible Output Contract
+
+For a selected idea, produce the following argument chain:
+
+```text
+one-sentence thesis
+  -> problem and positioning
+  -> corrections to the raw idea
+  -> formal model / method layers
+  -> theory and proof obligations
+  -> exactness and approximation boundaries
+  -> capability matrix against relevant baselines
+  -> task and query protocol
+  -> claim-driven experiments and metrics
+  -> numeric decision gates and predeclared pivots
+  -> week-by-week execution roadmap
+  -> code modules, compute, risk register, paper package, appendices
+```
+
+The reference document is structural guidance only. Never copy its prose,
+claims, equations, datasets, or numerical gates. Replace every project-specific
+item with evidence from the selected idea and local/retrieved sources.
 
 ## Outputs
 
@@ -142,24 +171,37 @@ Use `[x]` only when there is concrete local evidence or a named artifact. Use
 `[ ]` for missing or merely intended work. If a stage is not applicable, mark
 `N/A` and explain in the evidence cell.
 
-Then include the following sections:
+Then include the following sections. The first 15 sections are the project and
+evidence backbone; sections 16-18 make the document match a detailed research
+plan rather than a generic project guide:
 
 ```markdown
 ## 1. 研究背景与动机
 ## 2. 问题定义与边界
+## 2.5 Raw Idea 纠偏与已有工作定位
 ## 3. 核心洞察与方法总览
+## 3.1 模型 / 方法层 1
+## 3.2 模型 / 方法层 2
+## 3.3 模型 / 方法层 3
+## 3.4 推断、训练与复杂度
+## 3.5 Insight 与独特性
 ## 4. 理论基础与待证明命题
-## 5. 系统 / 算法设计细节
-## 6. 数据集与数据处理计划
+## 5. 能力矩阵与竞品边界
+## 6. 数据集、任务与查询协议
 ## 7. Baseline 与对照组设计
 ## 8. Claim -> Evidence -> Experiment Map
 ## 9. 详细实验安排
-## 10. AutoDL/HPC 执行计划
-## 11. 实现计划与仓库结构
-## 12. 可复现性协议
-## 13. 论文写作前置条件
-## 14. 风险、反例与失败解释
-## 15. 当前缺口与下一道 gate
+## 9.1 指标、金标准与评估协议
+## 9.2 图表清单与论文叙事
+## 10. 决策 Gate 与失败转向
+## 11. 周级执行路线图
+## 12. AutoDL/HPC 执行计划
+## 13. 实现计划与仓库结构
+## 14. 可复现性协议
+## 15. 风险登记表、反例与失败解释
+## 16. 论文写作前置条件与预期论文包
+## 17. 当前缺口与下一道 gate
+## 18. 附录：符号、关键推导、参考文献台账
 ```
 
 ### Section Requirements
@@ -167,12 +209,24 @@ Then include the following sections:
 - **Background**: explain the field gap, why naive fixes are insufficient, and
   why this project's insight is plausible.
 - **Problem definition**: formalize input, output, target tasks, assumptions,
-  non-goals, and success criteria.
+  non-goals, success criteria, and the strongest permissible conclusion.
+- **Raw idea correction**: list the initial claims or intuitions, what prior
+  work already occupies, what is actually novel, and how the framing changes.
+  A correction is required whenever the selected idea came from a paper or raw
+  brainstorming note.
+- **Method layers**: describe each layer's input, output, mathematical object,
+  trainable parameters, objective, interface, and reason it is needed. Keep the
+  layers compositional; do not hide a second contribution inside a paragraph.
+- **Inference boundary**: distinguish exact identities, numerical truncations,
+  approximations, sampling fallbacks, and worst-case complexity. State the
+  assumptions under which each guarantee holds.
 - **Theory**: list assumptions, variables, propositions/theorems if known,
   proof obligations, approximation arguments, complexity, and what experiments
   will validate if theory is incomplete.
-- **Method**: specify modules, interfaces, training/inference paths,
-  hyperparameters to freeze, and what is deliberately excluded.
+- **Capability matrix**: compare the selected method with strong relevant
+  baselines on the capabilities that motivate the work, such as likelihood,
+  multimodality, arbitrary queries, conditioning, calibration, consistency,
+  evidence, and guarantees. Use `unknown` when evidence is missing.
 - **Datasets**: separate synthetic, small real, large real, and optional
   datasets. State each dataset's role, scale, preprocessing, split, access, and
   failure risk.
@@ -182,6 +236,18 @@ Then include the following sections:
   experiment block, expected result, and failure interpretation.
 - **Experiment plan**: include design, metrics, seeds, run order, decision
   rule, expected artifact path, and paper table/figure target for every block.
+- **Metrics and gold standard**: define proper scores first, then diagnostics,
+  calibration, mode coverage, efficiency, and task-specific measures. State
+  how a gold-standard posterior or oracle is obtained when one exists.
+- **Decision gates**: every central assumption needs a predeclared numeric or
+  mechanically checkable gate, a time point, and a failure pivot. Never loosen a
+  gate after seeing the result.
+- **Timeline**: give a sequential week-level or milestone-level route from the
+  first de-risking test through paper packaging, with deliverables and gates.
+- **Risk register**: for each risk record signal, mitigation, fallback,
+  consequence for the paper, and the claim that must be downgraded.
+- **Paper package**: map planned figures, tables, theorem statements, appendix
+  material, rebuttal questions, and venue alternatives to the claims they serve.
 - **AutoDL/HPC**: separate local checks, remote preflight, smoke, pilot, formal
   suite, result transfer, and local audit.
 - **Reproducibility**: require commit hash, dirty status, configs, resolved
@@ -190,6 +256,78 @@ Then include the following sections:
 - **Paper readiness**: define what formal-run evidence and audit artifacts are
   needed before `paper-plan`; do not treat validation-only work as paper
   readiness.
+
+## Required Tables
+
+The plan must contain these tables, even when some cells are marked `TBD`:
+
+1. **Positioning table**: closest work, what it solves, what it does not solve,
+   and the exact differentiation.
+2. **Capability matrix**: capability rows, baseline columns, evidence status,
+   and caveats.
+3. **Claim map**: claim, support type, experiment, metric, expected result,
+   falsifier, artifact path.
+4. **Task / dataset / query table**: task, available input, target output,
+   gold standard, split, and failure risk.
+5. **Gate table**: gate ID, assumption, deadline, pass rule, evidence artifact,
+   and pivot.
+6. **Milestone table**: ordered week or milestone, work, deliverable, compute,
+   and decision.
+7. **Risk register**: risk, signal, mitigation, fallback, and claim impact.
+
+## Detail Standard
+
+For a technically ambitious idea, the finished plan should normally include:
+
+- a one-sentence summary and a 2-3 paragraph executive summary;
+- 3-6 explicit contributions or claims, with one dominant contribution;
+- 2-4 method layers and their interfaces;
+- 2-4 theory items or proof obligations, clearly labeled as theorem,
+  proposition, conjecture, or empirical check;
+- 3-6 task/query blocks and grouped baselines;
+- 3-5 core experiment blocks plus appendix experiments;
+- 3-5 predeclared gates with numeric or mechanical pass rules;
+- a 10-20 week execution route, adjusted to the actual budget;
+- a code module plan, compute estimate, risk register, and paper figure/table
+  inventory.
+
+Shorter plans are valid for genuinely small ideas, but omitting these categories
+because they are inconvenient is not a valid compression strategy.
+
+## Generation Procedure
+
+When the input is a selected candidate, read `refine-logs/FINAL_PROPOSAL.md`
+first. If it is absent, create or request an Idea Freeze before writing a
+high-confidence blueprint. A speculative blueprint is allowed only when the
+user explicitly requests it; label every unverified item as `hypothesis`,
+`needs_evidence`, or `TBD`.
+
+Build the document in this order:
+
+1. Write the one-sentence thesis and executive summary.
+2. Build the positioning table from the closest papers and methods.
+3. Write a raw-idea correction table:
+   `initial belief -> evidence -> correction -> consequence for the plan`.
+4. Define the problem, non-goals, tasks, observations, outputs, and success
+   criteria.
+5. Decompose the method into 2-4 layers. For every layer specify interfaces,
+   equations or algorithms when justified, parameters, training/estimation,
+   inference, complexity, and failure boundary.
+6. List theory claims and proof obligations. Separate proven statements from
+   conjectures and empirical mechanism checks.
+7. Fill the capability matrix and state why each baseline is included.
+8. Define datasets and query protocols before selecting metrics. Add synthetic
+   controls for the central mechanism whenever possible.
+9. Build the claim map, then derive only the necessary experiment blocks.
+10. Set numeric or mechanical gates before writing the timeline. Each failed
+    gate must have a predeclared downgrade, pivot, or stop decision.
+11. Write the week-by-week route, code modules, resource budget, risk register,
+    and paper package.
+12. Finish with current gaps and the single next gate. Do not mark an intended
+    stage complete without an evidence path.
+
+The plan should read as a coherent argument. Every later section must answer a
+question raised earlier; do not append disconnected benchmark or feature lists.
 
 ## BLUEPRINT_GATE.md
 
@@ -269,6 +407,10 @@ Use the macro map from `project-guide-protocol.md`:
 - Be detailed where decisions matter; be concise where the information is
   stable and already available elsewhere.
 - Do not generate a large document for a vague direction unless the user asks.
+  For a selected candidate or an explicit research-plan request, generate the
+  full PDF-level structure above.
+- Prefer an accepted Idea Freeze from `/research-refine` as the input. If it is
+  missing, mark the blueprint speculative and route back to `/research-refine`.
 - Do not claim readiness without evidence paths.
 - Do not treat pilot, smoke, or toy runs as paper evidence.
 - Do not advance from blueprint to `paper-plan` unless formal runs and the

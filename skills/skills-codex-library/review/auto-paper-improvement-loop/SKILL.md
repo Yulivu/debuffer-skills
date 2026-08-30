@@ -1,6 +1,6 @@
 ---
 name: auto-paper-improvement-loop
-description: "Autonomously improve a generated paper via GPT-5.4 xhigh review → implement fixes → recompile, for 2 rounds. Use when user says \"改论文\", \"improve paper\", \"论文润色循环\", \"auto improve\", or wants to iteratively polish a generated paper."
+description: "Run a bounded review → fix → recompile loop for a generated paper. The reviewer backend and model come from the shared policy or an explicit user override. Use when user says \"改论文\", \"improve paper\", \"论文润色循环\", \"auto improve\", or wants to iteratively polish a generated paper."
 argument-hint: "[paper-directory] [— edit-whitelist <path>]"
 allowed-tools: Bash(*), Read, Write, Edit, Grep, Glob
 ---
@@ -18,8 +18,11 @@ Unlike `/auto-review-loop` (which iterates on **research** — running experimen
 ## Constants
 
 - **MAX_ROUNDS = 2** — Two rounds of review→fix→recompile. Empirically, Round 1 catches structural issues (4→6/10), Round 2 catches remaining presentation issues (6→7/10). Diminishing returns beyond 2 rounds for writing-only improvements.
-- **REVIEWER_MODEL = `gpt-5.5`** — Model used via Codex MCP for paper review.
-- **REVIEWER_BIAS_GUARD = true** — When `true`, every review round uses a fresh `spawn_agent` reviewer with no prior review context. Do not use stale self-reported context for review rounds. Set to `false` only for deliberate debugging of the legacy behavior. **Empirical evidence:** running the same paper with continuation replies plus "since last round we did X" prompts inflated scores from real 3/10 → fake 8/10 across multiple rounds; switching to fresh threads recovered the true 3/10 assessment.
+- **REVIEWER_MODEL** — Resolve from `shared-references/model-policy.md` or an
+  explicit per-run reviewer override; never assume a particular model ID.
+- **REVIEWER_BIAS_GUARD = true** — Every review round uses a fresh review
+  context unless the selected protocol explicitly requires continuation. Do not
+  pass executor reasoning or prior score summaries to a fresh reviewer.
 - **REVIEW_LOG = `PAPER_IMPROVEMENT_LOG.md`** — Cumulative log of all rounds, stored in paper directory.
 - **HUMAN_CHECKPOINT = false** — When `true`, pause after each round's review and present score + weaknesses to the user. The user can approve fixes, provide custom modification instructions, skip specific fixes, or stop early. When `false` (default), runs fully autonomously.
 - **EDIT_WHITELIST = `null`** — Optional path to a YAML/JSON whitelist file constraining which paths and operations the fix-implementation step may touch. When `null` (default), all edits proceed unconstrained. When set via `— edit-whitelist <path>` (also accepts `— edit_whitelist <path>`), the loop loads the file at startup and consults it before each edit; rejected edits are logged to `PAPER_IMPROVEMENT_LOG.md` rather than silently dropped. See "Optional: Edit Whitelist" below.
@@ -195,7 +198,7 @@ Send the full paper text AND compiled PDF to GPT-5.4 xhigh:
 
 ```text
 spawn_agent:
-  model: gpt-5.5
+  model: <resolved-model-from-policy>
   reasoning_effort: xhigh
   message: |
     You are reviewing a [VENUE] paper. Please provide a detailed, structured review.
@@ -324,7 +327,7 @@ If `REVIEWER_BIAS_GUARD = true` (default), use a **fresh** `spawn_agent` reviewe
 
 ```text
 spawn_agent:
-  model: gpt-5.5
+  model: <resolved-model-from-policy>
   reasoning_effort: xhigh
   message: |
     You are reviewing a [VENUE] paper. This is a fresh, zero-context review.

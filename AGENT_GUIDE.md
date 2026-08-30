@@ -28,9 +28,10 @@
 |---|---|---|
 | 总流程 | `/research-pipeline` | 按项目阶段选择下游入口 |
 | 建仓/迁移 | `/research-repo-architect` | 结构、状态、AutoDL hooks |
-| 方向起步 | `/idea-discovery` | 方向、论文、代码库或 idea 起步 |
-| 研究蓝图 | `/research-blueprint` | 理论、实验、可复现协议和 gate |
-| 实验计划 | `/experiment-plan` | pilot gate、run order、预算 |
+| 方向起步 | `/idea-discovery` | 发现、筛选并选择 evidence-bounded candidate |
+| Idea Freeze | `/research-refine` | 冻结问题锚点、主 thesis、最小机制验证和 pivot 条件 |
+| 研究蓝图 | `/research-blueprint` | 生成与参考 PDF 同等结构和详细度的可执行研究计划 |
+| 实验计划 | `/experiment-plan` | 将已冻结蓝图转成 pilot gate、run order 和预算 |
 | 实验实现 | `/experiment-bridge` | 本地 tiny checks 到远程 handoff |
 | 远程准备 | `/autodl-hpc` | AutoDL/HPC preflight 和 smoke |
 | 审查评审 | `/research-review` | prompt-only 外部评审和证据审计 |
@@ -50,7 +51,7 @@
 | `core-research` | 建仓、idea、实验计划、AutoDL、基础审计入口 |
 | `paper` | 论文写作、图表、rebuttal/resubmit 入口 |
 | `review` | prompt-only 评审和证据审计入口 |
-| `full-flat` | 完整直调版，安装 92 个能力 |
+| `full-flat` | 完整直调版，安装 93 个能力 |
 
 ## 修改仓库时的校验
 

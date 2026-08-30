@@ -51,7 +51,9 @@ This skill is most valuable for **theory papers** with ≥5 theorem-class enviro
 
 ## Constants
 
-- **REVIEWER_MODEL** = `gpt-5.5` (default; specify `gpt-5.4` if you want to fall back to the legacy default).  Reviewer reasoning effort = `xhigh`.
+- **REVIEWER_MODEL** = resolve from the shared model policy or an explicit
+  per-run override; never hard-code a workflow default. Reviewer reasoning
+  effort comes from the selected adapter's supported settings.
 - **CONTEXT_POLICY** = `fresh` (REVIEWER_BIAS_GUARD).  Each thread is a fresh `mcp__codex__codex` call.  **Never** use `mcp__codex__codex-reply`.  No prior review summary, fix list, or executor explanation enters either prompt.
 - **ATTACK_LENGTH** = approximately 200 words (do not exceed 250).  Single coherent argument, not a list.
 - **DEFENSE_DECOMPOSITION** = 3-7 atomic rejection points extracted from the attack memo.  Each gets its own classification.
@@ -88,7 +90,7 @@ Invoke `mcp__codex__codex` (NOT `codex-reply`) with the following prompt structu
 
 ```
 mcp__codex__codex:
-  model: gpt-5.5
+  model: <resolved-model-from-policy>
   config: {"model_reasoning_effort": "xhigh"}
   sandbox: read-only
   cwd: <paper directory>
@@ -186,7 +188,7 @@ Invoke a second `mcp__codex__codex` call (still NOT `codex-reply` — Thread 2 i
 
 ```
 mcp__codex__codex:
-  model: gpt-5.5
+  model: <resolved-model-from-policy>
   config: {"model_reasoning_effort": "xhigh"}
   sandbox: read-only
   cwd: <paper directory>

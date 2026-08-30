@@ -85,7 +85,7 @@ and discussion/related-work placement.
 
 - **VENUE = `ICLR`** — Target venue. Options: `ICLR`, `NeurIPS`, `ICML`, `CVPR`, `ACL`, `AAAI`, `JMLR`, `TPAMI`, `ACM`, `IEEE_JOURNAL` (IEEE Transactions / Letters), `IEEE_CONF` (IEEE conferences). Affects style file, page limit, citation format.
 - **MAX_IMPROVEMENT_ROUNDS = 1** — Number of review→fix→recompile rounds in the improvement loop.
-- **REVIEWER_MODEL = `gpt-5.5`** — Model used via Codex MCP for plan review, figure review, writing review, and improvement loop.
+- **REVIEWER_MODEL** = resolve from the shared model policy or an explicit per-run override; never hard-code a workflow default.
 - **AUTO_PROCEED = false** — Pause between phases unless the user explicitly opts into auto-continue.
 - **HUMAN_CHECKPOINT = true** — Pause after each improvement review so the user can inspect the score and provide custom modification instructions. Passed through to `/auto-paper-improvement-loop`.
 - **ILLUSTRATION = `figurespec`** — Architecture/illustration generator for Phase 2b: `figurespec` (default, deterministic JSON→SVG via `/figure-spec`, best for architecture/workflow/topology), `gemini` (AI-generated via `/paper-illustration`, best for qualitative method illustrations; needs `GEMINI_API_KEY`), `codex-image2` (AI-generated via `/paper-illustration-image2` through the local Codex native image bridge — no external API key, uses your ChatGPT Plus/Pro quota; experimental), `mermaid` (Mermaid syntax via `/mermaid-diagram`, free, best for flowcharts), or `false` (skip Phase 2b, manual only).

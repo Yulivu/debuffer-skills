@@ -85,8 +85,14 @@ their gate conditions are met; otherwise update compact memory files.
 - **AUTO_PROCEED = false** — Wait for explicit user confirmation before leaving idea selection or any expensive gate.
 - **ARXIV_DOWNLOAD = false** — When `true`, `/research-lit` downloads the top relevant arXiv PDFs during literature survey. When `false` (default), only fetches metadata via arXiv API. Passed through to `/idea-discovery` → `/research-lit`.
 - **HUMAN_CHECKPOINT = true** — Pause review loops after each round so the user can inspect feedback before fixes or new experiments.
-- **REVIEWER_DIFFICULTY = medium** — How adversarial the reviewer is. `medium` (default): standard MCP review. `hard`: adds reviewer memory + debate protocol. `nightmare`: GPT reads repo directly via `codex exec` + memory + debate. Passed through to `/auto-review-loop`.
-- **CODE_REVIEW = true** — GPT-5.4 xhigh reviews experiment code before deployment. Catches logic bugs before wasting GPU hours. Set `false` to skip. Passed through to `/experiment-bridge`.
+- **REVIEWER_DIFFICULTY = medium** — Controls the requested review depth. In the
+  default prompt-only mode, it changes the generated review checklist. `hard`
+  and `nightmare` may be used for an explicitly authorized automatic reviewer
+  backend, but never select a model or backend by themselves. Passed through to
+  `/auto-review-loop`.
+- **CODE_REVIEW = prompt-only** — Write a code-review prompt before deployment.
+  An automatic reviewer backend requires explicit authorization for the current
+  run and must follow `shared-references/model-policy.md`.
 - **BASE_REPO = false** — GitHub repo URL to use as base codebase. When set, `/experiment-bridge` clones the repo first and implements experiments on top of it. When `false` (default), writes code from scratch or reuses existing project files. Passed through to `/experiment-bridge`.
 - **COMPACT = true** — Generate compact summary files for short-context models and session recovery. Passed through to `/idea-discovery` and `/experiment-bridge`.
 - **AUTO_WRITE = false** — When `true`, it may request the paper-writing workflow only after formal runs, evidence audit, and paper-plan gates pass. When `false` (default), stop at the next allowed gate and do not present manuscript commands.
@@ -139,9 +145,9 @@ are actually opened.
 
   | phase | what sets `accepted` | record as reviewer |
   |-------|----------------------|--------------------|
-  | `idea-discovery` | Gate 1 cross-model jury / novelty-check passed | `codex-gpt-5.5` + thread id |
+  | `idea-discovery` | Gate 1 cross-model jury / novelty-check passed | configured reviewer handle + thread/trace id |
   | `experiment-bridge` | experiments actually ran (jobs completed) — deterministic | `deterministic:experiment-bridge` |
-  | `auto-review-loop` | the loop hit its positive STOP (`score>=6 AND verdict∈{ready,almost}` — codex's verdict) | `codex-gpt-5.5` + final review trace id |
+  | `auto-review-loop` | the loop hit its positive STOP (`score>=6 AND verdict∈{ready,almost}`) | configured reviewer handle + final review trace id |
   | `evidence-summary` | compact status files updated and Stage 4 gate recorded; `docs/paper/NARRATIVE_REPORT.md` only if evidence readiness check passed | `deterministic:evidence-summary` |
   | `paper-plan` | `docs/paper/PAPER_PLAN.md` accepted and manuscript entry check explicitly passed | `deterministic:paper-plan-gate` |
   | `paper-writing` | submission audits passed (`verify_paper_audits.sh` exit 0) — deterministic | `deterministic:verify_paper_audits.sh` |
@@ -249,7 +255,7 @@ Once the user confirms which idea to pursue, delegate implementation and deploym
 **What this does (fully autonomous):**
 1. Parses `refine-logs/EXPERIMENT_PLAN.md` — extracts milestones, run order, compute budget
 2. Implements experiment code — extends pilot to full scale, follows existing codebase conventions
-3. **Cross-model code review** — GPT-5.4 xhigh reviews the implementation for logic bugs, incorrect metrics, and ground-truth misuse before any GPU time is spent
+3. **Code-review handoff** — writes a prompt-only review request for logic bugs, incorrect metrics, and ground-truth misuse before any GPU time is spent; automatic review is opt-in
 4. **Sanity check** — runs the smallest experiment first to verify the environment; auto-debugs failures (up to 3 attempts, with `/codex:rescue` fallback)
 5. Deploys full experiments — auto-routes by job count (≤5 → `/run-experiment`, ≥10 → `/experiment-queue` with OOM retry, wave gating, crash-safe state)
 6. Collects initial results — parses outputs, updates `refine-logs/EXPERIMENT_TRACKER.md`, runs `/training-check` if W&B is configured
@@ -277,7 +283,7 @@ Once initial results are in, start the autonomous improvement loop:
 ```
 
 **What this does (up to 4 rounds):**
-1. GPT-5.4 xhigh reviews the work (score, weaknesses, minimum fixes)
+1. The configured review mode evaluates the work (score, weaknesses, minimum fixes); prompt-only mode records the request and waits for pasted feedback
 2. Claude Code implements fixes (code changes, new experiments, reframing)
 3. Deploy fixes, collect new results
 4. Re-review → repeat until (score ≥ 6/10 AND verdict ∈ {ready, almost}) or 4 rounds reached

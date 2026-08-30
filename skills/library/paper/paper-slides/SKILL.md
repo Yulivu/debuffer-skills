@@ -24,7 +24,7 @@ Unlike posters (single page, visual-first), slides tell a **temporal story**: ea
 - **SPEAKER_NOTES = true** — Generate `\note{}` blocks in beamer and corresponding PPTX notes. Set `false` for clean slides without notes.
 - **PAPER_DIR = `paper/`** — Directory containing the compiled paper.
 - **OUTPUT_DIR = `slides/`** — Output directory for all slide files.
-- **REVIEWER_MODEL = `gpt-5.5`** — Model used via Codex MCP for slide review.
+- **REVIEWER_MODEL** = resolve from the shared model policy or an explicit per-run override; never hard-code a workflow default.
 - **AUTO_PROCEED = false** — At each checkpoint, **always wait for explicit user confirmation**.
 - **COMPILER = `latexmk`** — LaTeX build tool.
 - **ENGINE = `pdflatex`** — LaTeX engine. Use `xelatex` for CJK text.

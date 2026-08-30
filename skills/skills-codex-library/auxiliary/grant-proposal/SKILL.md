@@ -32,7 +32,7 @@ Grant proposals argue for **future work** (feasibility + potential), not complet
 
 - **GRANT_TYPE = `KAKENHI`** — Default grant type. Supported: `KAKENHI`, `NSF`, `NSFC`, `ERC`, `DFG`, `SNSF`, `ARC`, `NWO`, `GENERIC`. Override via argument (e.g., `/grant-proposal "topic — NSF"`).
 - **GRANT_SUBTYPE = `auto`** — Sub-type within the grant agency. Examples: KAKENHI `Start-up`/`Wakate`/`Kiban-B`; NSFC `Youth`/`Excellent-Youth`/`Distinguished`/`Overseas`/`Key`; NSF `CAREER`/`CRII`/`Standard`. Auto-detected from argument or defaults to the most common sub-type.
-- **REVIEWER_MODEL = `gpt-5.5`** — Model used via a secondary Codex agent for proposal review. Must be an OpenAI model (e.g., `gpt-5.5`, `o3`, `gpt-4o`).
+- **REVIEWER_MODEL** = resolve from the shared model policy or an explicit per-run override; never hard-code a workflow default.
 - **OUTPUT_FORMAT = `markdown`** — Output format. Supported: `markdown`, `latex`. LaTeX uses grant-specific templates when available.
 - **MAX_REVIEW_ROUNDS = 2** — Maximum external review-revise cycles before finalizing.
 - **OUTPUT_DIR = `grant-proposal/`** — Directory for generated proposal files.

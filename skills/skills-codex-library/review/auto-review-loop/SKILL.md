@@ -37,7 +37,7 @@ explicitly requests legacy automation:
 - POSITIVE_THRESHOLD: score >= 6/10 AND verdict ∈ {"ready", "almost"} — both must hold, matching the operative STOP CONDITION below. Verdict vocabulary is {"ready", "almost", "not ready"}. (Earlier wording used "or" + a stale verdict set; the AND form is authoritative.)
 - REVIEW_DOC: `review-stage/AUTO_REVIEW.md` (cumulative log) *(fall back to `./AUTO_REVIEW.md` for legacy projects)*
 - **OUTPUT_DIR = `review-stage/`** — All review-stage outputs go here. Create the directory if it doesn't exist.
-- REVIEWER_MODEL = `gpt-5.5` — Model used via a secondary Codex agent. Must be an OpenAI model (e.g., `gpt-5.5`, `o3`, `gpt-4o`)
+- **REVIEWER_MODEL** = resolve from the shared model policy or an explicit per-run override; never hard-code a workflow default.
 - **AUTONOMOUS_REVIEW = false** — When `true`, the user has explicitly
   authorized automatic reviewer calls and bounded low-risk fixes for this run.
   It never authorizes scope changes, test access, heavy compute, or acceptance.

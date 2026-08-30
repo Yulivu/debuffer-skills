@@ -46,7 +46,7 @@ The dangerous citation problems are **not** wildly fake citations — those are 
 
 ## Constants
 
-- **REVIEWER_MODEL = `gpt-5.5`** — Used via Codex MCP. Default for cross-model review with web access.
+- **REVIEWER_MODEL** = resolve from the shared model policy or an explicit per-run override; never hard-code a workflow default.
 - **CONTEXT_POLICY = `fresh`** — Each audit run uses a new reviewer thread (REVIEWER_BIAS_GUARD). Never `continuation reply`.
 - **WEB_SEARCH = required** — The reviewer must perform real web/DBLP/arXiv lookups, not pattern-match from memory. arXiv may be used to identify a paper, but the final verdict must prefer formal publication metadata when it exists.
 - **OUTPUT = `CITATION_AUDIT.md`** — Human-readable per-entry verdict report.
@@ -87,7 +87,7 @@ For each **cited** bib entry — i.e., each key in `cited_keys` with at least on
 
 ```
 a fresh external reviewer thread:
-  model: gpt-5.5
+  model: <resolved-model-from-policy>
   config: {"model_reasoning_effort": "xhigh"}
   sandbox: read-only
   prompt: |

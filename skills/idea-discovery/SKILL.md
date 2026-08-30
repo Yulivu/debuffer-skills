@@ -1,449 +1,209 @@
 ---
 name: idea-discovery
-description: "Workflow 1: Full idea discovery pipeline. Orchestrates research-lit → idea-creator → novelty-check → research-review → research-refine plus experiment-plan to go from a broad research direction to validated, pilot-tested ideas. Also handles robotics / embodied AI directions through simulation-first robotics mode. Use when user says \"找idea全流程\", \"idea discovery pipeline\", \"从零开始找方向\", \"robotics idea discovery\", \"embodied AI idea\", or wants the complete idea exploration workflow."
+description: "Find and select research directions without prematurely turning every candidate into a full research plan. Use for 找idea全流程, 从零开始找方向, idea discovery, reference-led topic discovery, or robotics / embodied-AI topic exploration."
 argument-hint: [research-direction]
-allowed-tools: Bash(*), Read, Write, Edit, Grep, Glob, WebSearch, WebFetch, Skill, mcp__codex__codex, mcp__codex__codex-reply
+allowed-tools: Bash(*), Read, Write, Edit, Grep, Glob, WebSearch, WebFetch, Skill
 ---
 
-# Workflow 1: Idea Discovery Pipeline
+# Idea Discovery
+
+Discover, compare, and select research candidates for: **$ARGUMENTS**
+
+This is the **candidate-discovery layer**. It must end with a selected,
+evidence-bounded candidate or a clear request for more direction. It must not
+silently generate a long method proposal, a full experiment roadmap, or a
+paper-ready research plan for every candidate.
 
 ## Capability Routing
 
-This is a first-layer entry skill. Keep it loaded as the user-facing route; when a request needs a specialized capability below, resolve the debuffer repo root from `.debuffer_skills/installed-skills-codex.txt` (`repo_root`) when available, read the referenced library `SKILL.md`, then follow that skill. Do not copy the whole library skill into this file.
+This is a first-layer entry skill. Resolve the debuffer repo root from
+`.debuffer_skills/installed-skills-codex.txt` (`repo_root`) when available, read
+the referenced library `SKILL.md`, then follow that skill. Do not duplicate
+library instructions here.
 
 - `/idea-creator`: read `../library/idea-method/idea-creator/SKILL.md`.
 - `/reference-paper-deconstruction`: read `../library/idea-method/reference-paper-deconstruction/SKILL.md`.
-- `/research-refine`: read `../library/idea-method/research-refine/SKILL.md`.
 - `/research-lit`: read `../library/literature/research-lit/SKILL.md`.
 - `/novelty-check`: read `../library/review/novelty-check/SKILL.md`.
-- `/integrity-forensics`: read `../library/review/integrity-forensics/SKILL.md`.
+- `/research-refine`: read `../library/idea-method/research-refine/SKILL.md` only after a candidate is selected.
+- `/research-blueprint`: use the entry skill `../research-blueprint/SKILL.md` only after Idea Freeze.
 
-
-Orchestrate a complete idea discovery workflow for: **$ARGUMENTS**
-
-## Overview
-
-This skill chains sub-skills into a single automated pipeline:
-
-```
-/research-lit → /idea-creator → /novelty-check → /research-review → /research-refine → /experiment-plan
-  (survey)      (brainstorm)    (verify novel)    (critical feedback)  (method)        (experiment plan)
-```
-
-Each phase builds on the previous one's output. The final deliverables are a validated `idea-stage/IDEA_REPORT.md` with ranked ideas, plus a refined proposal (`refine-logs/FINAL_PROPOSAL.md`) and experiment plan (`refine-logs/EXPERIMENT_PLAN.md`) for the top idea.
-
-## Customized Pack Defaults
-
-Read `../shared-references/lightweight-research-pack.md` first. Default to
-lightweight idea discovery unless the user requests a full report:
-
-- Classify startup mode (`venue-only`, `reference-paper`, `reference-codebase`,
-  `idea-doc`, `existing-repo`, or `partial-results`) and tailor the first
-  deliverable to the available material.
-- **AUTO_PROCEED = false**, **COMPACT = true**, **RENDER_HTML = false**.
-- For `venue-only`, create a concise `PROJECT_BRIEF.md`,
-  `idea-stage/IDEA_CANDIDATES.md`, and `NEXT_ACTIONS.md` before any long report.
-- For paper/code/reference starts, extract assumptions, reusable assets, and the
-  smallest validation plan instead of generating a large `IDEA_REPORT.md` by
-  default.
-- Do not run heavy pilots locally. If a pilot needs GPU time, prepare an
-  AutoDL-ready smoke/formal plan and ask for approval.
-- External critique is prompt-only by default: write
-  `review-prompts/idea_review_prompt.md` and wait for pasted feedback.
-- Treat `idea-creator` as the owner of A-E candidate generation. This workflow
-  should only pass startup mode, landscape, reference material, venue
-  constraints, and failure-memory context into `idea-creator`.
-- When `REFERENCE_LED = true`, run `reference-paper-deconstruction` before the
-  broad landscape search. It produces evidence-backed candidate seeds; it does
-  not replace `idea-creator`, `novelty-check`, or the user checkpoint.
-- Treat every reference-led candidate as provisional until its novelty check
-  passes; do not turn a future-work statement into a confirmed gap.
-- If the direction is robotics or embodied AI, use robotics mode: simulation
-  first, benchmark-specific ideas only, explicit embodiment/task/action frame,
-  failure metrics, and no real-robot execution without user approval.
-
-## Constants
-
-- **PILOT_MAX_HOURS = 2** — Skip any pilot experiment estimated to take > 2 hours per GPU. Flag as "needs manual pilot" in the report.
-- **PILOT_TIMEOUT_HOURS = 3** — Hard timeout: kill any running pilot that exceeds 3 hours. Collect partial results if available.
-- **MAX_PILOT_IDEAS = 3** — Run pilots for at most 3 top ideas in parallel. Additional ideas are validated on paper only.
-- **MAX_TOTAL_GPU_HOURS = 8** — Total GPU budget across all pilots. If exceeded, skip remaining pilots and note in report.
-- **AUTO_PROCEED = false** — Never auto-select an idea or cross a quality gate because the user did not respond. Automatic reviewer loops may run only after the user explicitly starts them.
-- **REVIEWER_MODEL = `gpt-5.5`** — Model used via Codex MCP. Must be an OpenAI model (e.g., `gpt-5.5`, `o3`, `gpt-4o`). Passed to sub-skills.
-- **OUTPUT_DIR = `idea-stage/`** — All idea-stage outputs go here. Create the directory if it doesn't exist.
-- **ARXIV_DOWNLOAD = false** — When `true`, `/research-lit` downloads the top relevant arXiv PDFs during Phase 1. When `false` (default), only fetches metadata. Passed through to `/research-lit`.
-- **COMPACT = false** — When `true`, generate compact summary files for short-context models and session recovery. Writes `idea-stage/IDEA_CANDIDATES.md` (top 3-5 ideas only) at the end of this workflow. Downstream skills read this instead of the full `idea-stage/IDEA_REPORT.md`.
-- **RENDER_HTML = true** — When `true` (default), auto-render `idea-stage/IDEA_REPORT.md` to HTML at workflow end via `/render-html`. Uses `--no-review` (the source MD already went through novelty + cross-model review during Phase 3). Set `false` to skip, or pass `— render html: false`.
-- **REF_PAPER = false** — Legacy single-paper fast path. Accepts a local PDF path, arXiv URL, or paper URL and writes `idea-stage/REF_PAPER_SUMMARY.md`.
-- **REFERENCE_LED = false** — Enable evidence-grounded topic discovery from a
-  core reference paper and optional comparators. Automatically enabled when
-  `— ref papers:` is supplied.
-- **REF_PAPERS = false** — Semicolon-separated core paper and up to three
-  comparators. Sources accept local paths, arXiv identifiers/URLs, or paper URLs.
-
-> 💡 These are defaults. Override by telling the skill, e.g., `/idea-discovery "topic" — ref paper: https://arxiv.org/abs/2406.04329` or `/idea-discovery "topic" — compact: true`.
-
-## Pipeline
-
-### Phase 0: Load Research Brief (if available)
-
-Before starting any other phase, check for a detailed research brief in the project:
-
-1. Look for `docs/project/RESEARCH_BRIEF.md` (or a path passed as `$ARGUMENTS`). Fall back to legacy root `RESEARCH_BRIEF.md` only for older projects.
-2. If found, read it and extract:
-   - Problem statement and context
-   - Constraints (compute, data, timeline, venue)
-   - What the user already tried / what didn't work
-   - Domain knowledge and non-goals
-   - Existing results (if any)
-3. Use this as the primary context for all subsequent phases — it replaces the one-line prompt
-4. If both `docs/project/RESEARCH_BRIEF.md` and a one-line `$ARGUMENTS` exist, merge them (brief takes priority for details, argument sets the direction)
-
-If no brief exists, proceed normally with `$ARGUMENTS` as the research direction.
-
-> 💡 Create a brief from the template at `docs/project/RESEARCH_BRIEF.md`.
-
-### Phase 0.5: Reference-Led Deconstruction (when `REFERENCE_LED` is enabled)
-
-**Skip entirely unless `REFERENCE_LED = true` or `$ARGUMENTS` contains `— ref papers:`.**
-
-1. Invoke `/reference-paper-deconstruction` with the research direction and the
-   supplied reference set. A single core paper is sufficient; the skill may add
-   comparators selected for question/design/data compatibility.
-2. Write and read `idea-stage/REFERENCE_DECONSTRUCTION.md` and the compact
-   `idea-stage/TOPIC_CANDIDATES.md` handoff.
-3. Carry the candidate evidence, minimum discriminating test, and conclusion
-   boundary into Phases 1 and 2. A `ready_for_novelty_check` status is not a
-   novelty verdict; `needs_evidence` and `blocked` records remain constraints,
-   not ideas to silently promote.
-4. Do not generate a legacy `REF_PAPER_SUMMARY.md` unless the user requested
-   `REF_PAPER` without reference-led mode. This preserves the old fast path.
-
-### Phase 0.6: Reference Paper Summary (when REF_PAPER is set)
-
-**Skip entirely if `REF_PAPER` is `false`.**
-
-Summarize the reference paper before searching the literature:
-
-1. **If arXiv URL** (e.g., `https://arxiv.org/abs/2406.04329`):
-   - Invoke `/arxiv "ARXIV_ID" — download` to fetch the PDF
-   - Read the first 5 pages (title, abstract, intro, method overview)
-
-2. **If local PDF path** (e.g., `papers/reference.pdf`):
-   - Read the PDF directly (first 5 pages)
-
-3. **If other URL**:
-   - Fetch and extract content via WebFetch
-
-4. **Generate `idea-stage/REF_PAPER_SUMMARY.md`**:
-
-```markdown
-# Reference Paper Summary
-
-**Title**: [paper title]
-**Authors**: [authors]
-**Venue**: [venue, year]
-
-## What They Did
-[2-3 sentences: core method and contribution]
-
-## Key Results
-[Main quantitative findings]
-
-## Limitations & Open Questions
-[What the paper didn't solve, acknowledged weaknesses, future work suggestions]
-
-## Potential Improvement Directions
-[Based on the limitations, what could be improved or extended?]
-
-## Codebase
-[If `base repo` is also set: link to the repo and note which parts correspond to the paper]
-```
-
-**🚦 Checkpoint:** Present the summary to the user:
-
-```
-📄 Reference paper summarized:
-- Title: [title]
-- Key limitation: [main gap]
-- Improvement directions: [2-3 bullets]
-
-Proceeding to literature survey with this as context.
-```
-
-Phase 1 and Phase 2 will use `idea-stage/REF_PAPER_SUMMARY.md` as additional context — `/research-lit` searches for related and competing work, `/idea-creator` generates ideas that build on or improve the reference paper.
-
-### Phase 1: Literature Survey
-
-Invoke `/research-lit` to map the research landscape. Idea discovery is exactly the place where Gemini's AI-driven broad coverage adds value, so include `gemini` as a source by default unless the user already specified an explicit `— sources:` directive in their idea-discovery invocation:
-
-```
-# If $ARGUMENTS already contains "— sources:", pass through unchanged
-# (the user is in control of source selection):
-/research-lit "$ARGUMENTS"
-
-# Otherwise (the common case), include gemini explicitly for broader discovery:
-/research-lit "$ARGUMENTS" — sources: all, gemini
-```
-
-When `idea-stage/TOPIC_CANDIDATES.md` exists, use it as a hypothesis ledger,
-not as a novelty verdict. For every carried candidate, search broader recent
-literature to determine whether its stated gap is still open, contested,
-already addressed, or still missing evidence. Preserve the candidate ID, source
-locators, gate status, minimum discriminating test, and conclusion boundary in
-the landscape notes. This check may downgrade a lead, but only
-`/novelty-check` can make the final differentiation judgment.
-
-If `gemini-cli` is not installed, `/research-lit` skips the Gemini source gracefully with a warning — no break to the pipeline. Users who want to force-disable Gemini in idea-discovery can pass `/idea-discovery "topic" — sources: all` explicitly (which becomes the literal source list, no auto-injection).
-
-**What this does:**
-- Search arXiv, Google Scholar, Semantic Scholar for recent papers
-- Plus Gemini-driven broad discovery (sub-problem decomposition, naming variants, alias coverage) when `gemini-cli` is available
-- Build a landscape map: sub-directions, approaches, open problems
-- Identify structural gaps and recurring limitations
-- Output a literature summary (saved to working notes)
-
-**🚦 Checkpoint:** Present the landscape summary to the user. Ask:
-
-```
-📚 Literature survey complete. Here's what I found:
-- [key findings, gaps, open problems]
-
-Does this match your understanding? Should I adjust the scope before generating ideas?
-(If no response, I'll proceed with the top-ranked direction.)
-```
-
-- **User approves** (or no response + AUTO_PROCEED=true) → proceed to Phase 2 with best direction.
-- **User requests changes** (e.g., "focus more on X", "ignore Y", "too broad") → refine the search with updated queries, re-run `/research-lit` with adjusted scope, and present again. Repeat until the user is satisfied.
-
-### Phase 2: Idea Generation + Filtering + Pilots
-
-Invoke `/idea-creator` with the landscape context and any available
-`idea-stage/REF_PAPER_SUMMARY.md` or `idea-stage/TOPIC_CANDIDATES.md` handoff:
-
-```
-/idea-creator "$ARGUMENTS"
-```
-
-**What this does:**
-- If `idea-stage/REF_PAPER_SUMMARY.md` exists, include it as context — ideas should build on, improve, or extend the reference paper
-- If `idea-stage/TOPIC_CANDIDATES.md` exists, pass each retained candidate's ID,
-  source locators, gate status, minimum discriminating evidence, and conclusion
-  boundary. These are evidence-backed seeds, not a replacement for A-E
-  generation or novelty verification.
-- Keep `needs_evidence` as an explicit search or validation requirement; do not
-  turn it into an accepted premise. Keep `blocked` candidates out of ranking
-  unless a narrower, evidence-backed repair is stated.
-- Delegate A-E candidate generation and compact idea-memory updates to
-  `idea-creator`; do not restate that logic here.
-- Pass `idea-stage/IDEA_MEMORY.md` and `experiments/NEGATIVE_RESULTS.md` as
-  banlist context unless the user explicitly asks to revisit a failed direction.
-- Brainstorm 8-12 concrete ideas via GPT-5.4 xhigh
-- Filter by feasibility, compute cost, quick novelty search
-- Deep validate top ideas (full novelty check + devil's advocate)
-- Prepare pilot specs for top ideas. Do not run heavy pilots locally; when GPU
-  time is needed, create AutoDL-ready pilot command blocks and wait for approval
-  or pasted results.
-- Rank by empirical signal
-- Output `idea-stage/IDEA_REPORT.md`
-
-**🚦 Checkpoint:** Present `idea-stage/IDEA_REPORT.md` ranked ideas to the user. Ask:
-
-```
-💡 Generated X ideas, filtered to Y, piloted Z. Top results:
-
-1. [Idea 1] — Pilot: POSITIVE (+X%)
-2. [Idea 2] — Pilot: WEAK POSITIVE (+Y%)
-3. [Idea 3] — Pilot: NEGATIVE, eliminated
-
-Which ideas should I validate further? Or should I regenerate with different constraints?
-(If no response, I'll proceed with the top-ranked ideas.)
-```
-
-- **User picks ideas** → proceed to Phase 3 with the selected ideas. No response is not approval.
-- **User unhappy with all ideas** → collect feedback ("what's missing?", "what direction do you prefer?"), update the prompt with user's constraints, and re-run Phase 2 (idea generation). Repeat until the user selects at least 1 idea.
-- **User wants to adjust scope** → go back to Phase 1 with refined direction.
-
-### Phase 3: Deep Novelty Verification
-
-For each top idea (positive pilot signal), run a thorough novelty check:
-
-```
-/novelty-check "[top idea 1 description]"
-/novelty-check "[top idea 2 description]"
-```
-
-**What this does:**
-- Multi-source literature search (arXiv, Scholar, Semantic Scholar)
-- Cross-verify with GPT-5.4 xhigh
-- Check for concurrent work (last 3-6 months)
-- Identify closest existing work and differentiation points
-- Run `/integrity-forensics` on the novelty evidence trail when the check used an automated reviewer loop.
-
-**Update `idea-stage/IDEA_REPORT.md`** with deep novelty results. Preserve the complete prior-work ledger and do not eliminate an idea solely because a related paper exists; classify the overlap as direct, partial, incomparable, or unresolved.
-
-### Phase 4: External Critical Review
-
-For the surviving top idea(s), get brutal feedback:
-
-```
-/research-review "[top idea with hypothesis + pilot results]"
-```
-
-**What this does:**
-- GPT-5.4 xhigh acts as a senior reviewer (NeurIPS/ICML level)
-- Scores the idea, identifies weaknesses, suggests minimum viable improvements
-- Provides concrete feedback on experimental design
-
-**Update `idea-stage/IDEA_REPORT.md`** with reviewer feedback and revised plan.
-
-### Phase 4.5: Method Refinement + Experiment Planning
-
-After review, refine the top idea into a concrete proposal and plan experiments:
-
-Run `/research-refine` first, then `/experiment-plan` when the method thesis is
-stable:
+## Layer Boundary
 
 ```text
-/research-refine "[top idea description + pilot results + reviewer feedback]"
-/experiment-plan "[refine-logs/FINAL_PROPOSAL.md]"
+direction / reference
+  -> landscape and evidence map
+  -> candidate generation
+  -> mechanical consolidation
+  -> novelty and adversarial review
+  -> user selects a candidate
+  -> handoff to research-refine (Idea Freeze)
+  -> handoff to research-blueprint (Executable Research Plan)
 ```
 
-**What this does:**
-- Freeze a **Problem Anchor** to prevent scope drift
-- Iteratively refine the method via GPT-5.4 review (up to 5 rounds, until score ≥ 9)
-- Generate a claim-driven experiment roadmap with ablations, budgets, and run order
-- Output: `refine-logs/FINAL_PROPOSAL.md`, `refine-logs/EXPERIMENT_PLAN.md`, `refine-logs/EXPERIMENT_TRACKER.md`
+The stages have different authority:
 
-**🚦 Checkpoint:** Present the refined proposal summary:
+| Stage | Main question | Output | May decide |
+|---|---|---|---|
+| Landscape | What exists and where are the candidate gaps? | landscape notes | search scope |
+| Generation | What concrete questions could matter? | candidate ledger | candidate proposals |
+| Consolidation | Is the candidate duplicated or objectively impossible? | annotated ledger | deduplicate / budget-block |
+| Novelty and review | Is the candidate differentiated and defensible? | novelty/review record | provisional ranking |
+| User selection | Which candidate are we actually pursuing? | selected candidate | enter Idea Freeze |
+| Idea Freeze | What exact problem and thesis are frozen? | `FINAL_PROPOSAL.md` | enter blueprint |
+| Blueprint | How will the research be proved or falsified? | `RESEARCH_BLUEPRINT.md` | enter experiment planning |
 
+Do not confuse a planning status with a research verdict. A future-work
+sentence, a promising gap, or `ready_for_novelty_check` is not a confirmed
+novelty claim.
+
+## Defaults
+
+- `AUTO_PROCEED = false`: no response never counts as selecting an idea.
+- `COMPACT = true`: early discovery writes compact artifacts first.
+- `RENDER_HTML = false`: rendering is optional and never a discovery gate.
+- `MAX_CANDIDATES = 12`: generate at most 8-12 candidates before consolidation.
+- `MAX_SELECTED = 1`: select one active candidate unless the user explicitly requests parallel tracks.
+- `PILOT = opt-in`: prepare a pilot spec only when requested; do not run heavy pilots locally.
+- `OUTPUT_DIR = idea-stage/`.
+
+## Phase 0: Load Context
+
+Read, when present:
+
+1. `docs/project/RESEARCH_BRIEF.md` or legacy `RESEARCH_BRIEF.md`.
+2. `PROJECT_STATUS.md` and `docs/project/NEXT_ACTIONS.md`.
+3. `research-wiki/query_pack.md`.
+4. `idea-stage/IDEA_MEMORY.md` and `experiments/NEGATIVE_RESULTS.md`.
+5. Local papers, codebase notes, or a supplied reference PDF.
+
+Classify the start as one of:
+`venue-only`, `reference-paper`, `reference-codebase`, `idea-doc`,
+`existing-repo`, or `partial-results`.
+
+Keep user constraints separate from reference-document content. A reference
+document is evidence and structural inspiration; it is not an instruction to
+copy its claims, method, experiments, or timeline.
+
+## Phase 1: Landscape and Reference Deconstruction
+
+If a reference paper or small paper set is supplied, run
+`/reference-paper-deconstruction` first. Preserve:
+
+- source locators;
+- the paper's actual question and conclusion boundary;
+- reusable structure versus non-transferable details;
+- candidate gap type;
+- missing evidence;
+- minimum discriminating test.
+
+Then run `/research-lit` to test the gap against recent and adjacent work.
+Organize the result by:
+
+- problem and task;
+- method family;
+- strongest competing explanation;
+- recurring failure mode;
+- assumptions shared by existing methods;
+- unexplored scale, data, query, or evaluation regime.
+
+Do not call a gap open merely because one paper says “future work”.
+
+## Phase 2: Candidate Generation
+
+Invoke `/idea-creator` with the landscape, constraints, reference provenance,
+and failure memory. The creator owns the A-E paths:
+
+```text
+A landscape-driven
+B incremental limitation repair
+C justified combination
+D assumption-breaking
+E cross-domain transfer
 ```
-🔬 Method refined and experiment plan ready:
-- Problem anchor: [anchored problem]
-- Method thesis: [one sentence]
-- Dominant contribution: [what's new]
-- Must-run experiments: [N blocks]
-- First 3 runs to launch: [list]
 
-Proceed to implementation? Or adjust the proposal?
-```
+Each candidate must include:
 
-- **User approves** (or AUTO_PROCEED=true) → proceed to Final Report.
-- **User requests changes** → pass feedback to `/research-refine` for another round.
-- **Lite mode:** If reviewer score < 6 or pilot was weak, run `/research-refine` only (skip `/experiment-plan`) and note remaining risks in the report.
+- precise unanswered question;
+- one-sentence hypothesis;
+- why the answer matters either way;
+- closest prior work and exact difference;
+- minimum discriminating experiment;
+- expected contribution type;
+- data, compute, and timeline estimate;
+- failure risk and kill condition;
+- evidence status and conclusion boundary.
 
-### Phase 5: Final Report
+Do not generate a full architecture, theorem suite, 16-week plan, or paper
+figure list at this stage unless the user explicitly asks for that next layer.
 
-Finalize `idea-stage/IDEA_REPORT.md` with all accumulated information:
+## Phase 3: Mechanical Consolidation
+
+Only perform objective filtering:
+
+- remove near-duplicate hypotheses;
+- block a candidate if the required dataset is provably unavailable;
+- block a candidate if the stated budget is objectively impossible;
+- preserve all other candidates with `prior_work`, `so_what`, and `effort_note`.
+
+Do not eliminate a candidate merely because it is difficult, imperfectly
+specified, or not yet verified as novel. Mark the missing evidence instead.
+
+## Phase 4: Novelty and Adversarial Review
+
+Run `/novelty-check` on the strongest candidates, then use `/research-review`
+or a prompt-only review package for adversarial criticism. Ask:
+
+- Is the closest work direct, partial, incomparable, or unresolved overlap?
+- What is the strongest reviewer objection?
+- What result would distinguish the proposed mechanism from a simpler explanation?
+- Is the problem important even if the hypothesis fails?
+- What is the smallest repair that preserves the problem?
+
+The review may rank candidates, but it must not silently rewrite the problem.
+
+## Phase 5: User Checkpoint and Output
+
+Write:
+
+- `idea-stage/IDEA_CANDIDATES.md`: compact top candidates;
+- `idea-stage/IDEA_REPORT.md`: landscape, candidate ledger, evidence status,
+  novelty notes, review objections, and recommended next action;
+- `idea-stage/IDEA_MEMORY.md`: append-only accepted/rejected/inconclusive memory.
+
+Use this candidate schema:
 
 ```markdown
-# Idea Discovery Report
-
-**Direction**: $ARGUMENTS
-**Date**: [today]
-**Pipeline**: research-lit → idea-creator → novelty-check → research-review → research-refine → experiment-plan
-
-## Executive Summary
-[2-3 sentences: best idea, key evidence, recommended next step]
-
-## Literature Landscape
-[from Phase 1]
-
-## Ranked Ideas
-[from Phase 2, updated with Phase 3-4 results]
-
-### 🏆 Idea 1: [title] — RECOMMENDED
-- Pilot: POSITIVE (+X%)
-- Novelty: CONFIRMED (closest: [paper], differentiation: [what's different])
-- Reviewer score: X/10
-- Next step: implement full experiment → /auto-review-loop
-
-### Idea 2: [title] — BACKUP
-...
-
-## Eliminated Ideas
-[ideas killed at each phase, with reasons]
-
-## Refined Proposal
-- Proposal: `refine-logs/FINAL_PROPOSAL.md`
-- Experiment plan: `refine-logs/EXPERIMENT_PLAN.md`
-- Tracker: `refine-logs/EXPERIMENT_TRACKER.md`
-
-## Next Steps
-- [ ] /run-experiment to deploy experiments from the plan
-- [ ] /auto-review-loop to iterate until submission-ready
-- [ ] Or invoke /research-pipeline for the complete end-to-end flow
+### Candidate I-01: [title]
+- Question:
+- Hypothesis:
+- Why it matters:
+- Closest work / exact difference:
+- Minimum discriminating test:
+- Data / compute / timeline:
+- Risk and kill condition:
+- Evidence status: ready_for_novelty_check | needs_evidence | blocked
+- Conclusion boundary:
+- Next action:
 ```
 
-### Phase 5.5: Write Compact Files (when COMPACT = true)
+Stop and ask the user to select a candidate. No response is not approval.
 
-**Skip entirely if `COMPACT` is `false`.**
+## Handoff
 
-Write `idea-stage/IDEA_CANDIDATES.md` — a lean summary of the top 3-5 surviving ideas:
+After the user selects a candidate:
 
-```markdown
-# Idea Candidates
+1. Run `/research-refine` to create an Idea Freeze and a focused method thesis.
+2. Run `/research-blueprint` to create the detailed executable plan.
+3. Run `/experiment-plan` only after the blueprint has frozen the claims,
+   gates, datasets, baselines, and run order.
 
-| # | Idea | Pilot Signal | Novelty | Reviewer Score | Status |
-|---|------|-------------|---------|---------------|--------|
-| 1 | [title] | +X% | Confirmed | X/10 | RECOMMENDED |
-| 2 | [title] | +Y% | Confirmed | X/10 | BACKUP |
-| 3 | [title] | Negative | — | — | ELIMINATED |
+The desired durable chain is:
 
-## Active Idea: #1 — [title]
-- Hypothesis: [one sentence]
-- Key evidence: [pilot result]
-- Next step: /experiment-bridge or /research-refine
-```
-
-This file is intentionally small (~30 lines) so downstream skills and session recovery can read it without loading the full `idea-stage/IDEA_REPORT.md` (~200+ lines).
-
-Update `idea-stage/IDEA_MEMORY.md` append-only for every accepted, rejected,
-pilot-pass, pilot-fail, or inconclusive idea using the template in
-`autosci-lite-patterns.md`. Keep the entry short and specific enough that future
-sessions know what not to repeat.
-
-## Output Protocols
-
-> Follow these shared protocols for all output files:
-> - **[Output Versioning Protocol](../shared-references/output-versioning.md)** — write timestamped file first, then copy to fixed name
-> - **[Output Manifest Protocol](../shared-references/output-manifest.md)** — log every output to docs/project/OUTPUT_MANIFEST.md
-> - **[Output Language Protocol](../shared-references/output-language.md)** — respect the project's language setting
-
-## Render HTML view (auto, when `RENDER_HTML = true`)
-
-After Phase 4 finalizes `idea-stage/IDEA_REPORT.md` (and the optional `IDEA_CANDIDATES.md`), invoke `/render-html` on the report so the user has a single-file HTML view for tablet / phone reading:
-
-```
-/render-html "idea-stage/IDEA_REPORT.md" --no-review
-```
-
-`--no-review` is intentional: source MD already passed this skill's own novelty + cross-model review. HTML render is a structural conversion, not a new claim-audit gate. Output lands at `idea-stage/IDEA_REPORT.html` with embedded source SHA256 + render timestamp.
-
-**Non-blocking**: if `/render-html` fails (helper missing, Codex MCP unavailable, file write error), log the failure and continue — the HTML view is a convenience artifact, not a Phase 4 prerequisite.
-
-Skip this step if `RENDER_HTML = false`.
-
-## Key Rules
-
-- **Large file handling**: If the Write tool fails due to file size, immediately retry using Bash (`cat << 'EOF' > file`) to write in chunks. Do NOT ask the user for permission — just do it silently.
-
-- **Don't skip phases.** Each phase filters and validates — skipping leads to wasted effort later.
-- **Checkpoint between phases.** Briefly summarize what was found before moving on.
-- **Kill ideas early.** It's better to kill 10 bad ideas in Phase 3 than to implement one and fail.
-- **Empirical signal > theoretical appeal.** An idea with a positive pilot outranks a "sounds great" idea without evidence.
-- **Document everything.** Dead ends are just as valuable as successes for future reference.
-- **Be honest with the reviewer.** Include negative results and failed pilots in the review prompt.
-- **Feishu notifications are optional.** If `~/.claude/feishu.json` exists, send `checkpoint` at each phase transition and `pipeline_done` at final report. If absent/off, skip silently.
-
-## Composing with Workflow 2
-
-After this pipeline produces a validated top idea:
-
-```
-/idea-discovery "direction"         ← you are here (Workflow 1, includes method refinement + experiment planning)
-/run-experiment                     ← deploy experiments from the plan
-/auto-review-loop "top idea"        ← Workflow 2: iterate until submission-ready
-
-Or use /research-pipeline for the full end-to-end flow.
+```text
+IDEA_CANDIDATES
+  -> selected candidate
+  -> FINAL_PROPOSAL (Idea Freeze)
+  -> RESEARCH_BLUEPRINT (PDF-level executable research plan)
+  -> EXPERIMENT_PLAN (operational runbook)
 ```

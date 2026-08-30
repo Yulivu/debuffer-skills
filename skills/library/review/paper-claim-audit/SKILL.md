@@ -90,7 +90,7 @@ Any .md file that is an executor-written summary
 
 ```
 mcp__codex__codex:
-  model: gpt-5.5
+  model: <resolved-model-from-policy>
   config: {"model_reasoning_effort": "xhigh"}
   prompt: |
     You are a paper-to-evidence auditor. You have ZERO prior context about

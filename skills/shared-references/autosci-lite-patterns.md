@@ -12,6 +12,15 @@ MCP reviewer, or SSH automation.
 - `idea-discovery` is only the end-to-end orchestrator. It should pass the
   landscape, startup mode, reference-paper/code context, and venue constraints
   into `idea-creator` instead of re-describing A-E generation itself.
+- `idea-discovery` ends at a user-selected, evidence-bounded candidate. It does
+  not silently produce a full method proposal or executable research plan.
+- `research-refine` owns **Idea Freeze**: the immutable Problem Anchor, one
+  dominant method thesis, explicit non-goals, minimum mechanism checks, and
+  kill/pivot condition.
+- `research-blueprint` owns the **Executable Research Plan**: PDF-level
+  positioning, raw-idea corrections, method layers, theory obligations,
+  capability matrix, task/query protocol, claim map, numeric gates, timeline,
+  implementation plan, risk register, and paper package.
 - `research-refine` may borrow A-E paths as route-selection lenses after a
   problem or candidate idea exists. It should not run a broad idea search; if
   the task still needs new candidates, hand off to `idea-creator`.

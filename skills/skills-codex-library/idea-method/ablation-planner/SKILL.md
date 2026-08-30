@@ -31,7 +31,7 @@ Read available project files to build the full picture:
 
 ```text
 spawn_agent:
-  model: gpt-5.5
+  model: <resolved-model-from-policy>
   reasoning_effort: xhigh
   message: |
     You are a rigorous ML reviewer planning ablation studies.

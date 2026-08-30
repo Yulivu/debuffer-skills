@@ -5,10 +5,13 @@ on:
     paths:
       - 'skills/**'
       - 'docs/SKILLS_CATALOG.md'
+      - 'docs/SKILL_LIBRARY_AUDIT.md'
       - 'README.md'
       - 'AGENT_GUIDE.md'
       - 'tools/check_skills_inventory.py'
+      - 'tools/audit_skill_library.py'
       - 'tests/test_codex_skill_mirror.py'
+      - 'tests/test_skill_library_audit.py'
       - '.github/workflows/check-skills-inventory.yml'
   workflow_dispatch:
 
@@ -25,5 +28,9 @@ jobs:
         run: python -m pip install pytest
       - name: Check skill inventory drift
         run: python tools/check_skills_inventory.py
+      - name: Generate and check skill library audit
+        run: python tools/audit_skill_library.py --stdout
       - name: Check Codex skill mirror semantics
         run: python -m pytest tests/test_codex_skill_mirror.py -q
+      - name: Check skill library audit invariants
+        run: python -m pytest tests/test_skill_library_audit.py -q

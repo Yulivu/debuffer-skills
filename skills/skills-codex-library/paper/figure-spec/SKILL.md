@@ -163,7 +163,7 @@ For paper architecture figures, invoke cross-model review:
 
 ```text
 spawn_agent:
-  model: gpt-5.5
+  model: <resolved-model-from-policy>
   reasoning_effort: xhigh
   message: |
     Review this SVG figure for a technical paper (architecture / workflow diagram).

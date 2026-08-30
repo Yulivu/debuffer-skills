@@ -43,7 +43,9 @@ This skill is most valuable for **theory papers** with ≥5 theorem-class enviro
 
 ## Constants
 
-- **REVIEWER_MODEL** = `gpt-5.5` (default; specify `gpt-5.4` if you want to fall back to the legacy default).  Reviewer reasoning effort = `xhigh`.
+- **REVIEWER_MODEL** = resolve from the shared model policy or an explicit
+  per-run override; never hard-code a workflow default. Reviewer reasoning
+  effort comes from the selected adapter's supported settings.
 - **CONTEXT_POLICY** = `fresh` (REVIEWER_BIAS_GUARD).  Each thread is a fresh `spawn_agent` call.  **Never** use `send_input`.  No prior review summary, fix list, or executor explanation enters either prompt.
 - **ATTACK_LENGTH** = approximately 200 words (do not exceed 250).  Single coherent argument, not a list.
 - **DEFENSE_DECOMPOSITION** = 3-7 atomic rejection points extracted from the attack memo.  Each gets its own classification.
@@ -80,7 +82,7 @@ Invoke `spawn_agent` (NOT `send_input`) with the following prompt structure. Use
 
 ```
 spawn_agent:
-  model: gpt-5.5
+  model: <resolved-model-from-policy>
   reasoning_effort: xhigh
   message: |
     You are simulating a hostile NeurIPS / ICLR / ICML reviewer for a paper.
@@ -138,7 +140,7 @@ Invoke a second `spawn_agent` call (still NOT `send_input` — Thread 2 is indep
 
 ```
 spawn_agent:
-  model: gpt-5.5
+  model: <resolved-model-from-policy>
   reasoning_effort: xhigh
   message: |
     You are an independent area-chair adjudicator examining whether the

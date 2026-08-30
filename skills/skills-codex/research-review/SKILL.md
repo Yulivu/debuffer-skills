@@ -3,7 +3,7 @@ name: "research-review"
 description: "Prepare a prompt-only deep critical review package for research ideas, papers, or results. Generates concise reviewer prompts for a separate conversation, supports venue profiles such as ICLR, AAAI, JMLR, and TPAMI, and consumes pasted feedback; reviewer agents are opt-in. Use when user says \"review my research\", \"help me review\", or \"get external review\"."
 ---
 
-# Research Review via a secondary Codex agent (xhigh reasoning)
+# Research Review via an external reviewer
 
 ## Capability Routing
 
@@ -21,12 +21,14 @@ Get a multi-round critical review of research work from an external LLM with max
 
 ## Customized Pack Defaults
 
-Read `../shared-references/lightweight-research-pack.md` and
-`../shared-references/venue-profiles.md` before preparing the review. Default to
+Read `../shared-references/lightweight-research-pack.md`,
+`../shared-references/venue-profiles.md`, and
+`../shared-references/model-policy.md` before preparing the review. Default to
 prompt-only review:
 
 - **REVIEWER_BACKEND = prompt-only**. Do not call secondary agents, Oracle, or
-  other reviewer backends unless the user explicitly requests legacy delegation.
+  other reviewer backends unless the user explicitly requests an automatic
+  backend and its adapter is available.
 - Write `review-prompts/research_review_prompt.md` with concise context, target
   venue profile, artifact paths, claims, evidence, known weaknesses, and exact
   reviewer questions.
@@ -40,15 +42,19 @@ prompt-only review:
 
 ## Constants
 
-- REVIEWER_MODEL = `gpt-5.5` — Model used via a secondary Codex agent. Must be an OpenAI model (e.g., `gpt-5.5`, `o3`, `gpt-4o`)
-- **REVIEWER_BACKEND = `codex`** — Default: Codex xhigh reviewer. Use `--reviewer: oracle-pro` only when explicitly requested; if Oracle is unavailable, warn and fall back to Codex xhigh.
+- REVIEWER_MODEL = the resolved model selected by the prompt-only conversation
+  or explicit automatic backend. Do not pin a model ID in this skill.
+- **REVIEWER_BACKEND = `prompt-only`** — An automatic backend is opt-in. If a
+  requested adapter is unavailable, emit a blocked result instead of silently
+  falling back.
 
 ## Context: $ARGUMENTS
 
 ## Prerequisites
 
-- Use `spawn_agent` and `send_input` when the user has explicitly allowed delegation or subagents.
-- If delegation is not allowed, run the same review loop locally and preserve the same deliverable structure.
+Prompt-only review has no provider prerequisite. For automatic delegation, use
+the host's configured task/thread adapter only after explicit user opt-in, and
+record the resolved model, effort, and reviewer handle in the trace.
 
 ## Workflow
 

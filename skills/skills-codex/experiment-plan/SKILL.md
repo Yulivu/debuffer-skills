@@ -1,6 +1,6 @@
 ---
 name: "experiment-plan"
-description: "Turn a refined research proposal or method idea into a detailed, question- and mechanism-driven experiment roadmap. Use after `research-refine`, or when the user asks for a detailed experiment plan, ablation matrix, evaluation protocol, run order, compute budget, or paper-ready validation that supports the core problem, novelty, simplicity, and any LLM / VLM / Diffusion / RL-based contribution."
+description: "Turn an accepted executable research plan into a detailed, question- and mechanism-driven experiment roadmap. Use after `research-blueprint`, or after `research-refine` only for exploratory planning, when the user asks for an experiment plan, ablation matrix, evaluation protocol, run order, compute budget, or paper-ready validation."
 ---
 
 # Experiment Plan: Question-Driven, Paper-Oriented Validation
@@ -19,7 +19,12 @@ Refine and concretize: **$ARGUMENTS**
 
 ## Overview
 
-Use this skill after the method is stable enough that the next question becomes: **what exact experiments should we run, in what order, to understand the mechanism and prepare paper evidence?** If the user wants the full chain in one request, run `/research-refine` first and continue here once the method thesis is stable.
+Use this skill after the method and executable research plan are stable enough
+that the next question becomes: **what exact experiments should we run, in what
+order, to understand the mechanism and prepare paper evidence?** If the user
+wants a full PDF-level plan, run `/research-refine` and then
+`/research-blueprint` first. This skill should operationalize that blueprint,
+not duplicate its positioning, theory, risk register, or paper package.
 
 The goal is not to generate a giant benchmark wishlist. The goal is to turn a proposal into a **question -> evidence -> run order** roadmap that supports four things:
 

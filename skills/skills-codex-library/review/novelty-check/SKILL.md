@@ -9,7 +9,7 @@ Check whether a proposed method/idea has already been done in the literature: **
 
 ## Constants
 
-- REVIEWER_MODEL = `gpt-5.5` — Model used via a secondary Codex agent. Must be an OpenAI model (e.g., `gpt-5.5`, `o3`, `gpt-4o`)
+- **REVIEWER_MODEL** = resolve from the shared model policy or an explicit per-run override; never hard-code a workflow default.
 - **REVIEWER_BACKEND = `codex`** — Default: Codex xhigh reviewer. Use `--reviewer: oracle-pro` only when explicitly requested; if Oracle is unavailable, warn and fall back to Codex xhigh.
 
 ## Instructions

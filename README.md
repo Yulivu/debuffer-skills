@@ -62,9 +62,9 @@ Windows 可双击根目录的 `Install Debuffer Skills.cmd` 打开中文图形�
 |---|---|
 | `research-pipeline` | 串联方向、实验、评审、论文和再投稿流程 |
 | `research-repo-architect` | 建仓、迁移、项目结构和本地/AutoDL 边界 |
-| `idea-discovery` | 从方向、论文、代码库或初步想法生成研究入口 |
-| `research-blueprint` | 正式实验前的理论、实验和可复现蓝图 |
-| `experiment-plan` | 可复现实验协议、pilot gate 和 run order |
+| `idea-discovery` | 发现、筛选并让用户选择 evidence-bounded candidate，不提前生成完整方案 |
+| `research-blueprint` | 从 Idea Freeze 生成与参考 PDF 同等结构和详细度的可执行研究计划 |
+| `experiment-plan` | 将已冻结的研究计划转成实验协议、pilot gate 和 run order |
 | `experiment-bridge` | 本地 tiny checks 到 AutoDL/HPC handoff |
 | `autodl-hpc` | AutoDL/HPC preflight、smoke、数据和结果回传 |
 | `research-review` | prompt-only 外部评审和证据审计入口 |
@@ -107,9 +107,14 @@ Windows 可双击根目录的 `Install Debuffer Skills.cmd` 打开中文图形�
 
 ```bash
 python tools/check_skills_inventory.py
+python tools/audit_skill_library.py
 python -m pytest tests/test_codex_skill_mirror.py -q
 git diff --check
 ```
+
+全库审计报告见
+[`docs/SKILL_LIBRARY_AUDIT.md`](docs/SKILL_LIBRARY_AUDIT.md)。它区分立即修复、
+保留但 opt-in、候选合并和后续拆分，不会自动改写技能。
 
 安装器改动后补跑：
 

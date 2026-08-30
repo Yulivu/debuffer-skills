@@ -22,7 +22,7 @@ Systematically verify a mathematical proof via cross-model adversarial review, f
 ## Constants
 
 - MAX_REVIEW_ROUNDS = 3
-- REVIEWER_MODEL = `gpt-5.5` — Default model for the Codex backend, reasoning effort always `xhigh`. Manual backend uses whatever model the user chooses, **but it must be a non-Claude model** — the executor is Claude, so routing the proof review into any Claude product makes Claude judge Claude and voids the cross-model invariant (see `shared-references/reviewer-routing.md`).
+- **REVIEWER_MODEL** = resolve from the shared model policy or an explicit per-run override; never hard-code a workflow default.
 - **REVIEWER_BACKEND = `codex`** — Default: Codex MCP (xhigh). Override with `— reviewer: oracle-pro` for Oracle MCP, or `— reviewer: manual` for Manual Review MCP. If manual-review MCP is unavailable, stop and print the install command; do not fall back to Codex. See `shared-references/reviewer-routing.md`.
 
 ## Reviewer Calling Convention

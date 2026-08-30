@@ -53,7 +53,7 @@ Pass ONLY file paths and the audit checklist to the reviewer. The reviewer reads
 
 ```text
 spawn_agent:
-  model: gpt-5.5
+  model: <resolved-model-from-policy>
   reasoning_effort: xhigh
   message: |
     You are an experiment integrity auditor. Read ALL files listed below

@@ -263,9 +263,10 @@ def check_inventory() -> list[str]:
         for path in docs_files
         if path.is_file()
     }
-    if docs_file_rels != {"docs/SKILLS_CATALOG.md"}:
+    allowed_docs = {"docs/SKILLS_CATALOG.md", "docs/SKILL_LIBRARY_AUDIT.md"}
+    if not docs_file_rels.issubset(allowed_docs):
         failures.append(
-            "docs/ must stay lightweight with only docs/SKILLS_CATALOG.md; found: "
+            "docs/ contains files outside the compact public docs set; found: "
             + ", ".join(sorted(docs_file_rels))
         )
 
@@ -311,6 +312,11 @@ def check_inventory() -> list[str]:
             "Install Profiles",
             "Remote Command Gate",
             "Repository Hygiene",
+        ),
+        SKILLS_ROOT / "shared-references" / "model-policy.md": (
+            "Reviewer interface",
+            "Platform profiles",
+            "Scheduling and background work",
         ),
     }
     for path, terms in required_policy_terms.items():

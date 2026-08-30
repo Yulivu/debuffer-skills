@@ -170,7 +170,7 @@ For paper architecture figures, invoke cross-model review:
 
 ```
 mcp__codex__codex:
-  model: gpt-5.5
+  model: <resolved-model-from-policy>
   config: {"model_reasoning_effort": "xhigh"}
   prompt: |
     Review this SVG figure for a technical paper (architecture / workflow diagram).

@@ -54,8 +54,8 @@ This skill bridges Workflow 1 (idea discovery + method refinement) and Workflow 
 
 ```
 Workflow 1 output:                    This skill:                                    Workflow 2 input:
-refine-logs/EXPERIMENT_PLAN.md   →   implement → GPT-5.4 review → deploy → collect → initial results ready
-refine-logs/EXPERIMENT_TRACKER.md     code        (cross-model)    /run-experiment     for /auto-review-loop
+refine-logs/EXPERIMENT_PLAN.md   →   implement → review handoff → deploy → collect → initial results ready
+refine-logs/EXPERIMENT_TRACKER.md     code        (prompt-only by default) /run-experiment for /auto-review-loop
 refine-logs/FINAL_PROPOSAL.md
 ```
 
@@ -63,11 +63,14 @@ refine-logs/FINAL_PROPOSAL.md
 
 - **CODE_REVIEW = prompt-only** — write an external code-review prompt before
   deployment. Legacy direct reviewer calls require explicit user request.
-- **AUTO_DEPLOY = true** — Automatically deploy experiments after implementation + review. Set `false` to manually inspect code before deploying.
+- **AUTO_DEPLOY = false** — Prepare the deployment plan and wait for explicit
+  approval after implementation, local checks, and the review handoff. Set
+  `true` only for an explicitly authorized run.
 - **SANITY_FIRST = true** — Run the sanity-stage experiment first (smallest, fastest) before launching the rest. Catches setup bugs early.
 - **MAX_PARALLEL_RUNS = 4** — Maximum number of experiments to deploy in parallel (limited by available GPUs).
 - **BASE_REPO = false** — GitHub repo URL to use as base codebase. When set, clone the repo first and implement experiments on top of it. When `false` (default), write code from scratch or reuse existing project files.
-- **COMPACT = false** — When `true`, (1) read `idea-stage/IDEA_CANDIDATES.md` instead of full `idea-stage/IDEA_REPORT.md` if available, (2) append experiment results to `EXPERIMENT_LOG.md` after collection.
+- **COMPACT = true** — Prefer compact idea and experiment logs for session
+  recovery; use the full reports when the compact artifacts are unavailable.
 
 > Override: `/experiment-bridge "EXPERIMENT_PLAN.md" — compact: true, base repo: https://github.com/org/project`
 
