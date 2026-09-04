@@ -239,7 +239,8 @@ Write a structured report to `idea-stage/IDEA_REPORT.md`:
 - **Novelty**: X/10 — closest work: [paper]
 - **Feasibility**: [compute, data, implementation estimates]
 - **Risk**: LOW/MEDIUM/HIGH
-- **Contribution type**: empirical / method / theory / diagnostic
+- **Paper type**: method-primary / audit-support / audit-only
+- **Method delta**: the smallest implementable change to a named step
 - **Pilot result**: [POSITIVE: metric +X% / NEGATIVE: no signal / SKIPPED: needs GPU]
 - **Reviewer's likely objection**: [strongest counterargument]
 - **Why we should do this**: [1-2 sentences]

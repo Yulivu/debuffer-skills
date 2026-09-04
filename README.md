@@ -1,6 +1,6 @@
 # debuffer-skills
 
-这是一个面向科研项目的轻量化 Codex skills 定制包。总能力数：**93**。默认入口：**13**。
+这是一个面向科研项目的轻量化 Codex skills 定制包。总能力数：**94**。默认入口：**13**。
 
 默认采用分层加载：项目里只直接暴露少量第一层入口 skill，细分能力放在 `skills/library/` 和 `skills/skills-codex-library/`，由入口 skill 按 `Capability Routing` 读取。需要旧式全部 slash 直调时，安装 `full-flat` profile。
 

@@ -16,8 +16,8 @@ def test_audit_report_is_reproducible_and_current() -> None:
         check=False,
     )
     assert result.returncode == 0, result.stderr
-    assert "Canonical skills: **93**" in result.stdout
-    assert "Codex mirror coverage: 13/13 entry and 80/80 library files." in result.stdout
+    assert "Canonical skills: **94**" in result.stdout
+    assert "Codex mirror coverage: 13/13 entry and 81/81 library files." in result.stdout
     assert "Generated: 2026-08-30" in result.stdout
 
 
@@ -26,6 +26,22 @@ def test_shared_policy_mirrors_are_identical() -> None:
         main = ROOT / "skills" / "shared-references" / name
         codex = ROOT / "skills" / "skills-codex" / "shared-references" / name
         assert main.read_text(encoding="utf-8") == codex.read_text(encoding="utf-8")
+
+
+def test_method_paper_gate_is_wired_into_idea_flow() -> None:
+    gate = ROOT / "skills" / "library" / "idea-method" / "method-paper-gate" / "SKILL.md"
+    codex_gate = ROOT / "skills" / "skills-codex-library" / "idea-method" / "method-paper-gate" / "SKILL.md"
+    assert gate.read_text(encoding="utf-8") == codex_gate.read_text(encoding="utf-8")
+    text = gate.read_text(encoding="utf-8")
+    assert "method-primary" in text
+    assert "audit-only" in text
+    for path in (
+        ROOT / "skills" / "idea-discovery" / "SKILL.md",
+        ROOT / "skills" / "skills-codex" / "idea-discovery" / "SKILL.md",
+        ROOT / "skills" / "library" / "idea-method" / "research-refine" / "SKILL.md",
+        ROOT / "skills" / "skills-codex-library" / "idea-method" / "research-refine" / "SKILL.md",
+    ):
+        assert "method-paper-gate" in path.read_text(encoding="utf-8")
 
 
 def test_review_defaults_do_not_pin_retired_model_ids() -> None:

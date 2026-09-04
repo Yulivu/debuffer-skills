@@ -53,6 +53,16 @@ Read `../../shared-references/autosci-lite-patterns.md`. A-E paths may be used
 to choose a route for this selected problem; broad candidate generation remains
 owned by `idea-creator`.
 
+## Phase 0.5: Method Paper Gate
+
+Read `idea-stage/METHOD_PAPER_GATE.md` when present. If it is missing, run
+`/method-paper-gate` on the selected candidate before freezing the anchor.
+
+Only a `method-primary` candidate may enter Idea Freeze. An `audit-only`
+candidate has no method delta and must return to `/idea-discovery`. An
+`audit-support` candidate may inform the method but cannot become the dominant
+contribution.
+
 ## Phase 1: Freeze the Problem Anchor
 
 Write an immutable anchor before designing the method:
@@ -87,7 +97,9 @@ Choose one route:
 
 - **minimal route**: smallest mechanism that targets the bottleneck;
 - **frontier route**: current primitive only when it naturally matches the bottleneck;
-- **diagnostic route**: an experiment or analysis that resolves a real contradiction.
+- **diagnostic route**: allowed only as a minimal validation stage; it cannot
+  be the dominant method thesis because it does not introduce an implementable
+  delta.
 
 The result must contain:
 

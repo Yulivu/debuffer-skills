@@ -23,6 +23,7 @@ library instructions here.
 
 - `/idea-creator`: read `../../skills-codex-library/idea-method/idea-creator/SKILL.md`.
 - `/reference-paper-deconstruction`: read `../../skills-codex-library/idea-method/reference-paper-deconstruction/SKILL.md`.
+- `/method-paper-gate`: read `../../skills-codex-library/idea-method/method-paper-gate/SKILL.md`.
 - `/research-lit`: read `../../skills-codex-library/literature/research-lit/SKILL.md`.
 - `/novelty-check`: read `../../skills-codex-library/review/novelty-check/SKILL.md`.
 - `/research-refine`: read `../../skills-codex-library/idea-method/research-refine/SKILL.md` only after a candidate is selected.
@@ -36,6 +37,7 @@ direction / reference
   -> candidate generation
   -> mechanical consolidation
   -> novelty and adversarial review
+  -> method-paper gate
   -> user selects a candidate
   -> research-refine (Idea Freeze)
   -> research-blueprint (Executable Research Plan)
@@ -105,7 +107,8 @@ E cross-domain transfer
 ```
 
 Every candidate needs a precise question, hypothesis, importance, closest work,
-minimum discriminating test, contribution type, resource estimate, failure
+minimum discriminating test, paper type (`method-primary`,
+`audit-support`, or `audit-only`), method delta, resource estimate, failure
 condition, evidence status, and conclusion boundary.
 
 Do not produce a full architecture, theorem suite, 16-week plan, or paper figure
@@ -124,6 +127,17 @@ an external review package for criticism. Preserve `review-tracing.md` whenever
 an external reviewer is used. Ask for the closest work, strongest objection,
 discriminating result, importance under failure, and smallest repair.
 
+## Phase 4.5: Method Paper Gate
+
+Before user selection, run `/method-paper-gate` on the strongest candidates.
+Write `idea-stage/METHOD_PAPER_GATE.md` with `method-primary`,
+`audit-support`, or `audit-only` for each candidate.
+
+Only `method-primary` candidates may proceed to `research-refine`.
+`audit-only` candidates must be rewritten into a method candidate or removed
+from the active selection list. Audit/evaluation/diagnostic work is supporting
+evidence, never the dominant contribution.
+
 ## Phase 5: User Checkpoint and Output
 
 Write:
@@ -141,6 +155,7 @@ Use this schema:
 - Hypothesis:
 - Why it matters:
 - Closest work / exact difference:
+- Paper type / method delta:
 - Minimum discriminating test:
 - Data / compute / timeline:
 - Risk and kill condition:

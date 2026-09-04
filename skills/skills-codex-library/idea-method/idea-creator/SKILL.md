@@ -41,10 +41,10 @@ paths as a coverage menu, not a quota:
 
 | Path | Candidate shape |
 |---|---|
-| A | Landscape-driven gap or diagnostic question |
+| A | Landscape-driven gap plus a concrete method nucleus |
 | B | Smallest repair for a concrete limitation of method M |
 | C | Combination of M1 and M2 with a testable reason for complementarity |
-| D | Break a shared assumption and test the failure boundary |
+| D | Break a shared assumption and replace the broken step with a mechanism |
 | E | Transfer a mechanism from domain X to Y with an adaptation boundary |
 
 For a sparse direction, include at least one A candidate and one applicable
@@ -64,7 +64,9 @@ Generate 8-12 candidates. For every candidate, write:
 - Mechanism sketch: the smallest proposed intervention or diagnostic
 - Closest work: papers or methods and the exact difference
 - Minimum discriminating test: data, comparison, metric, and expected direction
-- Contribution type: empirical | method | theory | diagnostic
+- Paper type: method-primary | audit-support | audit-only
+- Method delta: the smallest implementable change to a named step
+- Attribution experiment: how the experiment isolates delta
 - Resources: data availability, compute, implementation effort, timeline
 - Failure risk: the most likely way this can fail
 - Kill condition: what result stops or narrows the idea
@@ -75,6 +77,10 @@ Generate 8-12 candidates. For every candidate, write:
 The candidate must be falsifiable. “Apply X to Y and improve the score” is not
 enough unless the application exposes a mechanism, assumption, or transferable
 boundary.
+
+Run `/method-paper-gate` before finalizing the ledger. A candidate without a
+method delta is `audit-only` and must be rewritten or moved to supporting
+evidence; it cannot be selected as a method paper.
 
 ## Objective Consolidation
 

@@ -23,6 +23,7 @@ library instructions here.
 
 - `/idea-creator`: read `../library/idea-method/idea-creator/SKILL.md`.
 - `/reference-paper-deconstruction`: read `../library/idea-method/reference-paper-deconstruction/SKILL.md`.
+- `/method-paper-gate`: read `../library/idea-method/method-paper-gate/SKILL.md`.
 - `/research-lit`: read `../library/literature/research-lit/SKILL.md`.
 - `/novelty-check`: read `../library/review/novelty-check/SKILL.md`.
 - `/research-refine`: read `../library/idea-method/research-refine/SKILL.md` only after a candidate is selected.
@@ -36,6 +37,7 @@ direction / reference
   -> candidate generation
   -> mechanical consolidation
   -> novelty and adversarial review
+  -> method-paper gate
   -> user selects a candidate
   -> handoff to research-refine (Idea Freeze)
   -> handoff to research-blueprint (Executable Research Plan)
@@ -129,7 +131,8 @@ Each candidate must include:
 - why the answer matters either way;
 - closest prior work and exact difference;
 - minimum discriminating experiment;
-- expected contribution type;
+- paper type: method-primary | audit-support | audit-only;
+- method delta: the smallest implementable change to a named step;
 - data, compute, and timeline estimate;
 - failure risk and kill condition;
 - evidence status and conclusion boundary.
@@ -162,6 +165,17 @@ or a prompt-only review package for adversarial criticism. Ask:
 
 The review may rank candidates, but it must not silently rewrite the problem.
 
+## Phase 4.5: Method Paper Gate
+
+Before user selection, run `/method-paper-gate` on the strongest candidates.
+Write `idea-stage/METHOD_PAPER_GATE.md` with `method-primary`,
+`audit-support`, or `audit-only` for each candidate.
+
+Only `method-primary` candidates may proceed to `research-refine`.
+`audit-only` candidates must be rewritten into a method candidate or removed
+from the active selection list. Audit/evaluation/diagnostic work is supporting
+evidence, never the dominant contribution.
+
 ## Phase 5: User Checkpoint and Output
 
 Write:
@@ -179,6 +193,7 @@ Use this candidate schema:
 - Hypothesis:
 - Why it matters:
 - Closest work / exact difference:
+- Paper type / method delta:
 - Minimum discriminating test:
 - Data / compute / timeline:
 - Risk and kill condition:

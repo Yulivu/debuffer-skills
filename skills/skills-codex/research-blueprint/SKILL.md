@@ -12,6 +12,7 @@ This is a first-layer entry skill. Keep it loaded as the user-facing route; when
 - `/formula-derivation`: read `../../skills-codex-library/idea-method/formula-derivation/SKILL.md`.
 - `/ablation-planner`: read `../../skills-codex-library/idea-method/ablation-planner/SKILL.md`.
 - `/research-refine`: read `../../skills-codex-library/idea-method/research-refine/SKILL.md`.
+- `/method-paper-gate`: read `../../skills-codex-library/idea-method/method-paper-gate/SKILL.md`.
 - `/paper-plan`: read `../../skills-codex-library/paper/paper-plan/SKILL.md`.
 
 
@@ -346,6 +347,7 @@ Write a compact gate document:
 |---|---|---|---|
 | Problem and non-goals are stable | PASS/WARN/BLOCK |  |  |
 | Theory/mechanism basis is explicit | PASS/WARN/BLOCK |  |  |
+| Method paper gate passes with a method-primary thesis | PASS/WARN/BLOCK |  |  |
 | Method is implementable | PASS/WARN/BLOCK |  |  |
 | Claim map is complete | PASS/WARN/BLOCK |  |  |
 | Datasets and preprocessing are specified | PASS/WARN/BLOCK |  |  |
